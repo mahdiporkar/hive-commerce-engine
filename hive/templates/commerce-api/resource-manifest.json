@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "manifestVersion": "0.1.0",
+  "applicationKey": "{{applicationKey}}",
+  "moduleKey": "commerce-api",
+  "resources": [
+    {"key": "commerce", "type": "MODULE", "parentKey": "{{applicationKey}}", "name": "Commerce", "actions": ["view"]},
+    {"key": "commerce.api.catalog", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Catalog API", "actions": ["read", "create", "update", "publish", "archive", "configure"]},
+    {"key": "commerce.api.stores", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Store API", "actions": ["view", "configure"]},
+    {"key": "commerce.api.orders", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Order API", "actions": ["view", "fulfill", "cancel", "refund"]},
+    {"key": "commerce.api.sellers", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Seller API", "actions": ["view", "approve", "suspend"]},
+    {"key": "commerce.api.moderation", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Moderation API", "actions": ["review", "decide"]},
+    {"key": "commerce.api.finance", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Finance API", "actions": ["view", "settle", "approve_payout"]},
+    {"key": "commerce.api.digital", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Digital API", "actions": ["view", "revoke"]},
+    {"key": "commerce.api.customers", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Customer API", "actions": ["view"]}
+  ]
+}

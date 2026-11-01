@@ -1,0 +1,6 @@
+target/
+.local/
+*.log
+.idea/
+.vscode/
+node_modules/

@@ -1,0 +1,21 @@
+{
+  "target": {
+    "key": "commerce-engine",
+    "displayName": "Hive Commerce Engine",
+    "baseUrl": "{{engineBaseUrl}}"
+  },
+  "route": {
+    "key": "commerce",
+    "applicationKey": "{{applicationKey}}",
+    "pathPrefix": "/commerce",
+    "targetKey": "commerce-engine",
+    "authentication": "FORWARD_TOKEN"
+  },
+  "operations": [
+    {"key": "admin-attribute-define", "method": "POST", "pathPattern": "/v1/admin/attributes", "access": "AUTHENTICATED", "resourceKey": "commerce.api.catalog", "action": "configure"},
+    {"key": "admin-product-type-create", "method": "POST", "pathPattern": "/v1/admin/product-types", "access": "AUTHENTICATED", "resourceKey": "commerce.api.catalog", "action": "configure"},
+    {"key": "admin-product-type-publish", "method": "POST", "pathPattern": "/v1/admin/product-types/{productTypeKey}/versions/{version}/publish", "access": "AUTHENTICATED", "resourceKey": "commerce.api.catalog", "action": "configure"},
+    {"key": "admin-product-create", "method": "POST", "pathPattern": "/v1/admin/products", "access": "AUTHENTICATED", "resourceKey": "commerce.api.catalog", "action": "create"},
+    {"key": "admin-product-get", "method": "GET", "pathPattern": "/v1/admin/products/{productId}", "access": "AUTHENTICATED", "resourceKey": "commerce.api.catalog", "action": "read"}
+  ]
+}

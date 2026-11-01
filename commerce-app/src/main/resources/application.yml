@@ -1,0 +1,62 @@
+# Hive Commerce Engine. Secrets and endpoints come from the environment only (ADR-0014).
+spring:
+  application:
+    name: commerce-engine
+  main:
+    banner-mode: off
+  datasource:
+    url: ${COMMERCE_DB_URL}
+    username: ${COMMERCE_DB_USER:commerce_app}
+    password: ${COMMERCE_DB_PASSWORD}
+  flyway:
+    enabled: false # schema-per-context migrations are configured in SchemaMigrations
+  jackson:
+    deserialization:
+      use-big-decimal-for-floats: true
+      fail-on-unknown-properties: true
+
+server:
+  port: ${COMMERCE_PORT:8090}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  pattern:
+    level: "%5p [%X{correlationId:-}]"
+
+# Same switch as Hive: production unless explicitly downgraded for local work and tests.
+hive:
+  profile: ${HIVE_PROFILE:production}
+
+commerce:
+  tenant-id: ${COMMERCE_TENANT_ID:default}
+  store:
+    key: ${COMMERCE_STORE_KEY}
+    mode: ${COMMERCE_STORE_MODE:SINGLE_VENDOR}
+    default-currency: ${COMMERCE_STORE_CURRENCY:IRR}
+    locales: ${COMMERCE_STORE_LOCALES:fa,en}
+  hive:
+    route-key: ${COMMERCE_HIVE_ROUTE_KEY:commerce}
+    enforce-operation: true
+  security:
+    jwt:
+      issuer: ${COMMERCE_JWT_ISSUER}
+      jwk-set-uri: ${COMMERCE_JWT_JWKS_URI}
+      audience: ${COMMERCE_JWT_AUDIENCE:commerce-engine}
+  migration:
+    url: ${COMMERCE_DB_MIGRATION_URL:${COMMERCE_DB_URL}}
+    username: ${COMMERCE_DB_OWNER_USER:commerce_owner}
+    password: ${COMMERCE_DB_OWNER_PASSWORD}
+    runtime-role: ${COMMERCE_DB_USER:commerce_app}
