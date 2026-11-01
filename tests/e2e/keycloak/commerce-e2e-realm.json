@@ -1,0 +1,56 @@
+{
+  "realm": "commerce-e2e",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "accessTokenLifespan": 300,
+  "clients": [
+    {
+      "clientId": "hive-bff",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "test-only-keycloak-client-secret-0001",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://127.0.0.1:29504/login/oauth2/code/primary"],
+      "webOrigins": ["http://127.0.0.1:29504"],
+      "attributes": {"pkce.code.challenge.method": "S256", "post.logout.redirect.uris": "http://127.0.0.1:29504/*"},
+      "protocolMappers": [
+        {
+          "name": "commerce-engine-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {"included.custom.audience": "commerce-engine", "access.token.claim": "true", "id.token.claim": "false", "introspection.token.claim": "true"}
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "alice.catalog",
+      "enabled": true,
+      "email": "alice.catalog@example.test",
+      "emailVerified": true,
+      "firstName": "Alice",
+      "lastName": "Catalog",
+      "credentials": [{"type": "password", "value": "test-only-password-alice", "temporary": false}],
+      "requiredActions": []
+    },
+    {
+      "username": "bob.shopper",
+      "enabled": true,
+      "email": "bob.shopper@example.test",
+      "emailVerified": true,
+      "firstName": "Bob",
+      "lastName": "Shopper",
+      "credentials": [{"type": "password", "value": "test-only-password-bob", "temporary": false}],
+      "requiredActions": []
+    }
+  ]
+}

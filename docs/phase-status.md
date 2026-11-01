@@ -1,5 +1,100 @@
 # Phase status
 
+## Phase 1 — Commerce Foundation (PARTIAL: exit criterion met, scope items remaining)
+
+Exit criterion (master prompt §22): *a product can be created through the BFF by an authorized user and is denied for an unauthorized one*: **PASS**, through a real Hive BFF, authorization service, OpenFGA and Keycloak.
+
+Implemented:
+- Maven multi-module engine (ADR-0002): `commerce-shared-kernel`, `commerce-platform`, `commerce-store`, `commerce-catalog`, `commerce-app`. Spring Boot 3.5.5, Java 21, Maven wrapper.
+- Hive integration (ADR-0005, ADR-0016):
+  - JWT resource server (issuer, audience `commerce-engine`, JWKS).
+  - `HiveIdentityFilter`, the single anticorruption layer, produces `UserContext`. It rejects identity headers without a token, a missing identity, a foreign tenant, and a binding mismatch (with an audit row).
+  - `@HiveOperation` route-operation enforcement for operator handlers, failing closed when undeclared.
+  - Hive's `PlatformError` shape and correlation ids via the Hive starter; an access log without query strings; `CommerceProductionGuard` rules on top of Hive's `ProductionGuard`.
+- Tenant isolation (ADR-0009):
+  - Forced RLS on every tenant table from the first migration.
+  - Flyway history per schema, run as the owner role.
+  - The runtime role owns nothing, has no DELETE and cannot bypass RLS; `TenantTransactions` sets transaction-local scope.
+- Store context: the deployment store comes from configuration with a deterministic id and is bootstrapped idempotently; mode-change invariant.
+- Catalog context:
+  - Attribute library with 15 validated attribute types.
+  - Product types with versioned schemas; published versions are immutable in code and by DB trigger.
+  - Products with variants: schema validation, unique combinations, store-unique SKUs, slugs.
+  - Domain events written to a per-schema outbox.
+- Operator API: define attribute, create product type, publish schema version, create product, read product.
+- Hive templates: `hive/templates/commerce-api/resource-manifest.json` (adds action `read`) and `hive/templates/commerce-service.json` (target, route, 5 operations). `tools/build-hive-starter.sh` builds the starter (and, with `--services`, the Hive jars) from the pinned commit as `0.1.0-a75871a`.
+- End-to-end harness `tests/e2e/`: Keycloak realm with an audience mapper, browserless OIDC login, Hive registration from the templates.
+
+Reused (from Hive / existing code):
+- Hive starter (`CorrelationId`, `PlatformErrors`, `HiveException`, `Redaction`, `ProductionGuard`).
+- Hive compose dependencies and jars from the pinned commit; the harness pattern of Hive's `tests/support/stack.mjs`.
+- University ERP's resource-server-plus-header pattern.
+
+Changed files: `pom.xml`, `mvnw*`, `.mvn/`, `.gitattributes`, `.gitignore`, `commerce-*/**`, `deploy/sql/create-roles.sql`, `hive/templates/**`, `hive/drafts/gemstone/commerce-api/resource-manifest.json`, `tests/e2e/**`, `tools/build-hive-starter.sh`, and docs (`docs/testing/README.md`, this file, `route-operations.md`, `roadmap.md`, `README.md`).
+
+Database migrations: `platform/V1__identity_binding.sql`, `store/V1__store.sql`, `catalog/V1__catalog.sql`.
+
+API / route-operation / manifest changes:
+- Operations `admin-attribute-define`, `admin-product-type-create` and `admin-product-type-publish` (`commerce.api.catalog:configure`), `admin-product-create` (`:create`), `admin-product-get` (`:read`).
+- Resource manifest 0.1.0 gains action `read` on `commerce.api.catalog`. It was never published to a real installation, so there is no version bump.
+
+Tests Added: 72 Maven tests (shared kernel 5, store 3, catalog 42, app 22 = architecture 9 + route contract 1 + engine integration 12), plus 1 end-to-end test with 7 subtests.
+
+Tests Executed:
+```sh
+tools/build-hive-starter.sh --services                       # exit 0
+./mvnw -B install                                           # exit 0, Tests run: 72, Failures: 0, Errors: 0
+node --test tests/e2e/catalog-through-bff.test.mjs          # exit 0, 8 pass, 0 fail
+node <hive-cli> validate hive/drafts/gemstone/commerce-api/resource-manifest.json   # PASS
+```
+
+PASS:
+- **Domain:**
+  - money (IRR 0 minor units, HALF_EVEN, no cross-currency arithmetic), localized text, store id and mode rules;
+  - 31 attribute-type cases; product-type publish, version and variant rules;
+  - product validation: all violations reported, unique combinations, single implicit variant, published-schema requirement, scope.
+- **Build rules:** architecture rules, and the route contract (template ⇄ handlers; admin operations are AUTHENTICATED with declared actions).
+- **Engine integration, allowed:** operator flow with an outbox event; 422 with violations; 409 `SKU_TAKEN` and `SCHEMA_VERSION_PUBLISHED`.
+- **Engine integration, denied:**
+  - anonymous 401;
+  - forged header without a token 401 on admin and non-admin paths;
+  - wrong audience, wrong issuer, expired, foreign-key and malformed tokens 401;
+  - token without forwarded identity 401;
+  - foreign tenant 403;
+  - binding mismatch 401 plus a `security_event` row;
+  - wrong or missing route operation 403.
+- **Engine integration, isolation:** another store's product returns 404 by id; the runtime role without scope fails and cannot DELETE; the published-schema trigger blocks updates.
+- **Through Hive, allowed:** the granted operator (Hive role `catalog-manager` → `commerce.api.catalog` read/create/configure) creates attributes, a product type and a product, and reads it back. The Hive identity is bound to the Keycloak subject and recorded as `created_by`.
+- **Through Hive, denied:**
+  - an ungranted signed-in user gets 403 `ACCESS_DENIED` on three operations; none of those correlation ids is in the engine log, and no rows are written;
+  - an anonymous caller gets 401 without reaching the engine;
+  - a missing CSRF header gets 403;
+  - a forged `X-Hive-User-Id` sent directly to the engine gets 401;
+  - after the role assignment is revoked, the BFF returns 403.
+
+FAIL (and how fixed):
+- `MoneyTest`: the JDK lists 2 minor units for IRR, but §12.11 requires 0. Fixed with an explicit minor-unit policy in `Money`.
+- The engine integration tests could not start because Docker Engine 29 rejects Testcontainers 1.21.3. Fixed by pinning 1.21.4.
+- End-to-end: role assignment returns 200, not 201 (assertion corrected). Waiting on `/api/me/context` permissions never succeeded, so the wait now probes the protected operation (see the limitations below).
+
+NOT EXECUTED (and why):
+- Phase 1 scope items not built yet: categories, listings, search projection and filtering, the default internal seller (Seller context), product update/archive and schema-migration jobs, the outbox dispatcher (events are written but not yet published), configuration JSON Schema validation (ADR-0014), the OpenAPI document, the GitHub Actions workflow, admin MFEs.
+- Scenario D (handicraft configuration-only fixture): depends on categories.
+- Production-profile startup with an HTTPS issuer: only the development profile was run. The production guard rules have no test yet; they have only been reviewed.
+
+Known limitations:
+- `/api/me/context` did not list the `commerce-api` permissions for the granted operator, although the server-side decisions were correct. Likely cause (unverified): the context includes only modules with an active micro-frontend artifact. This must be checked before admin MFEs rely on `context.permissions.can()`.
+- The identity binding trusts the first BFF-delivered pairing per external identity (ADR-0005).
+- `JSON` attributes are bounded objects; schema-level validation of their content is deferred.
+- The end-to-end suite takes about 4 minutes (Keycloak and Hive core start-up) and is not yet in CI.
+- The Phase 0 `hive up --build` retag of the local `hive/*:0.1.0-dev` images still applies.
+
+Open Blockers: none.
+
+Next phase: finish the Phase 1 scope items above (categories, listings, search projection, default seller, config schema, outbox dispatcher, OpenAPI, CI), then Phase 2 (cart, checkout, payments).
+
+Commit SHA(s): `3e80136` (engine skeleton) and the follow-up commit with the end-to-end suite and docs, on `phase-1/foundation`.
+
 ## Phase 0 — Discovery and Architecture (COMPLETE, approved 2026-11-02)
 
 Gate outcome: ADR-0004 approved by the owner with requirements R1–R5; all ADRs accepted after the [architecture review](architecture/adr-review.md); ADR-0016 added.

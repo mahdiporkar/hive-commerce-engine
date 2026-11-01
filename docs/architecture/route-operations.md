@@ -17,7 +17,7 @@ Conventions: [ADR-0004](decisions/ADR-0004-participant-access-model.md) (who is 
 ```text
 <client>                         APPLICATION (root, created with the application)
   commerce                       MODULE        actions: view
-    commerce.api.catalog         API_RESOURCE  actions: create, update, publish, archive, configure
+    commerce.api.catalog         API_RESOURCE  actions: read, create, update, publish, archive, configure
     commerce.api.stores          API_RESOURCE  actions: view, configure
     commerce.api.orders          API_RESOURCE  actions: view, fulfill, cancel, refund
     commerce.api.sellers         API_RESOURCE  actions: view, approve, suspend
@@ -34,11 +34,13 @@ Admin MFE modules each add `commerce.admin.<area>` (`PAGE`, action `view`) attac
 | Role | Grants |
 |---|---|
 | `marketplace-admin` | `manage` on `commerce` (implies all actions below it) |
-| `catalog-manager` | catalog: create, update, publish, archive, configure; moderation: review, decide |
+| `catalog-manager` | catalog: read, create, update, publish, archive, configure; moderation: review, decide |
 | `order-manager` | orders: view, fulfill, cancel; customers: view |
 | `finance` | finance: view, settle, approve_payout; orders: refund |
 
 ## Operations — minimum vertical slice (Phase 1–2)
+
+The source of truth for implemented operations is [`hive/templates/commerce-service.json`](../../hive/templates/commerce-service.json); `RouteContractTest` fails the build if it and the engine handlers disagree. Rows marked ✔ are implemented.
 
 Browser path = `/api/routes/commerce` + upstream path. Path segments: literal, `{param}` or `*` (Hive `RoutePathPolicy`).
 
@@ -57,9 +59,12 @@ Browser path = `/api/routes/commerce` + upstream path. Path segments: literal, `
 | GET | `/v1/shop/orders` | HYBRID ✱ | — | my orders |
 | GET | `/v1/shop/orders/{orderId}` | HYBRID ✱ | — | my order (ownership checked) |
 | GET | `/v1/shop/me` | HYBRID ✱ | — | memberships and context for storefront/MFEs |
-| POST | `/v1/admin/product-types` | AUTHENTICATED | `commerce.api.catalog:configure` | create product type + schema v1 |
+| POST | `/v1/admin/attributes` | AUTHENTICATED | `commerce.api.catalog:configure` | define attribute (`admin-attribute-define`) ✔ Phase 1 |
+| POST | `/v1/admin/product-types` | AUTHENTICATED | `commerce.api.catalog:configure` | create product type + draft schema v1 (`admin-product-type-create`) ✔ Phase 1 |
+| POST | `/v1/admin/product-types/{productTypeKey}/versions/{version}/publish` | AUTHENTICATED | `commerce.api.catalog:configure` | publish schema version (`admin-product-type-publish`) ✔ Phase 1 |
 | POST | `/v1/admin/categories` | AUTHENTICATED | `commerce.api.catalog:configure` | create category |
-| POST | `/v1/admin/products` | AUTHENTICATED | `commerce.api.catalog:create` | create product |
+| POST | `/v1/admin/products` | AUTHENTICATED | `commerce.api.catalog:create` | create product (`admin-product-create`) ✔ Phase 1 |
+| GET | `/v1/admin/products/{productId}` | AUTHENTICATED | `commerce.api.catalog:read` | read product (`admin-product-get`) ✔ Phase 1 |
 | PUT | `/v1/admin/products/{productId}` | AUTHENTICATED | `commerce.api.catalog:update` | update (revision) |
 | POST | `/v1/admin/products/{productId}/publish` | AUTHENTICATED | `commerce.api.catalog:publish` | publish listing |
 | GET | `/v1/admin/orders` | AUTHENTICATED | `commerce.api.orders:view` | store orders |

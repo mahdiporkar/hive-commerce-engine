@@ -5,7 +5,7 @@
   "moduleKey": "commerce-api",
   "resources": [
     {"key": "commerce", "type": "MODULE", "parentKey": "gemstone", "name": "Commerce", "actions": ["view"]},
-    {"key": "commerce.api.catalog", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Catalog API", "actions": ["create", "update", "publish", "archive", "configure"]},
+    {"key": "commerce.api.catalog", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Catalog API", "actions": ["read", "create", "update", "publish", "archive", "configure"]},
     {"key": "commerce.api.stores", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Store API", "actions": ["view", "configure"]},
     {"key": "commerce.api.orders", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Order API", "actions": ["view", "fulfill", "cancel", "refund"]},
     {"key": "commerce.api.sellers", "type": "API_RESOURCE", "parentKey": "commerce", "name": "Seller API", "actions": ["view", "approve", "suspend"]},
