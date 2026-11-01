@@ -1,6 +1,6 @@
 # ADR-0008 — Digital file upload and delivery (Gap 5)
 
-Status: proposed · Date: 2026-11-01
+Status: accepted · Date: 2026-11-01 · Accepted 2026-11-02 after the [architecture review](../adr-review.md)
 
 ## Decision
 - `FileStorageProvider` port with an S3-compatible adapter (MinIO locally). One private bucket per client, with keys `t/{tenant}/s/{store}/assets/{randomId}/{version}`.
@@ -9,6 +9,8 @@ Status: proposed · Date: 2026-11-01
 - Prompt text (small) may be returned inline after the same checks.
 - Public previews live under a separate prefix or bucket. Public APIs never return paid object keys.
 - Browsers must be able to reach the storage endpoint (a public hostname for signed URLs) while the bucket policy stays private.
+
+- Signed download URLs live at most 300 s (configurable down to 60 s), cover one content version, and consume one download from the limit when issued.
 
 ## Consequences
 Large files never pass through the BFF. Delivered content can be copied, and no DRM claims are made.

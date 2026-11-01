@@ -1,6 +1,6 @@
 # ADR-0011 — Money and the double-entry ledger
 
-Status: proposed · Date: 2026-11-01
+Status: accepted · Date: 2026-11-01 · Accepted 2026-11-02 after the [architecture review](../adr-review.md)
 
 ## Decision
 - `Money(amount: BigDecimal, currency: ISO-4217)`. Scale and rounding come from a currency table (IRR = 0 minor units; HALF_EVEN unless configured). Adding amounts in different currencies throws. Toman is a display formatter only.

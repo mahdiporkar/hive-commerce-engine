@@ -1,6 +1,6 @@
 # ADR-0015 — DDD model: confirmed hypothesis and changes
 
-Status: proposed · Date: 2026-11-01
+Status: accepted · Date: 2026-11-01 · Accepted 2026-11-02 after the [architecture review](../adr-review.md)
 
 ## Context
 Master prompt §6.1 gives a starting hypothesis for subdomains, bounded contexts, the context map and aggregates. It must be checked through event storming ([write-up](../../domain/event-storming.md); a desk session, with no domain experts yet).

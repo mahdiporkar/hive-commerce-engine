@@ -1,6 +1,6 @@
 # ADR-0001 — Record decisions; pin the Hive revision
 
-Status: proposed · Date: 2026-11-01
+Status: accepted · Date: 2026-11-01 · Accepted 2026-11-02 after the [architecture review](../adr-review.md)
 
 ## Context
 Hive is pre-1.0 (`0.1.0-dev.0`) on `platform-v1`, with no published packages and no `main` branch. Its behavior changes between commits.

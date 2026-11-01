@@ -1,6 +1,6 @@
 # ADR-0006 — Hive resource vocabulary and route-operation conventions
 
-Status: proposed · Date: 2026-11-01
+Status: accepted · Date: 2026-11-01 · Accepted 2026-11-02 after the [architecture review](../adr-review.md)
 
 ## Decision
 - One proxy route per client: key `commerce`, prefix `/commerce`, target `commerce-engine`, `FORWARD_TOKEN`, `stripPrefix=true`. Upstream API paths are versioned (`/v1/...`).

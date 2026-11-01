@@ -1,8 +1,10 @@
 # Phase status
 
-## Phase 0 — Discovery and Architecture (COMPLETE, awaiting approval at the gate)
+## Phase 0 — Discovery and Architecture (COMPLETE, approved 2026-11-02)
 
-**Proposed ADRs (all `Status: proposed`). Decide these first:**
+Gate outcome: ADR-0004 approved by the owner with requirements R1–R5; all ADRs accepted after the [architecture review](architecture/adr-review.md); ADR-0016 added.
+
+**ADRs as presented at the gate (now accepted):**
 1. [ADR-0004](architecture/decisions/ADR-0004-participant-access-model.md): customers and sellers use `HYBRID` operations with Commerce-enforced identity and ownership; only operators are Hive-gated. **Needs an explicit owner decision** (the alternative is manual `SECURITY_ADMIN` role assignment per seller).
 2. [ADR-0003](architecture/decisions/ADR-0003-one-hive-install-per-client.md): one Hive installation per client (forced by install-global key uniqueness).
 3. [ADR-0015](architecture/decisions/ADR-0015-ddd-model.md): DDD model confirmed from the §6.1 hypothesis with 9 changes (attribute library, SKU scope, UniqueItem as StockItem flag, single trigger for entitlements, Finance inputs, Refund inside Payment, no Customer context in v1, Hive ACL module, capture-after-expiry).

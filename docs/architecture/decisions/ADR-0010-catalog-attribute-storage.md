@@ -1,6 +1,6 @@
 # ADR-0010 — Catalog attributes: JSONB, versioned schemas, projection
 
-Status: proposed · Date: 2026-11-01
+Status: accepted · Date: 2026-11-01 · Accepted 2026-11-02 after the [architecture review](../adr-review.md)
 
 ## Decision
 - `product_type` has immutable `product_type_schema_version` rows: a JSON Schema 2020-12 subset generated from the attribute definitions. Each product references the schema version it was validated against.

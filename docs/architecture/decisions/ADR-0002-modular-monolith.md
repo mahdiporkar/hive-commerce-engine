@@ -1,6 +1,6 @@
 # ADR-0002 — Modular monolith: one Maven module and one schema per bounded context
 
-Status: proposed · Date: 2026-11-01 (revised for master prompt v2 §6.1)
+Status: accepted · Date: 2026-11-01 (revised for master prompt v2 §6.1) · Accepted 2026-11-02 after the [architecture review](../adr-review.md)
 
 ## Decision
 One deployable Spring Boot 3.5.x application (same line as Hive, currently 3.5.5), Java 21, built from a Maven multi-module project:
@@ -27,7 +27,7 @@ infrastructure/  JDBC adapters, outbox writers, provider adapters
 api/             REST controllers and DTOs (OpenAPI); never expose domain objects
 ```
 
-**Persistence:** one PostgreSQL schema per context (`store`, `catalog`, `listing`, `seller`, `pricing`, `inventory`, `checkout`, `ordering`, `payment`, `fulfillment`, `digital`, `finance`, plus `platform` for the outbox, inbox, identity binding and audit). Flyway migrations live in each module (`db/migration/<schema>`). Each context's repositories use a DB role whose `search_path` and grants cover only its schema; this is enforced in integration tests. No cross-schema foreign keys; references are ids.
+**Persistence:** one PostgreSQL database, one schema per context (`store`, `catalog`, `listing`, `seller`, `pricing`, `inventory`, `checkout`, `ordering`, `payment`, `fulfillment`, `digital`, `finance`, plus `platform` for identity binding, business audit and extension data). Each context has its **own outbox table in its own schema**, so a context transaction touches exactly one schema. Flyway runs **one history per schema** from each module (`db/migration/<schema>`). One runtime DataSource and runtime role for the whole process; schema isolation is enforced by ArchUnit (repositories reference only their own schema constant) and by a build test that scans each module's SQL for foreign schema names. No cross-schema foreign keys; references are ids. Migrations run as a separate owner role (ADR-0009).
 
 **Persistence technology:** Spring JDBC (`JdbcClient`) with explicit mappers, not JPA, so domain classes stay annotation-free and aggregate boundaries map to explicit SQL. Optimistic locking uses `revision` in `UPDATE ... WHERE revision = ?`.
 

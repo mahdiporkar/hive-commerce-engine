@@ -1,6 +1,6 @@
 # ADR-0003 — One Hive installation per client (Gaps 6 and 8)
 
-Status: proposed · Date: 2026-11-01
+Status: accepted · Date: 2026-11-01 · Accepted 2026-11-02 after the [architecture review](../adr-review.md)
 
 ## Context (verified at a75871a)
 - `module_key`, `route_key`, `target_key`, `path_prefix`, `role_key` and `group_key` are **globally unique** in one Hive install (migrations V3–V5).

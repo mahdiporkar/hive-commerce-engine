@@ -18,7 +18,7 @@ Hive is the platform; this engine is a reusable solution layer; client repositor
 - [ERD per bounded context](docs/architecture/erd.md)
 - [Extension system (SPI)](docs/architecture/extension-system.md)
 - [Repository boundaries](docs/architecture/repository-boundaries.md)
-- [Decisions (ADRs)](docs/architecture/decisions)
+- [Decisions (ADRs)](docs/architecture/decisions) and the [ADR review matrix](docs/architecture/adr-review.md)
 - [Roadmap and minimum vertical slice](docs/roadmap.md)
 
 Pinned Hive revision: [`hive/HIVE_REVISION`](hive/HIVE_REVISION).
