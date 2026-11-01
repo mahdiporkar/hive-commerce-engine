@@ -1,0 +1,7 @@
+services:
+  bff:
+    environment:
+      HIVE_PROXY_ALLOW_HTTP: "true"
+  echo:
+    image: node:22-bookworm
+    command: ["node", "-e", "require('http').createServer((q,r)=>{const h={};for(const k of ['authorization','cookie','x-hive-user-id','x-hive-tenant-id','x-correlation-id','x-hive-route','x-hive-operation','x-forged'])if(q.headers[k])h[k]=k==='authorization'?'<present>':q.headers[k];r.setHeader('content-type','application/json');r.end(JSON.stringify({method:q.method,url:q.url,headers:h}))}).listen(8099)"]
