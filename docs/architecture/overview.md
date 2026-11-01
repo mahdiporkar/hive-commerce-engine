@@ -21,41 +21,9 @@ flowchart TB
   shopper -.->|pre-signed upload / download| s3
 ```
 
-## Bounded contexts (context map)
+## Bounded contexts
 
-```mermaid
-flowchart LR
-  subgraph Core[Commerce core - repository A]
-    CFG[Configuration<br/>mode, capabilities, currencies]
-    STO[Store & Channel]
-    SEL[Seller & Membership]
-    CAT[Catalog<br/>categories, product types, attributes,<br/>products, variants, listings]
-    OFF[Offers & Pricing]
-    INV[Inventory & Reservations]
-    CART[Cart & Checkout]
-    ORD[Orders & Seller Orders]
-    PAY[Payments & Refunds]
-    FUL[Fulfillment & Shipments]
-    FIN[Commission, Ledger,<br/>Settlement, Payout]
-    DIG[Digital assets, Licenses,<br/>Entitlements]
-  end
-  EXT[Extension SPI<br/>gemstone verification,<br/>prompt verification]
-  CAT --> OFF --> CART --> ORD
-  INV --> CART
-  ORD --> PAY
-  ORD --> FUL
-  ORD --> DIG
-  PAY --> FIN
-  ORD --> FIN
-  SEL --> OFF
-  SEL --> FIN
-  STO --> CAT
-  CFG --> STO
-  EXT -.->|SPI| CAT
-  EXT -.->|SPI| SEL
-```
-
-Relationships: Catalog is upstream of Offers, Cart and Orders, which consume snapshots (published language: `ListingSnapshot`, `PriceQuote`). Orders publish `OrderPaid`, `OrderLineRefunded` and similar events through the transactional outbox; Finance, Fulfillment and Digital conform to those events.
+Twelve bounded contexts (Store, Catalog, Listing, Seller, Pricing, Inventory, Checkout, Ordering, Payment, Fulfillment, Digital Delivery, Finance) plus the Extension SPI, each a Maven module with its own PostgreSQL schema ([ADR-0002](decisions/ADR-0002-modular-monolith.md)). Subdomains, relationships and integration patterns: [context map](../domain/context-map.md). Aggregates, events and the CheckoutProcess saga: [domain model](domain-model.md).
 
 ## Purchase sequence (physical, single vendor)
 
@@ -104,7 +72,7 @@ sequenceDiagram
   end
 ```
 
-Further diagrams are produced in the phase that implements them: digital upload/download (Phase 3), multi-seller order processing (Phase 4).
+Further diagrams are produced in the phase that implements them: digital upload/download (Phase 3), multi-seller order processing (Phase 4). The checkout saga state machine is in [aggregates](../domain/aggregates.md).
 
 ## Deployment per client
 
