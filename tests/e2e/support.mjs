@@ -18,6 +18,7 @@ export const ISSUER = `http://127.0.0.1:${PORTS.keycloak}/realms/commerce-e2e`;
 export const BFF = `http://127.0.0.1:${PORTS.bff}`;
 export const ENGINE = `http://127.0.0.1:${PORTS.engine}`;
 export const APPLICATION = 'commerce-e2e';
+export const FAKE_PSP_SECRET = 'test-only-fake-psp-secret-e2e-0001';
 
 const pause = ms => new Promise(r => setTimeout(r, ms));
 const secret = () => randomBytes(24).toString('hex');
@@ -107,7 +108,9 @@ export async function startEnvironment(t) {
     HIVE_PROFILE: 'development', COMMERCE_PORT: String(PORTS.engine), COMMERCE_DB_URL: `jdbc:postgresql://127.0.0.1:${PORTS.engineDb}/commerce`,
     COMMERCE_DB_USER: 'commerce_app', COMMERCE_DB_PASSWORD: credentials.engineRuntime, COMMERCE_DB_OWNER_USER: 'commerce_owner',
     COMMERCE_DB_OWNER_PASSWORD: credentials.engineOwner, COMMERCE_TENANT_ID: 'default', COMMERCE_STORE_KEY: 'e2e-store',
-    COMMERCE_JWT_ISSUER: ISSUER, COMMERCE_JWT_JWKS_URI: `${ISSUER}/protocol/openid-connect/certs`, COMMERCE_JWT_AUDIENCE: 'commerce-engine'});
+    COMMERCE_JWT_ISSUER: ISSUER, COMMERCE_JWT_JWKS_URI: `${ISSUER}/protocol/openid-connect/certs`, COMMERCE_JWT_AUDIENCE: 'commerce-engine',
+    COMMERCE_PAYMENT_PROVIDER: 'fake', COMMERCE_FAKE_PAYMENTS: 'true', COMMERCE_FAKE_PAYMENTS_SECRET: FAKE_PSP_SECRET,
+    COMMERCE_PAYMENT_RETURN_URL: `${BFF}/checkout/return`, COMMERCE_TAX_RATE_PERCENT: '9', COMMERCE_FLAT_SHIPPING: '500000'});
   await ready(`${ENGINE}/actuator/health/readiness`);
 
   java('bff', resolve(HIVE, `services/bff/target/bff-0.1.0-${SHORT}.jar`), {

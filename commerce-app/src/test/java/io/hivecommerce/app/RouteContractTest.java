@@ -70,12 +70,14 @@ class RouteContractTest {
     if (m.isAnnotatedWith(PostMapping.class)) return "POST";
     if (m.isAnnotatedWith(GetMapping.class)) return "GET";
     if (m.isAnnotatedWith(PutMapping.class)) return "PUT";
+    if (m.isAnnotatedWith(org.springframework.web.bind.annotation.DeleteMapping.class)) return "DELETE";
     throw new IllegalStateException("Unsupported mapping on " + m.getFullName());
   }
 
   private static String path(JavaMethod m) {
     if (m.isAnnotatedWith(PostMapping.class)) return m.getAnnotationOfType(PostMapping.class).value()[0];
     if (m.isAnnotatedWith(GetMapping.class)) return m.getAnnotationOfType(GetMapping.class).value()[0];
+    if (m.isAnnotatedWith(org.springframework.web.bind.annotation.DeleteMapping.class)) return m.getAnnotationOfType(org.springframework.web.bind.annotation.DeleteMapping.class).value()[0];
     return m.getAnnotationOfType(PutMapping.class).value()[0];
   }
 }

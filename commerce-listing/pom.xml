@@ -24,6 +24,14 @@
       <artifactId>commerce-seller</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.hivecommerce</groupId>
+      <artifactId>commerce-store</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.hivecommerce</groupId>
+      <artifactId>commerce-inventory</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>

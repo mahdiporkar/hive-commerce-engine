@@ -94,6 +94,96 @@
         },
         "type" : "object"
       },
+      "CartLine" : {
+        "properties" : {
+          "currency" : {
+            "type" : "string"
+          },
+          "itemId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "offerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productSlug" : {
+            "type" : "string"
+          },
+          "purchasable" : {
+            "type" : "boolean"
+          },
+          "quantity" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sku" : {
+            "type" : "string"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "uniqueItem" : {
+            "type" : "boolean"
+          },
+          "unitPrice" : {
+            "type" : "number"
+          },
+          "variantAttributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          }
+        },
+        "type" : "object"
+      },
+      "CartTotals" : {
+        "properties" : {
+          "currency" : {
+            "type" : "string"
+          },
+          "shipping" : {
+            "type" : "number"
+          },
+          "subtotal" : {
+            "type" : "number"
+          },
+          "tax" : {
+            "type" : "number"
+          },
+          "total" : {
+            "type" : "number"
+          }
+        },
+        "type" : "object"
+      },
+      "CartView" : {
+        "properties" : {
+          "cartId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "lines" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CartLine"
+            },
+            "type" : "array"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "totals" : {
+            "$ref" : "#/components/schemas/CartTotals"
+          }
+        },
+        "type" : "object"
+      },
       "CategoryAttributesBody" : {
         "properties" : {
           "attributes" : {
@@ -216,6 +306,49 @@
         },
         "type" : "object"
       },
+      "CheckoutBody" : {
+        "properties" : {
+          "idempotencyKey" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CheckoutView" : {
+        "properties" : {
+          "checkoutId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "currency" : {
+            "type" : "string"
+          },
+          "failureCode" : {
+            "type" : "string"
+          },
+          "orderId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "orderNumber" : {
+            "type" : "string"
+          },
+          "paymentId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "redirectUrl" : {
+            "type" : "string"
+          },
+          "state" : {
+            "type" : "string"
+          },
+          "total" : {
+            "type" : "number"
+          }
+        },
+        "type" : "object"
+      },
       "ConstraintsBody" : {
         "properties" : {
           "max" : {
@@ -240,6 +373,17 @@
               "type" : "string"
             },
             "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "CreatedCart" : {
+        "properties" : {
+          "cart" : {
+            "$ref" : "#/components/schemas/CartView"
+          },
+          "cartToken" : {
+            "type" : "string"
           }
         },
         "type" : "object"
@@ -284,6 +428,20 @@
         },
         "type" : "object"
       },
+      "DetailWithOffers" : {
+        "properties" : {
+          "offers" : {
+            "items" : {
+              "$ref" : "#/components/schemas/OfferView"
+            },
+            "type" : "array"
+          },
+          "product" : {
+            "$ref" : "#/components/schemas/Detail"
+          }
+        },
+        "type" : "object"
+      },
       "FacetCount" : {
         "properties" : {
           "count" : {
@@ -315,6 +473,99 @@
           },
           "visible" : {
             "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "FulfillmentView" : {
+        "properties" : {
+          "carrier" : {
+            "type" : "string"
+          },
+          "fulfillmentId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "orderId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "sellerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "sellerOrderId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "trackingCode" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ItemBody" : {
+        "properties" : {
+          "offerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "quantity" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "LineView" : {
+        "properties" : {
+          "kind" : {
+            "type" : "string"
+          },
+          "lineId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "lineTotal" : {
+            "type" : "number"
+          },
+          "offerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "quantity" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sku" : {
+            "type" : "string"
+          },
+          "tax" : {
+            "type" : "number"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "unitPrice" : {
+            "type" : "number"
+          },
+          "variantAttributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
           }
         },
         "type" : "object"
@@ -358,6 +609,81 @@
         },
         "type" : "object"
       },
+      "OfferCommand" : {
+        "properties" : {
+          "amount" : {
+            "type" : "number"
+          },
+          "condition" : {
+            "type" : "string"
+          },
+          "currency" : {
+            "type" : "string"
+          },
+          "quantity" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sellerSku" : {
+            "type" : "string"
+          },
+          "uniqueItem" : {
+            "type" : "boolean"
+          },
+          "variantId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "OfferView" : {
+        "properties" : {
+          "available" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "condition" : {
+            "type" : "string"
+          },
+          "currency" : {
+            "type" : "string"
+          },
+          "digital" : {
+            "type" : "boolean"
+          },
+          "offerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "price" : {
+            "type" : "number"
+          },
+          "productId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "sellerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "uniqueItem" : {
+            "type" : "boolean"
+          },
+          "variantId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "OptionBody" : {
         "properties" : {
           "code" : {
@@ -368,6 +694,41 @@
               "type" : "string"
             },
             "type" : "object"
+          }
+        },
+        "type" : "object"
+      },
+      "OrderView" : {
+        "properties" : {
+          "currency" : {
+            "type" : "string"
+          },
+          "customerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "number" : {
+            "type" : "string"
+          },
+          "orderId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "paymentId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "sellerOrders" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SellerOrderView"
+            },
+            "type" : "array"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "total" : {
+            "type" : "number"
           }
         },
         "type" : "object"
@@ -397,6 +758,28 @@
           "total" : {
             "format" : "int64",
             "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "PaymentView" : {
+        "properties" : {
+          "amount" : {
+            "type" : "number"
+          },
+          "currency" : {
+            "type" : "string"
+          },
+          "orderId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "paymentId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
           }
         },
         "type" : "object"
@@ -533,6 +916,43 @@
         },
         "type" : "object"
       },
+      "RefundBody" : {
+        "properties" : {
+          "amount" : {
+            "type" : "number"
+          },
+          "idempotencyKey" : {
+            "type" : "string"
+          },
+          "orderLineIds" : {
+            "items" : {
+              "format" : "uuid",
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "RefundView" : {
+        "properties" : {
+          "amount" : {
+            "type" : "number"
+          },
+          "paymentId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "refundId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "RejectBody" : {
         "properties" : {
           "reason" : {
@@ -546,6 +966,42 @@
           "revision" : {
             "format" : "int64",
             "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "SellerOrderView" : {
+        "properties" : {
+          "lines" : {
+            "items" : {
+              "$ref" : "#/components/schemas/LineView"
+            },
+            "type" : "array"
+          },
+          "sellerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "sellerOrderId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "shipping" : {
+            "type" : "number"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ShipBody" : {
+        "properties" : {
+          "carrier" : {
+            "type" : "string"
+          },
+          "trackingCode" : {
+            "type" : "string"
           }
         },
         "type" : "object"
@@ -576,6 +1032,50 @@
             "type" : "string"
           },
           "variantDefining" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "StockBody" : {
+        "properties" : {
+          "onHand" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "StockView" : {
+        "properties" : {
+          "available" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "offerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "onHand" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "reserved" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "unique" : {
+            "type" : "boolean"
+          },
+          "unlimited" : {
             "type" : "boolean"
           }
         },
@@ -640,6 +1140,82 @@
   },
   "openapi" : "3.1.0",
   "paths" : {
+    "/hooks/fake-psp/sessions/{ref}/{decision}" : {
+      "post" : {
+        "operationId" : "fakeDecision",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "ref",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "decision",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "string"
+                  },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "webhooks" ]
+      }
+    },
+    "/hooks/payments/{provider}" : {
+      "post" : {
+        "operationId" : "receive",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "provider",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "format" : "byte",
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "string"
+                  },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "webhooks" ]
+      }
+    },
     "/v1/admin/attributes" : {
       "post" : {
         "operationId" : "defineAttribute",
@@ -807,6 +1383,70 @@
         "tags" : [ "catalog-admin-controller" ]
       }
     },
+    "/v1/admin/fulfillments/{fulfillmentId}/deliver" : {
+      "post" : {
+        "operationId" : "deliver",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "fulfillmentId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FulfillmentView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "fulfillment-admin-controller" ]
+      }
+    },
+    "/v1/admin/fulfillments/{fulfillmentId}/ship" : {
+      "post" : {
+        "operationId" : "ship",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "fulfillmentId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ShipBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FulfillmentView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "fulfillment-admin-controller" ]
+      }
+    },
     "/v1/admin/listings/{listingId}/approve" : {
       "post" : {
         "operationId" : "approve",
@@ -896,6 +1536,186 @@
           }
         },
         "tags" : [ "listing-admin-controller" ]
+      }
+    },
+    "/v1/admin/offers" : {
+      "post" : {
+        "operationId" : "create_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OfferCommand"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OfferView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "offer-admin-controller" ]
+      }
+    },
+    "/v1/admin/offers/{offerId}/stock" : {
+      "post" : {
+        "operationId" : "adjust",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "offerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StockBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StockView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "inventory-admin-controller" ]
+      }
+    },
+    "/v1/admin/orders" : {
+      "get" : {
+        "operationId" : "orders",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/OrderView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin-orders" ]
+      }
+    },
+    "/v1/admin/orders/{orderId}" : {
+      "get" : {
+        "operationId" : "order",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "orderId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrderView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin-orders" ]
+      }
+    },
+    "/v1/admin/orders/{orderId}/fulfillments" : {
+      "get" : {
+        "operationId" : "ofOrder",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "orderId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/FulfillmentView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "fulfillment-admin-controller" ]
+      }
+    },
+    "/v1/admin/orders/{orderId}/refunds" : {
+      "post" : {
+        "operationId" : "refund",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "orderId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RefundBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RefundView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin-refunds" ]
       }
     },
     "/v1/admin/product-types" : {
@@ -1042,6 +1862,258 @@
         "tags" : [ "listing-admin-controller" ]
       }
     },
+    "/v1/shop/carts" : {
+      "post" : {
+        "operationId" : "create",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "cart",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreatedCart"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "shop-checkout-controller" ]
+      }
+    },
+    "/v1/shop/carts/current" : {
+      "get" : {
+        "operationId" : "current",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "cart",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CartView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "shop-checkout-controller" ]
+      }
+    },
+    "/v1/shop/carts/current/items" : {
+      "post" : {
+        "operationId" : "add",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "cart",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ItemBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CartView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "shop-checkout-controller" ]
+      }
+    },
+    "/v1/shop/carts/current/items/{itemId}" : {
+      "delete" : {
+        "operationId" : "remove",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "cart",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "itemId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CartView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "shop-checkout-controller" ]
+      }
+    },
+    "/v1/shop/checkouts" : {
+      "post" : {
+        "operationId" : "checkout",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CheckoutBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CheckoutView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "shop-checkout-controller" ]
+      }
+    },
+    "/v1/shop/checkouts/{checkoutId}" : {
+      "get" : {
+        "operationId" : "attempt",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "checkoutId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CheckoutView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "shop-checkout-controller" ]
+      }
+    },
+    "/v1/shop/orders" : {
+      "get" : {
+        "operationId" : "myOrders",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/OrderView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "shop-orders" ]
+      }
+    },
+    "/v1/shop/orders/{orderId}" : {
+      "get" : {
+        "operationId" : "myOrder",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "orderId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrderView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "shop-orders" ]
+      }
+    },
+    "/v1/shop/payments/{paymentId}/verify" : {
+      "post" : {
+        "operationId" : "verify",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "paymentId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaymentView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "shop-payments" ]
+      }
+    },
     "/v1/store/categories" : {
       "get" : {
         "operationId" : "categories",
@@ -1108,7 +2180,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Detail"
+                  "$ref" : "#/components/schemas/DetailWithOffers"
                 }
               }
             },

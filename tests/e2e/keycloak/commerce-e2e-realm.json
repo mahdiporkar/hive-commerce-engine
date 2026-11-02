@@ -17,16 +17,28 @@
       "directAccessGrantsEnabled": false,
       "implicitFlowEnabled": false,
       "serviceAccountsEnabled": false,
-      "redirectUris": ["http://127.0.0.1:29504/login/oauth2/code/primary"],
-      "webOrigins": ["http://127.0.0.1:29504"],
-      "attributes": {"pkce.code.challenge.method": "S256", "post.logout.redirect.uris": "http://127.0.0.1:29504/*"},
+      "redirectUris": [
+        "http://127.0.0.1:29504/login/oauth2/code/primary"
+      ],
+      "webOrigins": [
+        "http://127.0.0.1:29504"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://127.0.0.1:29504/*"
+      },
       "protocolMappers": [
         {
           "name": "commerce-engine-audience",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
-          "config": {"included.custom.audience": "commerce-engine", "access.token.claim": "true", "id.token.claim": "false", "introspection.token.claim": "true"}
+          "config": {
+            "included.custom.audience": "commerce-engine",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
         }
       ]
     }
@@ -39,7 +51,13 @@
       "emailVerified": true,
       "firstName": "Alice",
       "lastName": "Catalog",
-      "credentials": [{"type": "password", "value": "test-only-password-alice", "temporary": false}],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test-only-password-alice",
+          "temporary": false
+        }
+      ],
       "requiredActions": []
     },
     {
@@ -49,7 +67,45 @@
       "emailVerified": true,
       "firstName": "Bob",
       "lastName": "Shopper",
-      "credentials": [{"type": "password", "value": "test-only-password-bob", "temporary": false}],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test-only-password-bob",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "carol.buyer",
+      "enabled": true,
+      "email": "carol.buyer@example.test",
+      "emailVerified": true,
+      "firstName": "Carol",
+      "lastName": "Buyer",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test-only-password-carol",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "dave.buyer",
+      "enabled": true,
+      "email": "dave.buyer@example.test",
+      "emailVerified": true,
+      "firstName": "Dave",
+      "lastName": "Buyer",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test-only-password-dave",
+          "temporary": false
+        }
+      ],
       "requiredActions": []
     }
   ]

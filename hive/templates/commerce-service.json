@@ -133,6 +133,124 @@
       "method": "GET",
       "pathPattern": "/v1/store/products/{slug}",
       "access": "PUBLIC"
+    },
+    {
+      "key": "admin-offer-create",
+      "method": "POST",
+      "pathPattern": "/v1/admin/offers",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
+    },
+    {
+      "key": "admin-offer-stock",
+      "method": "POST",
+      "pathPattern": "/v1/admin/offers/{offerId}/stock",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
+    },
+    {
+      "key": "admin-orders",
+      "method": "GET",
+      "pathPattern": "/v1/admin/orders",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.orders",
+      "action": "view"
+    },
+    {
+      "key": "admin-order",
+      "method": "GET",
+      "pathPattern": "/v1/admin/orders/{orderId}",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.orders",
+      "action": "view"
+    },
+    {
+      "key": "admin-order-fulfillments",
+      "method": "GET",
+      "pathPattern": "/v1/admin/orders/{orderId}/fulfillments",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.orders",
+      "action": "view"
+    },
+    {
+      "key": "admin-fulfillment-ship",
+      "method": "POST",
+      "pathPattern": "/v1/admin/fulfillments/{fulfillmentId}/ship",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.orders",
+      "action": "fulfill"
+    },
+    {
+      "key": "admin-fulfillment-deliver",
+      "method": "POST",
+      "pathPattern": "/v1/admin/fulfillments/{fulfillmentId}/deliver",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.orders",
+      "action": "fulfill"
+    },
+    {
+      "key": "admin-order-refund",
+      "method": "POST",
+      "pathPattern": "/v1/admin/orders/{orderId}/refunds",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.orders",
+      "action": "refund"
+    },
+    {
+      "key": "shop-cart-create",
+      "method": "POST",
+      "pathPattern": "/v1/shop/carts",
+      "access": "HYBRID"
+    },
+    {
+      "key": "shop-cart",
+      "method": "GET",
+      "pathPattern": "/v1/shop/carts/current",
+      "access": "HYBRID"
+    },
+    {
+      "key": "shop-cart-add",
+      "method": "POST",
+      "pathPattern": "/v1/shop/carts/current/items",
+      "access": "HYBRID"
+    },
+    {
+      "key": "shop-cart-remove",
+      "method": "DELETE",
+      "pathPattern": "/v1/shop/carts/current/items/{itemId}",
+      "access": "HYBRID"
+    },
+    {
+      "key": "shop-checkout",
+      "method": "POST",
+      "pathPattern": "/v1/shop/checkouts",
+      "access": "HYBRID"
+    },
+    {
+      "key": "shop-checkout-get",
+      "method": "GET",
+      "pathPattern": "/v1/shop/checkouts/{checkoutId}",
+      "access": "HYBRID"
+    },
+    {
+      "key": "shop-orders",
+      "method": "GET",
+      "pathPattern": "/v1/shop/orders",
+      "access": "HYBRID"
+    },
+    {
+      "key": "shop-order",
+      "method": "GET",
+      "pathPattern": "/v1/shop/orders/{orderId}",
+      "access": "HYBRID"
+    },
+    {
+      "key": "shop-payment-verify",
+      "method": "POST",
+      "pathPattern": "/v1/shop/payments/{paymentId}/verify",
+      "access": "HYBRID"
     }
   ]
 }

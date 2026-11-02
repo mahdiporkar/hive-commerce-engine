@@ -28,6 +28,30 @@
       <artifactId>commerce-listing</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.hivecommerce</groupId>
+      <artifactId>commerce-inventory</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.hivecommerce</groupId>
+      <artifactId>commerce-pricing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.hivecommerce</groupId>
+      <artifactId>commerce-ordering</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.hivecommerce</groupId>
+      <artifactId>commerce-payment</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.hivecommerce</groupId>
+      <artifactId>commerce-fulfillment</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.hivecommerce</groupId>
+      <artifactId>commerce-checkout</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
     </dependency>

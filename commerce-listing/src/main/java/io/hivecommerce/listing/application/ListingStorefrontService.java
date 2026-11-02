@@ -29,8 +29,11 @@ public class ListingStorefrontService {
   private final TenantTransactions transactions;
   private final ListingProjection projection;
   private final CatalogQueries catalog;
+  private final OfferService offerService;
 
-  public ListingStorefrontService(DeploymentScope deployment, TenantTransactions transactions, ListingProjection projection, CatalogQueries catalog) {
+  public ListingStorefrontService(DeploymentScope deployment, TenantTransactions transactions, ListingProjection projection, CatalogQueries catalog,
+      OfferService offerService) {
+    this.offerService = offerService;
     this.deployment = deployment;
     this.transactions = transactions;
     this.projection = projection;
@@ -65,9 +68,14 @@ public class ListingStorefrontService {
     });
   }
 
-  public Detail bySlug(UserContext user, String slug) {
-    return transactions.inScope(deployment.scope(), () -> projection.bySlug(deployment.scope(), slug)
-        .orElseThrow(() -> HiveException.notFound("Product not found")));
+  /** Product detail with its active offers (price and current availability). */
+  public record DetailWithOffers(Detail product, List<OfferService.OfferView> offers) {}
+
+  public DetailWithOffers bySlug(UserContext user, String slug) {
+    return transactions.inScope(deployment.scope(), () -> {
+      var detail = projection.bySlug(deployment.scope(), slug).orElseThrow(() -> HiveException.notFound("Product not found"));
+      return new DetailWithOffers(detail, offerService.offersOfProduct(deployment.scope(), detail.productId()));
+    });
   }
 
   private static String key(String key) {

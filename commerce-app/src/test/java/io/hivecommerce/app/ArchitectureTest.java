@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /** Boundary rules of ADR-0002 and §6.1.4, enforced on every build. */
 class ArchitectureTest {
-  private static final List<String> CONTEXTS = List.of("store", "catalog", "seller", "listing");
+  private static final List<String> CONTEXTS = List.of("store", "catalog", "seller", "listing", "inventory", "pricing", "ordering", "payment", "fulfillment", "checkout");
   private static JavaClasses classes;
 
   @BeforeAll
@@ -44,7 +44,7 @@ class ArchitectureTest {
   @Test
   void sharedKernelDependsOnNothingInternal() {
     noClasses().that().resideInAPackage("io.hivecommerce.shared..")
-        .should().dependOnClassesThat().resideInAnyPackage("io.hivecommerce.platform..", "io.hivecommerce.store..", "io.hivecommerce.catalog..", "io.hivecommerce.seller..", "io.hivecommerce.listing..", "org.springframework..")
+        .should().dependOnClassesThat().resideInAnyPackage("io.hivecommerce.platform..", "io.hivecommerce.store..", "io.hivecommerce.catalog..", "io.hivecommerce.seller..", "io.hivecommerce.listing..", "io.hivecommerce.inventory..", "io.hivecommerce.pricing..", "io.hivecommerce.ordering..", "io.hivecommerce.payment..", "io.hivecommerce.fulfillment..", "io.hivecommerce.checkout..", "org.springframework..")
         .check(classes);
   }
 
@@ -63,7 +63,7 @@ class ArchitectureTest {
 
   @Test
   void hiveTypesStayInThePlatformAnticorruptionLayer() {
-    noClasses().that().resideInAnyPackage("io.hivecommerce.store..", "io.hivecommerce.catalog..", "io.hivecommerce.seller..", "io.hivecommerce.listing..")
+    noClasses().that().resideInAnyPackage("io.hivecommerce.store..", "io.hivecommerce.catalog..", "io.hivecommerce.seller..", "io.hivecommerce.listing..", "io.hivecommerce.inventory..", "io.hivecommerce.pricing..", "io.hivecommerce.ordering..", "io.hivecommerce.payment..", "io.hivecommerce.fulfillment..", "io.hivecommerce.checkout..")
         .should().dependOnClassesThat().haveFullyQualifiedName("io.hivecommerce.platform.identity.HiveHeaders")
         .check(classes);
     noClasses().that().resideInAnyPackage("io.hivecommerce..domain..", "io.hivecommerce..application..")
@@ -87,13 +87,14 @@ class ArchitectureTest {
     methods().that().areDeclaredInClassesThat().areAnnotatedWith(RestController.class)
         .and(com.tngtech.archunit.base.DescribedPredicate.describe("are request handlers",
             m -> m.getAnnotations().stream().anyMatch(a -> a.getRawType().getName().startsWith("org.springframework.web.bind.annotation.") && a.getRawType().getSimpleName().endsWith("Mapping"))))
+        .and().areNotAnnotatedWith(io.hivecommerce.platform.web.ProviderCallback.class)
         .should().beAnnotatedWith(HiveOperation.class)
         .check(classes);
   }
 
   /** Each context's SQL may name only its own schema (ADR-0002: schema isolation without per-context roles). */
   @ParameterizedTest
-  @ValueSource(strings = {"commerce-platform:platform", "commerce-store:store", "commerce-catalog:catalog", "commerce-seller:seller", "commerce-listing:listing"})
+  @ValueSource(strings = {"commerce-platform:platform", "commerce-store:store", "commerce-catalog:catalog", "commerce-seller:seller", "commerce-listing:listing", "commerce-inventory:inventory", "commerce-ordering:ordering", "commerce-payment:payment", "commerce-fulfillment:fulfillment", "commerce-checkout:checkout"})
   void sqlNamesOnlyItsOwnSchema(String moduleAndSchema) throws IOException {
     String module = moduleAndSchema.split(":")[0], own = moduleAndSchema.split(":")[1];
     List<String> foreign = Stream.of("platform", "store", "catalog", "listing", "seller", "pricing", "inventory", "checkout", "ordering", "payment",

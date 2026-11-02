@@ -57,6 +57,20 @@ commerce:
     digital-products: ${COMMERCE_CAP_DIGITAL:true}
     seller-onboarding: ${COMMERCE_CAP_SELLER_ONBOARDING:false}
     commissions: ${COMMERCE_CAP_COMMISSIONS:false}
+  pricing:
+    tax-rate-percent: ${COMMERCE_TAX_RATE_PERCENT:0}
+    flat-shipping: ${COMMERCE_FLAT_SHIPPING:0}
+  inventory:
+    reservation-ttl: ${COMMERCE_RESERVATION_TTL:PT15M}
+  checkout:
+    guest-cart-ttl: ${COMMERCE_GUEST_CART_TTL:P7D}
+  payments:
+    provider: ${COMMERCE_PAYMENT_PROVIDER:}
+    return-url: ${COMMERCE_PAYMENT_RETURN_URL:}
+    fake:
+      enabled: ${COMMERCE_FAKE_PAYMENTS:false}
+      webhook-secret: ${COMMERCE_FAKE_PAYMENTS_SECRET:}
+      psp-base-url: ${COMMERCE_FAKE_PSP_URL:http://fake-psp.invalid}
   catalog:
     max-category-depth: ${COMMERCE_CATALOG_MAX_DEPTH:5}
   hive:

@@ -11,6 +11,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * plays the migration owner; {@code commerce_app} is a plain role that cannot bypass row-level security.
  */
 public final class EngineTestSupport {
+  public static final String FAKE_PSP_SECRET = "test-only-fake-psp-secret-0001";
   public static final String RUNTIME_PASSWORD = "test-only-runtime-password-0001";
   public static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17.6-alpine")
       .withDatabaseName("commerce").withUsername("commerce_owner").withPassword("test-only-owner-password-0001")
@@ -36,6 +37,10 @@ public final class EngineTestSupport {
     registry.add("commerce.store.key", () -> "test-store");
     registry.add("commerce.security.jwt.issuer", () -> TestIdentityProvider.ISSUER);
     registry.add("commerce.security.jwt.jwk-set-uri", IDP::jwksUri);
+    registry.add("commerce.payments.provider", () -> "fake");
+    registry.add("commerce.payments.fake.enabled", () -> "true");
+    registry.add("commerce.payments.fake.webhook-secret", () -> FAKE_PSP_SECRET);
+    registry.add("commerce.payments.return-url", () -> "https://shop.test/checkout/return");
   }
 
   /** Superuser connection for test setup that must bypass row-level security. */

@@ -44,6 +44,27 @@ class SchemaMigrations {
   @DependsOn("sellerSchema")
   FlywayMigrationInitializer listingSchema() { return initializer("listing"); }
 
+  @Bean
+  @DependsOn("listingSchema")
+  FlywayMigrationInitializer inventorySchema() { return initializer("inventory"); }
+
+  @Bean
+  @DependsOn("inventorySchema")
+  FlywayMigrationInitializer orderingSchema() { return initializer("ordering"); }
+
+  @Bean
+  @DependsOn("orderingSchema")
+  FlywayMigrationInitializer paymentSchema() { return initializer("payment"); }
+
+  @Bean
+  @DependsOn("paymentSchema")
+  FlywayMigrationInitializer fulfillmentSchema() { return initializer("fulfillment"); }
+
+  @Bean
+  @DependsOn("fulfillmentSchema")
+  FlywayMigrationInitializer checkoutSchema() { return initializer("checkout"); }
+
+
   private FlywayMigrationInitializer initializer(String schema) {
     Flyway flyway = Flyway.configure()
         .dataSource(url, user, password)

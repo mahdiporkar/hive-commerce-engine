@@ -23,7 +23,13 @@
     <module>commerce-store</module>
     <module>commerce-catalog</module>
     <module>commerce-seller</module>
+    <module>commerce-inventory</module>
+    <module>commerce-pricing</module>
     <module>commerce-listing</module>
+    <module>commerce-ordering</module>
+    <module>commerce-payment</module>
+    <module>commerce-fulfillment</module>
+    <module>commerce-checkout</module>
     <module>commerce-app</module>
   </modules>
 
@@ -70,6 +76,36 @@
       <dependency>
         <groupId>io.hivecommerce</groupId>
         <artifactId>commerce-listing</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.hivecommerce</groupId>
+        <artifactId>commerce-inventory</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.hivecommerce</groupId>
+        <artifactId>commerce-pricing</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.hivecommerce</groupId>
+        <artifactId>commerce-ordering</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.hivecommerce</groupId>
+        <artifactId>commerce-payment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.hivecommerce</groupId>
+        <artifactId>commerce-fulfillment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.hivecommerce</groupId>
+        <artifactId>commerce-checkout</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

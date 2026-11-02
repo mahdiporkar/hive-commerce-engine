@@ -25,6 +25,9 @@ public class CommerceProductionGuard {
         .rule("commerce.security.jwt.jwk-set-uri must be an https URL", () -> !https(env.getProperty("commerce.security.jwt.jwk-set-uri")))
         .rule("commerce.security.jwt.audience is required", () -> blank(env.getProperty("commerce.security.jwt.audience")))
         .rule("commerce.hive.enforce-operation must stay enabled", () -> !env.getProperty("commerce.hive.enforce-operation", Boolean.class, true))
+        .rule("the FAKE payment provider must not be enabled", () -> env.getProperty("commerce.payments.fake.enabled", Boolean.class, false))
+        .rule("commerce.payments.return-url must be an https URL when a payment provider is configured",
+            () -> !blank(env.getProperty("commerce.payments.provider")) && !https(env.getProperty("commerce.payments.return-url")))
         .rule("the runtime database password must be at least 16 characters", () -> env.getProperty("spring.datasource.password", "").length() < 16)
         .rule("the migration database password must be at least 16 characters", () -> env.getProperty("commerce.migration.password", "").length() < 16)
         .enforce("commerce-engine");

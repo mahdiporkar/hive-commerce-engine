@@ -1,6 +1,5 @@
 package io.hivecommerce.listing.api;
 
-import io.hivecommerce.listing.application.ListingProjection.Detail;
 import io.hivecommerce.listing.application.ListingProjection.Page;
 import io.hivecommerce.listing.application.ListingStorefrontService;
 import io.hivecommerce.platform.identity.UserContext;
@@ -30,7 +29,7 @@ class ListingStoreController {
 
   @GetMapping("/products/{slug}")
   @HiveOperation("store-product-detail")
-  Detail detail(UserContext user, @PathVariable String slug) {
+  ListingStorefrontService.DetailWithOffers detail(UserContext user, @PathVariable String slug) {
     return storefront.bySlug(user, slug);
   }
 }

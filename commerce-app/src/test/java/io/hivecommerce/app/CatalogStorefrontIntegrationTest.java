@@ -102,7 +102,7 @@ class CatalogStorefrontIntegrationTest {
 
   @Test
   void productDetailIsPublicAndUnpublishHidesIt() {
-    var detail = api.call(Caller.anonymous(), "store-product-detail", "GET", "/v1/store/products/walnut-carved-box", null).expect(200).body();
+    var detail = api.call(Caller.anonymous(), "store-product-detail", "GET", "/v1/store/products/walnut-carved-box", null).expect(200).body().get("product");
     assertThat(detail.get("title").get("fa").asText()).isEqualTo("جعبه منبت گردو");
     assertThat(detail.get("variants")).hasSize(1);
     String listingId = detail.get("listingId").asText();
