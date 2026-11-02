@@ -12,10 +12,127 @@
     "authentication": "FORWARD_TOKEN"
   },
   "operations": [
-    {"key": "admin-attribute-define", "method": "POST", "pathPattern": "/v1/admin/attributes", "access": "AUTHENTICATED", "resourceKey": "commerce.api.catalog", "action": "configure"},
-    {"key": "admin-product-type-create", "method": "POST", "pathPattern": "/v1/admin/product-types", "access": "AUTHENTICATED", "resourceKey": "commerce.api.catalog", "action": "configure"},
-    {"key": "admin-product-type-publish", "method": "POST", "pathPattern": "/v1/admin/product-types/{productTypeKey}/versions/{version}/publish", "access": "AUTHENTICATED", "resourceKey": "commerce.api.catalog", "action": "configure"},
-    {"key": "admin-product-create", "method": "POST", "pathPattern": "/v1/admin/products", "access": "AUTHENTICATED", "resourceKey": "commerce.api.catalog", "action": "create"},
-    {"key": "admin-product-get", "method": "GET", "pathPattern": "/v1/admin/products/{productId}", "access": "AUTHENTICATED", "resourceKey": "commerce.api.catalog", "action": "read"}
+    {
+      "key": "admin-attribute-define",
+      "method": "POST",
+      "pathPattern": "/v1/admin/attributes",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "configure"
+    },
+    {
+      "key": "admin-product-type-create",
+      "method": "POST",
+      "pathPattern": "/v1/admin/product-types",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "configure"
+    },
+    {
+      "key": "admin-product-type-publish",
+      "method": "POST",
+      "pathPattern": "/v1/admin/product-types/{productTypeKey}/versions/{version}/publish",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "configure"
+    },
+    {
+      "key": "admin-product-create",
+      "method": "POST",
+      "pathPattern": "/v1/admin/products",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "create"
+    },
+    {
+      "key": "admin-product-get",
+      "method": "GET",
+      "pathPattern": "/v1/admin/products/{productId}",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "read"
+    },
+    {
+      "key": "admin-category-create",
+      "method": "POST",
+      "pathPattern": "/v1/admin/categories",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "configure"
+    },
+    {
+      "key": "admin-category-move",
+      "method": "POST",
+      "pathPattern": "/v1/admin/categories/{categoryId}/move",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "configure"
+    },
+    {
+      "key": "admin-category-attributes",
+      "method": "POST",
+      "pathPattern": "/v1/admin/categories/{categoryId}/attributes",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "configure"
+    },
+    {
+      "key": "admin-category-archive",
+      "method": "POST",
+      "pathPattern": "/v1/admin/categories/{categoryId}/archive",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "configure"
+    },
+    {
+      "key": "admin-product-publish",
+      "method": "POST",
+      "pathPattern": "/v1/admin/products/{productId}/publish",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "publish"
+    },
+    {
+      "key": "admin-listing-unpublish",
+      "method": "POST",
+      "pathPattern": "/v1/admin/listings/{listingId}/unpublish",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "publish"
+    },
+    {
+      "key": "admin-listing-approve",
+      "method": "POST",
+      "pathPattern": "/v1/admin/listings/{listingId}/approve",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.moderation",
+      "action": "decide"
+    },
+    {
+      "key": "admin-listing-reject",
+      "method": "POST",
+      "pathPattern": "/v1/admin/listings/{listingId}/reject",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.moderation",
+      "action": "decide"
+    },
+    {
+      "key": "store-categories",
+      "method": "GET",
+      "pathPattern": "/v1/store/categories",
+      "access": "PUBLIC"
+    },
+    {
+      "key": "store-products-search",
+      "method": "GET",
+      "pathPattern": "/v1/store/products",
+      "access": "PUBLIC"
+    },
+    {
+      "key": "store-product-detail",
+      "method": "GET",
+      "pathPattern": "/v1/store/products/{slug}",
+      "access": "PUBLIC"
+    }
   ]
 }

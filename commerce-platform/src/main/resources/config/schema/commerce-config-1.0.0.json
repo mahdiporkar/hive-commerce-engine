@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hive-commerce-engine/config/commerce-config-1.0.0.json",
+  "title": "Hive Commerce Engine client configuration 1.0.0 (ADR-0014). Secrets and endpoints are not part of it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["configSchemaVersion", "tenantId", "store", "hive", "capabilities", "security"],
+  "properties": {
+    "configSchemaVersion": {"const": "1.0.0"},
+    "tenantId": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,159}$"},
+    "store": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "mode", "defaultCurrency", "locales"],
+      "properties": {
+        "key": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,79}$"},
+        "mode": {"enum": ["SINGLE_VENDOR", "MULTI_VENDOR", "HYBRID"]},
+        "defaultCurrency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+        "locales": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z]{2}$"}}
+      }
+    },
+    "hive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["routeKey"],
+      "properties": {"routeKey": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,79}$"}}
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "physicalProducts": {"type": "boolean"},
+        "digitalProducts": {"type": "boolean"},
+        "sellerOnboarding": {"type": "boolean"},
+        "commissions": {"type": "boolean"}
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issuer", "audience"],
+      "properties": {
+        "issuer": {"type": "string", "pattern": "^https?://[^\\s]+$"},
+        "audience": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

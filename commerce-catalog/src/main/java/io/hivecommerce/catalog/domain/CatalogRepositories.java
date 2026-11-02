@@ -31,10 +31,31 @@ public final class CatalogRepositories {
     Optional<ProductType> findById(TenantScope scope, UUID id);
   }
 
+  public interface Categories {
+    void insert(Category category);
+
+    /** Persists the category; when {@code oldPath} differs from its path, rewrites the paths of its descendants. */
+    void update(Category category, String oldPath);
+
+    Optional<Category> findById(TenantScope scope, UUID id);
+
+    boolean hasActiveChildren(TenantScope scope, UUID id);
+
+    /** Levels below the category (0 for a leaf). */
+    int subtreeHeight(TenantScope scope, Category category);
+
+    List<Category> findActive(TenantScope scope);
+
+    /** The category and all its active descendants. */
+    List<UUID> subtreeIds(TenantScope scope, UUID id);
+  }
+
   public interface Products {
     void insert(Product product);
 
     Optional<Product> findById(TenantScope scope, UUID id);
+
+    Optional<Product> findByVariantId(TenantScope scope, UUID variantId);
   }
 
   /** Transactional outbox of this context (ADR-0002): written in the same transaction as the aggregate change. */

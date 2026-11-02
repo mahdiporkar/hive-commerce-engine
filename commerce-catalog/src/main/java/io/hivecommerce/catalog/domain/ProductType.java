@@ -28,15 +28,17 @@ public final class ProductType {
   private final TenantScope scope;
   private final String key;
   private final LocalizedText name;
+  private final ProductKind kind;
   private final List<SchemaVersion> versions;
   private final long revision;
   private final List<DomainEvent> events = new ArrayList<>();
 
-  private ProductType(UUID id, TenantScope scope, String key, LocalizedText name, List<SchemaVersion> versions, long revision) {
+  private ProductType(UUID id, TenantScope scope, String key, LocalizedText name, ProductKind kind, List<SchemaVersion> versions, long revision) {
     this.id = id;
     this.scope = scope;
     this.key = key;
     this.name = name;
+    this.kind = kind;
     this.versions = new ArrayList<>(versions);
     this.versions.sort(Comparator.comparingInt(SchemaVersion::number));
     this.revision = revision;
@@ -44,16 +46,21 @@ public final class ProductType {
 
   /** Creates the type with draft version 1. */
   public static ProductType create(UUID id, TenantScope scope, String key, LocalizedText name, List<AttributeSpec> specs) {
+    return create(id, scope, key, name, ProductKind.PHYSICAL, specs);
+  }
+
+  public static ProductType create(UUID id, TenantScope scope, String key, LocalizedText name, ProductKind kind, List<AttributeSpec> specs) {
     var v = new Violations();
     if (key == null || !KEY.matcher(key).matches()) v.add("key", "must match " + KEY.pattern());
     if (name == null) v.add("name", "is required");
+    if (kind == null) v.add("kind", "is required");
     validateSpecs(specs, v);
     v.throwIfAny();
-    return new ProductType(id, scope, key, name, List.of(new SchemaVersion(1, SchemaVersion.Status.DRAFT, specs, null)), 0);
+    return new ProductType(id, scope, key, name, kind, List.of(new SchemaVersion(1, SchemaVersion.Status.DRAFT, specs, null)), 0);
   }
 
-  public static ProductType restore(UUID id, TenantScope scope, String key, LocalizedText name, List<SchemaVersion> versions, long revision) {
-    return new ProductType(id, scope, key, name, versions, revision);
+  public static ProductType restore(UUID id, TenantScope scope, String key, LocalizedText name, ProductKind kind, List<SchemaVersion> versions, long revision) {
+    return new ProductType(id, scope, key, name, kind, versions, revision);
   }
 
   /** Starts the next version as a draft with the given attributes (a copy-and-change of the latest version). */
@@ -116,6 +123,7 @@ public final class ProductType {
   public TenantScope scope() { return scope; }
   public String key() { return key; }
   public LocalizedText name() { return name; }
+  public ProductKind kind() { return kind; }
   public List<SchemaVersion> versions() { return List.copyOf(versions); }
   public long revision() { return revision; }
 }

@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /** Boundary rules of ADR-0002 and §6.1.4, enforced on every build. */
 class ArchitectureTest {
-  private static final List<String> CONTEXTS = List.of("store", "catalog");
+  private static final List<String> CONTEXTS = List.of("store", "catalog", "seller", "listing");
   private static JavaClasses classes;
 
   @BeforeAll
@@ -44,7 +44,7 @@ class ArchitectureTest {
   @Test
   void sharedKernelDependsOnNothingInternal() {
     noClasses().that().resideInAPackage("io.hivecommerce.shared..")
-        .should().dependOnClassesThat().resideInAnyPackage("io.hivecommerce.platform..", "io.hivecommerce.store..", "io.hivecommerce.catalog..", "org.springframework..")
+        .should().dependOnClassesThat().resideInAnyPackage("io.hivecommerce.platform..", "io.hivecommerce.store..", "io.hivecommerce.catalog..", "io.hivecommerce.seller..", "io.hivecommerce.listing..", "org.springframework..")
         .check(classes);
   }
 
@@ -63,7 +63,7 @@ class ArchitectureTest {
 
   @Test
   void hiveTypesStayInThePlatformAnticorruptionLayer() {
-    noClasses().that().resideInAnyPackage("io.hivecommerce.store..", "io.hivecommerce.catalog..")
+    noClasses().that().resideInAnyPackage("io.hivecommerce.store..", "io.hivecommerce.catalog..", "io.hivecommerce.seller..", "io.hivecommerce.listing..")
         .should().dependOnClassesThat().haveFullyQualifiedName("io.hivecommerce.platform.identity.HiveHeaders")
         .check(classes);
     noClasses().that().resideInAnyPackage("io.hivecommerce..domain..", "io.hivecommerce..application..")
@@ -93,7 +93,7 @@ class ArchitectureTest {
 
   /** Each context's SQL may name only its own schema (ADR-0002: schema isolation without per-context roles). */
   @ParameterizedTest
-  @ValueSource(strings = {"commerce-platform:platform", "commerce-store:store", "commerce-catalog:catalog"})
+  @ValueSource(strings = {"commerce-platform:platform", "commerce-store:store", "commerce-catalog:catalog", "commerce-seller:seller", "commerce-listing:listing"})
   void sqlNamesOnlyItsOwnSchema(String moduleAndSchema) throws IOException {
     String module = moduleAndSchema.split(":")[0], own = moduleAndSchema.split(":")[1];
     List<String> foreign = Stream.of("platform", "store", "catalog", "listing", "seller", "pricing", "inventory", "checkout", "ordering", "payment",

@@ -3,6 +3,8 @@ package io.hivecommerce.catalog.infrastructure;
 import io.hivecommerce.catalog.domain.AttributeDefinition;
 import io.hivecommerce.catalog.domain.AttributeType;
 import io.hivecommerce.catalog.domain.CatalogRepositories;
+import io.hivecommerce.catalog.domain.Category;
+import io.hivecommerce.catalog.domain.ProductKind;
 import io.hivecommerce.catalog.domain.Product;
 import io.hivecommerce.catalog.domain.ProductType;
 import io.hivecommerce.catalog.domain.SchemaVersion;
@@ -90,7 +92,8 @@ final class JdbcCatalogRepositories {
     @Override
     public void insert(ProductType type) {
       try {
-        jdbc.sql("insert into catalog.product_type(id, tenant_id, store_id, key, name) values (:id, :tenant, :store, :key, cast(:name as jsonb))")
+        jdbc.sql("insert into catalog.product_type(id, tenant_id, store_id, key, name, kind) values (:id, :tenant, :store, :key, cast(:name as jsonb), :kind)")
+            .param("kind", type.kind().name())
             .param("id", type.id()).param("tenant", type.scope().tenantId()).param("store", type.scope().storeId()).param("key", type.key())
             .param("name", json.write(type.name().values())).update();
       } catch (DuplicateKeyException e) {
@@ -130,11 +133,11 @@ final class JdbcCatalogRepositories {
     public Optional<ProductType> findById(TenantScope scope, UUID id) { return find(scope, "id = :value", id); }
 
     private Optional<ProductType> find(TenantScope scope, String condition, Object value) {
-      return jdbc.sql("select id, key, name, revision from catalog.product_type where tenant_id = :tenant and store_id = :store and " + condition)
+      return jdbc.sql("select id, key, name, kind, revision from catalog.product_type where tenant_id = :tenant and store_id = :store and " + condition)
           .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("value", value)
-          .query((rs, n) -> new Object[] {rs.getObject("id", UUID.class), rs.getString("key"), rs.getString("name"), rs.getLong("revision")})
+          .query((rs, n) -> new Object[] {rs.getObject("id", UUID.class), rs.getString("key"), rs.getString("name"), rs.getLong("revision"), rs.getString("kind")})
           .optional()
-          .map(row -> ProductType.restore((UUID) row[0], scope, (String) row[1], json.text((String) row[2]), versions(scope, (UUID) row[0]), (Long) row[3]));
+          .map(row -> ProductType.restore((UUID) row[0], scope, (String) row[1], json.text((String) row[2]), ProductKind.valueOf((String) row[4]), versions(scope, (UUID) row[0]), (Long) row[3]));
     }
 
     private List<SchemaVersion> versions(TenantScope scope, UUID typeId) {
@@ -146,6 +149,107 @@ final class JdbcCatalogRepositories {
               rs.getTimestamp("published_at") == null ? null : rs.getTimestamp("published_at").toInstant()))
           .list();
     }
+  }
+
+  @Repository
+  static class Categories implements CatalogRepositories.Categories {
+    private final JdbcClient jdbc;
+    private final CatalogJson json;
+
+    Categories(JdbcClient jdbc, CatalogJson json) {
+      this.jdbc = jdbc;
+      this.json = json;
+    }
+
+    @Override
+    public void insert(Category c) {
+      try {
+        jdbc.sql("""
+            insert into catalog.category(id, tenant_id, store_id, parent_id, path, slug, name, attribute_keys, position, status)
+            values (:id, :tenant, :store, :parent, :path, :slug, cast(:name as jsonb), :keys, :position, :status)""")
+            .param("id", c.id()).param("tenant", c.scope().tenantId()).param("store", c.scope().storeId()).param("parent", c.parentId())
+            .param("path", c.path()).param("slug", c.slug().value()).param("name", json.write(c.name().values()))
+            .param("keys", c.attributeKeys().toArray(String[]::new)).param("position", c.position()).param("status", c.status().name()).update();
+      } catch (DuplicateKeyException e) {
+        throw conflict(e, Map.of("category_sibling_slug_uk", "CATEGORY_SLUG_TAKEN"));
+      }
+    }
+
+    @Override
+    public void update(Category c, String oldPath) {
+      int updated;
+      try {
+        updated = jdbc.sql("""
+            update catalog.category set parent_id = :parent, path = :path, attribute_keys = :keys, status = :status,
+              revision = revision + 1, updated_at = now()
+            where id = :id and tenant_id = :tenant and store_id = :store and revision = :revision""")
+            .param("parent", c.parentId()).param("path", c.path()).param("keys", c.attributeKeys().toArray(String[]::new))
+            .param("status", c.status().name()).param("id", c.id()).param("tenant", c.scope().tenantId()).param("store", c.scope().storeId())
+            .param("revision", c.revision()).update();
+      } catch (DuplicateKeyException e) {
+        throw conflict(e, Map.of("category_sibling_slug_uk", "CATEGORY_SLUG_TAKEN"));
+      }
+      if (updated != 1) throw new OptimisticLockingFailureException("category " + c.id() + " changed concurrently");
+      if (oldPath != null && !oldPath.equals(c.path())) {
+        // Paths contain only UUIDs and slashes, so they carry no LIKE wildcards.
+        jdbc.sql("""
+            update catalog.category set path = :newPath || substr(path, length(:oldPath) + 1), updated_at = now()
+            where tenant_id = :tenant and store_id = :store and path like :oldPrefix and id <> :id""")
+            .param("newPath", c.path()).param("oldPath", oldPath).param("oldPrefix", oldPath + "%")
+            .param("tenant", c.scope().tenantId()).param("store", c.scope().storeId()).param("id", c.id()).update();
+      }
+    }
+
+    @Override
+    public Optional<Category> findById(TenantScope scope, UUID id) {
+      return select(scope, "id = :id", id).stream().findFirst();
+    }
+
+    @Override
+    public boolean hasActiveChildren(TenantScope scope, UUID id) {
+      return jdbc.sql("select count(*) from catalog.category where tenant_id = :tenant and store_id = :store and parent_id = :id and status = 'ACTIVE'")
+          .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("id", id).query(Long.class).single() > 0;
+    }
+
+    @Override
+    public int subtreeHeight(TenantScope scope, Category c) {
+      Integer deepest = jdbc.sql("""
+          select max(length(path) - length(replace(path, '/', ''))) from catalog.category
+          where tenant_id = :tenant and store_id = :store and path like :prefix""")
+          .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("prefix", c.path() + "%").query(Integer.class).single();
+      return deepest == null ? 0 : (deepest - 1) - c.depth();
+    }
+
+    @Override
+    public List<Category> findActive(TenantScope scope) {
+      return select(scope, "status = 'ACTIVE'", null);
+    }
+
+    @Override
+    public List<UUID> subtreeIds(TenantScope scope, UUID id) {
+      return findById(scope, id).filter(root -> root.status() == Category.Status.ACTIVE).map(root -> jdbc.sql("""
+          select id from catalog.category where tenant_id = :tenant and store_id = :store and status = 'ACTIVE' and path like :prefix""")
+          .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("prefix", root.path() + "%").query(UUID.class).list())
+          .orElse(List.of());
+    }
+
+    private List<Category> select(TenantScope scope, String condition, UUID id) {
+      var statement = jdbc.sql("select id, parent_id, path, slug, name, attribute_keys, position, status, revision from catalog.category "
+              + "where tenant_id = :tenant and store_id = :store and " + condition + " order by path")
+          .param("tenant", scope.tenantId()).param("store", scope.storeId());
+      if (id != null) statement = statement.param("id", id);
+      return statement.query((rs, n) -> Category.restore(rs.getObject("id", UUID.class), scope, rs.getObject("parent_id", UUID.class), rs.getString("path"),
+              new Slug(rs.getString("slug")), json.text(rs.getString("name")), java.util.Arrays.asList((String[]) rs.getArray("attribute_keys").getArray()),
+              rs.getInt("position"), Category.Status.valueOf(rs.getString("status")), rs.getLong("revision")))
+          .list();
+    }
+  }
+
+  /** Registers the catalog outbox with the platform dispatcher. */
+  @org.springframework.context.annotation.Configuration
+  static class OutboxRegistration {
+    @org.springframework.context.annotation.Bean
+    io.hivecommerce.platform.events.OutboxSource catalogOutbox() { return new io.hivecommerce.platform.events.OutboxSource("catalog"); }
   }
 
   @Repository
@@ -162,9 +266,9 @@ final class JdbcCatalogRepositories {
     public void insert(Product p) {
       try {
         jdbc.sql("""
-            insert into catalog.product(id, tenant_id, store_id, product_type_id, schema_version, title, slug, attributes, status, created_by)
-            values (:id, :tenant, :store, :type, :version, cast(:title as jsonb), :slug, cast(:attributes as jsonb), :status, :createdBy)""")
-            .param("id", p.id()).param("tenant", p.scope().tenantId()).param("store", p.scope().storeId()).param("type", p.productTypeId())
+            insert into catalog.product(id, tenant_id, store_id, product_type_id, category_id, schema_version, title, slug, attributes, status, created_by)
+            values (:id, :tenant, :store, :type, :category, :version, cast(:title as jsonb), :slug, cast(:attributes as jsonb), :status, :createdBy)""")
+            .param("id", p.id()).param("tenant", p.scope().tenantId()).param("store", p.scope().storeId()).param("type", p.productTypeId()).param("category", p.categoryId())
             .param("version", p.schemaVersion()).param("title", json.write(p.title().values())).param("slug", p.slug().value())
             .param("attributes", json.write(p.attributes())).param("status", p.status().name()).param("createdBy", p.createdBy()).update();
         for (var v : p.variants()) {
@@ -180,6 +284,13 @@ final class JdbcCatalogRepositories {
     }
 
     @Override
+    public Optional<Product> findByVariantId(TenantScope scope, UUID variantId) {
+      return jdbc.sql("select product_id from catalog.product_variant where id = :id and tenant_id = :tenant and store_id = :store")
+          .param("id", variantId).param("tenant", scope.tenantId()).param("store", scope.storeId()).query(UUID.class).optional()
+          .flatMap(productId -> findById(scope, productId));
+    }
+
+    @Override
     public Optional<Product> findById(TenantScope scope, UUID id) {
       var variants = jdbc.sql("""
           select id, sku, attributes from catalog.product_variant
@@ -188,10 +299,10 @@ final class JdbcCatalogRepositories {
           .query((rs, n) -> new Product.Variant(rs.getObject("id", UUID.class), rs.getString("sku"), json.map(rs.getString("attributes"))))
           .list();
       return jdbc.sql("""
-          select product_type_id, schema_version, title, slug, attributes, status, created_by, revision from catalog.product
+          select product_type_id, category_id, schema_version, title, slug, attributes, status, created_by, revision from catalog.product
           where id = :id and tenant_id = :tenant and store_id = :store""")
           .param("id", id).param("tenant", scope.tenantId()).param("store", scope.storeId())
-          .query((rs, n) -> Product.restore(id, scope, rs.getObject("product_type_id", UUID.class), rs.getInt("schema_version"), json.text(rs.getString("title")),
+          .query((rs, n) -> Product.restore(id, scope, rs.getObject("product_type_id", UUID.class), rs.getObject("category_id", UUID.class), rs.getInt("schema_version"), json.text(rs.getString("title")),
               new Slug(rs.getString("slug")), json.map(rs.getString("attributes")), variants, Product.Status.valueOf(rs.getString("status")),
               rs.getObject("created_by", UUID.class), rs.getLong("revision")))
           .optional();

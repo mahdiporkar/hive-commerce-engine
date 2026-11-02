@@ -40,13 +40,25 @@ logging:
 hive:
   profile: ${HIVE_PROFILE:production}
 
+springdoc:
+  api-docs:
+    enabled: ${COMMERCE_OPENAPI_ENABLED:false}
+
 commerce:
+  config-schema-version: "1.0.0"
   tenant-id: ${COMMERCE_TENANT_ID:default}
   store:
     key: ${COMMERCE_STORE_KEY}
     mode: ${COMMERCE_STORE_MODE:SINGLE_VENDOR}
     default-currency: ${COMMERCE_STORE_CURRENCY:IRR}
     locales: ${COMMERCE_STORE_LOCALES:fa,en}
+  capabilities:
+    physical-products: ${COMMERCE_CAP_PHYSICAL:true}
+    digital-products: ${COMMERCE_CAP_DIGITAL:true}
+    seller-onboarding: ${COMMERCE_CAP_SELLER_ONBOARDING:false}
+    commissions: ${COMMERCE_CAP_COMMISSIONS:false}
+  catalog:
+    max-category-depth: ${COMMERCE_CATALOG_MAX_DEPTH:5}
   hive:
     route-key: ${COMMERCE_HIVE_ROUTE_KEY:commerce}
     enforce-operation: true

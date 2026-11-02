@@ -36,6 +36,14 @@ class SchemaMigrations {
   @DependsOn("storeSchema")
   FlywayMigrationInitializer catalogSchema() { return initializer("catalog"); }
 
+  @Bean
+  @DependsOn("catalogSchema")
+  FlywayMigrationInitializer sellerSchema() { return initializer("seller"); }
+
+  @Bean
+  @DependsOn("sellerSchema")
+  FlywayMigrationInitializer listingSchema() { return initializer("listing"); }
+
   private FlywayMigrationInitializer initializer(String schema) {
     Flyway flyway = Flyway.configure()
         .dataSource(url, user, password)

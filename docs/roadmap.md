@@ -19,7 +19,7 @@ Exit criteria for Phase 1: step 1. For Phase 2: steps 2–7 plus Scenario A (two
 | Phase | Scope | Exit |
 |---|---|---|
 | 0 (complete) | Discovery, ADRs, vocabulary, slice | owner approval of this report |
-| 1 (in progress; skeleton, Hive integration and secure product creation done) | Engine skeleton (Boot 3.5.5, starter from pinned commit), ArchUnit, Flyway, UserContext/JWT, ProductionGuard rules, config schema, store/default seller, categories, product types + schema versions, products/variants/listings, search projection, Hive registration templates, local Hive + Keycloak test harness | slice step 1 through the BFF |
+| 1 (complete) | Engine skeleton (Boot 3.5.5, starter from pinned commit), ArchUnit, Flyway, UserContext/JWT, ProductionGuard rules, config schema, store/default seller, categories, product types + schema versions, products/variants/listings, search projection, Hive registration templates, local Hive + Keycloak test harness | slice step 1 through the BFF |
 | 2 | Cart, checkout, reservations, orders, payment port + fake provider, webhook ingress + inbox, verification, fulfillment, order history, ledger basics | Scenario A |
 | 3 | Storage port + MinIO, upload/finalize, entitlements, signed downloads, prompt inline delivery | Scenario B |
 | 4 | Seller onboarding (ADR-0004), memberships, offers, moderation, order splitting, commissions, settlements, payouts | Scenario C, E |

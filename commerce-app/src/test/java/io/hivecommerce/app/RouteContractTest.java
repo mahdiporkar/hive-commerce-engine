@@ -44,6 +44,9 @@ class RouteContractTest {
     for (JsonNode op : template.get("operations")) {
       String key = op.get("key").asText(), path = op.get("pathPattern").asText();
       fromTemplate.put(key, new Operation(op.get("method").asText(), path));
+      String access = op.get("access").asText();
+      if (path.startsWith("/v1/store/")) assertThat(access).as("%s must be PUBLIC", key).isEqualTo("PUBLIC");
+      if (path.startsWith("/v1/shop/") || path.startsWith("/v1/seller/")) assertThat(access).as("%s must be HYBRID (ADR-0004)", key).isEqualTo("HYBRID");
       if (path.startsWith("/v1/admin/")) {
         assertThat(op.get("access").asText()).as("%s must be AUTHENTICATED", key).isEqualTo("AUTHENTICATED");
         assertThat(declaredActions.getOrDefault(op.get("resourceKey").asText(), Set.of()))

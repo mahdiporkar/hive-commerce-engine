@@ -21,4 +21,6 @@ The suite binds ports 29500–29521 on 127.0.0.1, creates throwaway containers (
 ## Notes
 
 - Testcontainers is pinned to 1.21.4 because the version managed by Spring Boot 3.5.5 (1.21.3) is rejected by Docker Engine 29.
-- The e2e suite waits for Hive grants by probing the protected operation itself, not `/api/me/context`. During Phase 1, that endpoint did not list `commerce-api` permissions; the cause is not yet investigated (see the Phase 1 report).
+- The e2e suite waits for Hive grants by probing the protected operation itself, not `/api/me/context`. Hive computes permission hints only for applications with active micro-frontend modules (see the Phase 1 report).
+- Scenario D (configuration-only handicraft store) runs in `CatalogStorefrontIntegrationTest` from `fixtures/handicraft/catalog.json`.
+- `OpenApiContractTest` compares the live API with `docs/api/openapi.json`; regenerate deliberately with `-Dopenapi.write=true`.

@@ -20,7 +20,7 @@ class ProductTest {
   private static final UUID ACTOR = UUID.randomUUID();
 
   private static Product create(ProductType type, Map<String, Object> attributes, List<Product.VariantDraft> variants) {
-    return Product.create(Ids.newId(), SCOPE, type, LocalizedText.of("en", "Bowl"), "bowl", attributes, variants, ACTOR, Ids::newId, NOW);
+    return Product.create(Ids.newId(), SCOPE, type, null, LocalizedText.of("en", "Bowl"), "bowl", attributes, variants, ACTOR, Ids::newId, NOW);
   }
 
   @Test
@@ -66,7 +66,7 @@ class ProductTest {
         .isInstanceOfSatisfying(DomainRuleException.class, e -> assertThat(e.code()).isEqualTo("SCHEMA_NOT_PUBLISHED"));
     var foreign = publishedType(List.of());
     var otherScope = new TenantScope("other", UUID.randomUUID());
-    assertThatThrownBy(() -> Product.create(Ids.newId(), otherScope, foreign, LocalizedText.of("en", "x"), "x", Map.of(),
+    assertThatThrownBy(() -> Product.create(Ids.newId(), otherScope, foreign, null, LocalizedText.of("en", "x"), "x", Map.of(),
         List.of(new Product.VariantDraft("A", Map.of())), ACTOR, Ids::newId, NOW)).isInstanceOf(DomainRuleException.class);
   }
 }

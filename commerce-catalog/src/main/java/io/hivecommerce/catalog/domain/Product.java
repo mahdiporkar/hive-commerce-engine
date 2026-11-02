@@ -45,6 +45,7 @@ public final class Product {
   private final UUID id;
   private final TenantScope scope;
   private final UUID productTypeId;
+  private final UUID categoryId;
   private final int schemaVersion;
   private final LocalizedText title;
   private final Slug slug;
@@ -55,11 +56,12 @@ public final class Product {
   private final long revision;
   private final List<DomainEvent> events = new ArrayList<>();
 
-  private Product(UUID id, TenantScope scope, UUID productTypeId, int schemaVersion, LocalizedText title, Slug slug, Map<String, Object> attributes,
+  private Product(UUID id, TenantScope scope, UUID productTypeId, UUID categoryId, int schemaVersion, LocalizedText title, Slug slug, Map<String, Object> attributes,
       List<Variant> variants, Status status, UUID createdBy, long revision) {
     this.id = id;
     this.scope = scope;
     this.productTypeId = productTypeId;
+    this.categoryId = categoryId;
     this.schemaVersion = schemaVersion;
     this.title = title;
     this.slug = slug;
@@ -70,7 +72,7 @@ public final class Product {
     this.revision = revision;
   }
 
-  public static Product create(UUID id, TenantScope scope, ProductType type, LocalizedText title, String slug, Map<String, Object> attributes,
+  public static Product create(UUID id, TenantScope scope, ProductType type, UUID categoryId, LocalizedText title, String slug, Map<String, Object> attributes,
       List<VariantDraft> variantDrafts, UUID createdBy, Supplier<UUID> ids, Instant now) {
     if (!type.scope().equals(scope)) throw new DomainRuleException("PRODUCT_TYPE_UNKNOWN", "Unknown product type");
     SchemaVersion schema = type.latestPublished()
@@ -86,7 +88,7 @@ public final class Product {
     var normalized = schema.normalizeProductAttributes(attributes, v);
     var variants = variants(schema, variantDrafts, ids, v);
     v.throwIfAny();
-    var product = new Product(id, scope, type.id(), schema.number(), title, parsedSlug, normalized, variants, Status.DRAFT, createdBy, 0);
+    var product = new Product(id, scope, type.id(), categoryId, schema.number(), title, parsedSlug, normalized, variants, Status.DRAFT, createdBy, 0);
     product.events.add(new ProductCreated(id, type.key(), schema.number(), variants.size(), now));
     return product;
   }
@@ -119,9 +121,9 @@ public final class Product {
     return result;
   }
 
-  public static Product restore(UUID id, TenantScope scope, UUID productTypeId, int schemaVersion, LocalizedText title, Slug slug, Map<String, Object> attributes,
+  public static Product restore(UUID id, TenantScope scope, UUID productTypeId, UUID categoryId, int schemaVersion, LocalizedText title, Slug slug, Map<String, Object> attributes,
       List<Variant> variants, Status status, UUID createdBy, long revision) {
-    return new Product(id, scope, productTypeId, schemaVersion, title, slug, attributes, variants, status, createdBy, revision);
+    return new Product(id, scope, productTypeId, categoryId, schemaVersion, title, slug, attributes, variants, status, createdBy, revision);
   }
 
   public List<DomainEvent> pullEvents() {
@@ -133,6 +135,7 @@ public final class Product {
   public UUID id() { return id; }
   public TenantScope scope() { return scope; }
   public UUID productTypeId() { return productTypeId; }
+  public UUID categoryId() { return categoryId; }
   public int schemaVersion() { return schemaVersion; }
   public LocalizedText title() { return title; }
   public Slug slug() { return slug; }

@@ -1,19 +1,25 @@
 package io.hivecommerce.catalog.application;
 
+import io.hivecommerce.catalog.application.CatalogCommands.CreateCategory;
 import io.hivecommerce.catalog.application.CatalogCommands.CreateProduct;
 import io.hivecommerce.catalog.application.CatalogCommands.CreateProductType;
 import io.hivecommerce.catalog.application.CatalogCommands.DefineAttribute;
+import io.hivecommerce.catalog.application.CatalogCommands.MoveCategory;
 import io.hivecommerce.catalog.application.CatalogViews.AttributeView;
+import io.hivecommerce.catalog.application.CatalogViews.CategoryView;
 import io.hivecommerce.catalog.application.CatalogViews.ProductTypeView;
 import io.hivecommerce.catalog.application.CatalogViews.ProductView;
 import io.hivecommerce.catalog.domain.AttributeDefinition;
 import io.hivecommerce.catalog.domain.AttributeSpec;
 import io.hivecommerce.catalog.domain.CatalogRepositories;
+import io.hivecommerce.catalog.domain.Category;
 import io.hivecommerce.catalog.domain.Product;
+import io.hivecommerce.catalog.domain.ProductKind;
 import io.hivecommerce.catalog.domain.ProductType;
 import io.hivecommerce.platform.identity.UserContext;
 import io.hivecommerce.platform.tenancy.DeploymentScope;
 import io.hivecommerce.platform.tenancy.TenantTransactions;
+import io.hivecommerce.shared.DomainValidationException;
 import io.hivecommerce.shared.Ids;
 import io.hivecommerce.shared.TenantScope;
 import io.hivecommerce.shared.Violations;
@@ -24,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,19 +45,24 @@ public class CatalogAdminService {
   private final TenantTransactions transactions;
   private final CatalogRepositories.AttributeDefinitions attributes;
   private final CatalogRepositories.ProductTypes productTypes;
+  private final CatalogRepositories.Categories categories;
   private final CatalogRepositories.Products products;
   private final CatalogRepositories.Outbox outbox;
   private final Clock clock;
+  private final int maxCategoryDepth;
 
   public CatalogAdminService(DeploymentScope deployment, TenantTransactions transactions, CatalogRepositories.AttributeDefinitions attributes,
-      CatalogRepositories.ProductTypes productTypes, CatalogRepositories.Products products, CatalogRepositories.Outbox outbox, Clock clock) {
+      CatalogRepositories.ProductTypes productTypes, CatalogRepositories.Categories categories, CatalogRepositories.Products products,
+      CatalogRepositories.Outbox outbox, Clock clock, @Value("${commerce.catalog.max-category-depth:5}") int maxCategoryDepth) {
     this.deployment = deployment;
     this.transactions = transactions;
     this.attributes = attributes;
     this.productTypes = productTypes;
+    this.categories = categories;
     this.products = products;
     this.outbox = outbox;
     this.clock = clock;
+    this.maxCategoryDepth = maxCategoryDepth;
   }
 
   public AttributeView defineAttribute(UserContext user, DefineAttribute command) {
@@ -67,7 +79,8 @@ public class CatalogAdminService {
   public ProductTypeView createProductType(UserContext user, CreateProductType command) {
     TenantScope scope = operatorScope(user);
     return transactions.inScope(scope, () -> {
-      var type = ProductType.create(Ids.newId(), scope, command.key(), command.name(), resolveSpecs(scope, command.attributes()));
+      var kind = command.kind() == null ? ProductKind.PHYSICAL : command.kind();
+      var type = ProductType.create(Ids.newId(), scope, command.key(), command.name(), kind, resolveSpecs(scope, command.attributes()));
       productTypes.insert(type);
       outbox.append(scope, type.pullEvents());
       return ProductTypeView.of(type);
@@ -85,14 +98,68 @@ public class CatalogAdminService {
     });
   }
 
+  public CategoryView createCategory(UserContext user, CreateCategory command) {
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> {
+      Category parent = command.parentId() == null ? null : categories.findById(scope, command.parentId())
+          .orElseThrow(() -> DomainValidationException.of("parentId", "unknown category"));
+      requireAttributesExist(scope, command.attributes());
+      var category = Category.create(Ids.newId(), scope, parent, command.slug(), command.name(), command.attributes(), command.position(), maxCategoryDepth,
+          clock.instant());
+      categories.insert(category);
+      outbox.append(scope, category.pullEvents());
+      return CategoryView.of(category);
+    });
+  }
+
+  public CategoryView moveCategory(UserContext user, UUID categoryId, MoveCategory command) {
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> {
+      var category = existingCategory(scope, categoryId, command.revision());
+      Category parent = command.parentId() == null ? null : categories.findById(scope, command.parentId())
+          .orElseThrow(() -> DomainValidationException.of("parentId", "unknown category"));
+      String oldPath = category.moveTo(parent, categories.subtreeHeight(scope, category), maxCategoryDepth, clock.instant());
+      categories.update(category, oldPath);
+      outbox.append(scope, category.pullEvents());
+      return CategoryView.of(category);
+    });
+  }
+
+  public CategoryView assignCategoryAttributes(UserContext user, UUID categoryId, List<String> keys, long revision) {
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> {
+      var category = existingCategory(scope, categoryId, revision);
+      requireAttributesExist(scope, keys);
+      category.assignAttributes(keys, clock.instant());
+      categories.update(category, null);
+      outbox.append(scope, category.pullEvents());
+      return CategoryView.of(category);
+    });
+  }
+
+  public CategoryView archiveCategory(UserContext user, UUID categoryId, long revision) {
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> {
+      var category = existingCategory(scope, categoryId, revision);
+      category.archive(categories.hasActiveChildren(scope, categoryId), clock.instant());
+      categories.update(category, null);
+      outbox.append(scope, category.pullEvents());
+      return CategoryView.of(category);
+    });
+  }
+
   public ProductView createProduct(UserContext user, CreateProduct command) {
     TenantScope scope = operatorScope(user);
     UUID actor = user.requireActor();
     return transactions.inScope(scope, () -> {
       var type = productTypes.findByKey(scope, String.valueOf(command.productType()))
-          .orElseThrow(() -> io.hivecommerce.shared.DomainValidationException.of("productType", "unknown product type"));
-      var product = Product.create(Ids.newId(), scope, type, command.title(), command.slug(), command.attributes(), command.variants(), actor,
-          Ids::newId, clock.instant());
+          .orElseThrow(() -> DomainValidationException.of("productType", "unknown product type"));
+      if (command.categoryId() != null) {
+        var category = categories.findById(scope, command.categoryId()).orElseThrow(() -> DomainValidationException.of("categoryId", "unknown category"));
+        if (category.status() != Category.Status.ACTIVE) throw DomainValidationException.of("categoryId", "category is archived");
+      }
+      var product = Product.create(Ids.newId(), scope, type, command.categoryId(), command.title(), command.slug(), command.attributes(), command.variants(),
+          actor, Ids::newId, clock.instant());
       products.insert(product);
       outbox.append(scope, product.pullEvents());
       return ProductView.of(product);
@@ -110,6 +177,20 @@ public class CatalogAdminService {
     user.requireActor();
     if (!deployment.tenantId().equals(user.tenantId())) throw HiveException.forbidden("This identity belongs to another tenant");
     return deployment.scope();
+  }
+
+  private Category existingCategory(TenantScope scope, UUID id, long revision) {
+    var category = categories.findById(scope, id).orElseThrow(() -> HiveException.notFound("Category not found"));
+    if (category.revision() != revision) throw HiveException.stale();
+    return category;
+  }
+
+  private void requireAttributesExist(TenantScope scope, List<String> keys) {
+    if (keys == null || keys.isEmpty()) return;
+    var known = attributes.findByKeys(scope, keys).stream().map(AttributeDefinition::key).collect(Collectors.toSet());
+    var violations = new Violations();
+    for (int i = 0; i < keys.size(); i++) if (!known.contains(keys.get(i))) violations.add("attributes[" + i + "]", "unknown attribute " + keys.get(i));
+    violations.throwIfAny();
   }
 
   private List<AttributeSpec> resolveSpecs(TenantScope scope, List<CatalogCommands.SpecReference> references) {

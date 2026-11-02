@@ -1,0 +1,60 @@
+{
+  "description": "Handicraft store (master prompt §17): configured through the engine API only, with zero core changes (Scenario D).",
+  "attributes": [
+    {"key": "material", "type": "ENUM", "labels": {"en": "Material", "fa": "جنس"}, "flags": {"filterable": true, "searchable": true},
+     "options": [
+       {"code": "clay", "labels": {"en": "Clay", "fa": "سفال"}},
+       {"code": "wool", "labels": {"en": "Wool", "fa": "پشم"}},
+       {"code": "silver", "labels": {"en": "Silver", "fa": "نقره"}},
+       {"code": "walnut", "labels": {"en": "Walnut wood", "fa": "چوب گردو"}},
+       {"code": "copper", "labels": {"en": "Copper", "fa": "مس"}}]},
+    {"key": "color", "type": "COLOR", "labels": {"en": "Color", "fa": "رنگ"}, "flags": {"filterable": true},
+     "options": [
+       {"code": "turquoise", "labels": {"en": "Turquoise", "fa": "فیروزه‌ای"}},
+       {"code": "crimson", "labels": {"en": "Crimson", "fa": "لاکی"}},
+       {"code": "natural", "labels": {"en": "Natural", "fa": "طبیعی"}}]},
+    {"key": "dimensions", "type": "JSON", "labels": {"en": "Dimensions (cm)", "fa": "ابعاد (سانتی‌متر)"}},
+    {"key": "length", "type": "MEASUREMENT", "labels": {"en": "Length", "fa": "طول"}, "flags": {"filterable": true, "sortable": true},
+     "constraints": {"min": 0, "units": ["cm", "m"]}},
+    {"key": "production_method", "type": "ENUM", "labels": {"en": "Production method", "fa": "روش تولید"}, "flags": {"filterable": true},
+     "options": [
+       {"code": "hand-thrown", "labels": {"en": "Hand-thrown", "fa": "چرخ‌کاری دستی"}},
+       {"code": "hand-knotted", "labels": {"en": "Hand-knotted", "fa": "گره‌زنی دستی"}},
+       {"code": "hand-carved", "labels": {"en": "Hand-carved", "fa": "منبت‌کاری"}},
+       {"code": "hammered", "labels": {"en": "Hammered", "fa": "قلم‌زنی"}}]},
+    {"key": "region", "type": "STRING", "labels": {"en": "Region", "fa": "منطقه"}, "flags": {"filterable": true}, "constraints": {"maxLength": 80}},
+    {"key": "artisan", "type": "STRING", "labels": {"en": "Artisan", "fa": "هنرمند"}, "constraints": {"maxLength": 120}},
+    {"key": "customizable", "type": "BOOLEAN", "labels": {"en": "Customization available", "fa": "قابل سفارشی‌سازی"}, "flags": {"filterable": true}},
+    {"key": "preparation_days", "type": "INTEGER", "labels": {"en": "Preparation time (days)", "fa": "زمان آماده‌سازی (روز)"}, "flags": {"filterable": true},
+     "constraints": {"min": 0, "max": 365}}
+  ],
+  "productTypes": [
+    {"key": "handicraft-item", "name": {"en": "Handicraft item", "fa": "صنایع‌دستی"}, "kind": "PHYSICAL",
+     "attributes": [
+       {"key": "material", "required": true}, {"key": "production_method", "required": true}, {"key": "region", "required": true},
+       {"key": "artisan", "required": false}, {"key": "dimensions", "required": false}, {"key": "length", "required": false},
+       {"key": "customizable", "required": true}, {"key": "preparation_days", "required": true},
+       {"key": "color", "required": true, "variantDefining": true}]}
+  ],
+  "categories": [
+    {"ref": "pottery", "slug": "pottery", "name": {"en": "Pottery", "fa": "سفال و سرامیک"}, "attributes": ["material", "color", "region"]},
+    {"ref": "carpets", "slug": "carpets", "name": {"en": "Carpets", "fa": "فرش و گلیم"}, "attributes": ["material", "length", "production_method"]},
+    {"ref": "jewelry", "slug": "traditional-jewelry", "name": {"en": "Traditional jewelry", "fa": "زیورآلات سنتی"}, "attributes": ["material"]},
+    {"ref": "woodwork", "slug": "woodwork", "name": {"en": "Woodwork", "fa": "منبت و خاتم"}, "attributes": ["material", "production_method"]},
+    {"ref": "decorative", "slug": "decorative-crafts", "name": {"en": "Decorative crafts", "fa": "صنایع تزئینی"}, "attributes": ["material"]},
+    {"ref": "bowls", "parent": "pottery", "slug": "bowls", "name": {"en": "Bowls", "fa": "کاسه"}, "attributes": ["color"]}
+  ],
+  "products": [
+    {"productType": "handicraft-item", "category": "bowls", "slug": "lalejin-turquoise-bowl", "title": {"en": "Lalejin turquoise bowl", "fa": "کاسه فیروزه‌ای لالجین"},
+     "attributes": {"material": "clay", "production_method": "hand-thrown", "region": "Lalejin, Hamedan", "artisan": "Workshop Hamedani",
+       "dimensions": {"diameter": 22, "height": 9}, "customizable": false, "preparation_days": 3},
+     "variants": [{"sku": "HC-BOWL-TQ", "attributes": {"color": "turquoise"}}]},
+    {"productType": "handicraft-item", "category": "carpets", "slug": "qashqai-gabbeh", "title": {"en": "Qashqai gabbeh", "fa": "گبه قشقایی"},
+     "attributes": {"material": "wool", "production_method": "hand-knotted", "region": "Fars", "length": {"value": 180, "unit": "cm"},
+       "customizable": true, "preparation_days": 60},
+     "variants": [{"sku": "HC-GABBEH-CR", "attributes": {"color": "crimson"}}, {"sku": "HC-GABBEH-NA", "attributes": {"color": "natural"}}]},
+    {"productType": "handicraft-item", "category": "woodwork", "slug": "walnut-carved-box", "title": {"en": "Carved walnut box", "fa": "جعبه منبت گردو"},
+     "attributes": {"material": "walnut", "production_method": "hand-carved", "region": "Abadeh", "customizable": true, "preparation_days": 14},
+     "variants": [{"sku": "HC-BOX-NA", "attributes": {"color": "natural"}}]}
+  ]
+}

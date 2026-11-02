@@ -1,0 +1,1122 @@
+{
+  "components" : {
+    "schemas" : {
+      "AttributeBody" : {
+        "properties" : {
+          "constraints" : {
+            "$ref" : "#/components/schemas/ConstraintsBody"
+          },
+          "flags" : {
+            "$ref" : "#/components/schemas/FlagsBody"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "labels" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "options" : {
+            "items" : {
+              "$ref" : "#/components/schemas/OptionBody"
+            },
+            "type" : "array"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AttributeView" : {
+        "properties" : {
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "labels" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "options" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "Card" : {
+        "properties" : {
+          "attributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          },
+          "categoryId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "listingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          }
+        },
+        "type" : "object"
+      },
+      "CategoryAttributesBody" : {
+        "properties" : {
+          "attributes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "CategoryBody" : {
+        "properties" : {
+          "attributes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "name" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "parentId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "position" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "slug" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CategoryNode" : {
+        "properties" : {
+          "attributes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "depth" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "name" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "parentId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "position" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "slug" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CategoryView" : {
+        "properties" : {
+          "attributes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "depth" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "name" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "parentId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "position" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ConstraintsBody" : {
+        "properties" : {
+          "max" : {
+            "type" : "number"
+          },
+          "maxLength" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "min" : {
+            "type" : "number"
+          },
+          "minLength" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "referenceType" : {
+            "type" : "string"
+          },
+          "units" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "Detail" : {
+        "properties" : {
+          "attributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          },
+          "categoryId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "listingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "variants" : {
+            "items" : {
+              "additionalProperties" : { },
+              "type" : "object"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "FacetCount" : {
+        "properties" : {
+          "count" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "value" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "FlagsBody" : {
+        "properties" : {
+          "comparable" : {
+            "type" : "boolean"
+          },
+          "filterable" : {
+            "type" : "boolean"
+          },
+          "searchable" : {
+            "type" : "boolean"
+          },
+          "sortable" : {
+            "type" : "boolean"
+          },
+          "visible" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "ListingView" : {
+        "properties" : {
+          "channel" : {
+            "type" : "string"
+          },
+          "listingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "rejectionReason" : {
+            "type" : "string"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MoveBody" : {
+        "properties" : {
+          "parentId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "OptionBody" : {
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "labels" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          }
+        },
+        "type" : "object"
+      },
+      "Page" : {
+        "properties" : {
+          "facets" : {
+            "items" : {
+              "$ref" : "#/components/schemas/FacetCount"
+            },
+            "type" : "array"
+          },
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/Card"
+            },
+            "type" : "array"
+          },
+          "page" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "size" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "total" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "ProductBody" : {
+        "properties" : {
+          "attributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          },
+          "categoryId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productType" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "variants" : {
+            "items" : {
+              "$ref" : "#/components/schemas/VariantBody"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "ProductTypeBody" : {
+        "properties" : {
+          "attributes" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SpecBody"
+            },
+            "type" : "array"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "name" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          }
+        },
+        "type" : "object"
+      },
+      "ProductTypeView" : {
+        "properties" : {
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "name" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "versions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/VersionView"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "ProductView" : {
+        "properties" : {
+          "attributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          },
+          "categoryId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productTypeId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "schemaVersion" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "variants" : {
+            "items" : {
+              "$ref" : "#/components/schemas/VariantView"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "RejectBody" : {
+        "properties" : {
+          "reason" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "RevisionBody" : {
+        "properties" : {
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "SpecBody" : {
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "required" : {
+            "type" : "boolean"
+          },
+          "variantDefining" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "SpecView" : {
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "required" : {
+            "type" : "boolean"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "variantDefining" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "VariantBody" : {
+        "properties" : {
+          "attributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          },
+          "sku" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "VariantView" : {
+        "properties" : {
+          "attributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "sku" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "VersionView" : {
+        "properties" : {
+          "attributes" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SpecView"
+            },
+            "type" : "array"
+          },
+          "publishedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "version" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      }
+    }
+  },
+  "info" : {
+    "description" : "Reached through the Hive BFF at /api/routes/commerce. Access per operation: hive/templates/commerce-service.json.",
+    "title" : "Hive Commerce Engine API",
+    "version" : "v1"
+  },
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/v1/admin/attributes" : {
+      "post" : {
+        "operationId" : "defineAttribute",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AttributeBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AttributeView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/categories" : {
+      "post" : {
+        "operationId" : "createCategory",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CategoryBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CategoryView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/categories/{categoryId}/archive" : {
+      "post" : {
+        "operationId" : "archiveCategory",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "categoryId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RevisionBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CategoryView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/categories/{categoryId}/attributes" : {
+      "post" : {
+        "operationId" : "assignCategoryAttributes",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "categoryId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CategoryAttributesBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CategoryView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/categories/{categoryId}/move" : {
+      "post" : {
+        "operationId" : "moveCategory",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "categoryId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MoveBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CategoryView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/listings/{listingId}/approve" : {
+      "post" : {
+        "operationId" : "approve",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "listingId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListingView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "listing-admin-controller" ]
+      }
+    },
+    "/v1/admin/listings/{listingId}/reject" : {
+      "post" : {
+        "operationId" : "reject",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "listingId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RejectBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListingView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "listing-admin-controller" ]
+      }
+    },
+    "/v1/admin/listings/{listingId}/unpublish" : {
+      "post" : {
+        "operationId" : "unpublish",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "listingId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListingView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "listing-admin-controller" ]
+      }
+    },
+    "/v1/admin/product-types" : {
+      "post" : {
+        "operationId" : "createProductType",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProductTypeBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProductTypeView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/product-types/{productTypeKey}/versions/{version}/publish" : {
+      "post" : {
+        "operationId" : "publishSchemaVersion",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "productTypeKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "version",
+          "required" : true,
+          "schema" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProductTypeView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/products" : {
+      "post" : {
+        "operationId" : "createProduct",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProductBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProductView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/products/{productId}" : {
+      "get" : {
+        "operationId" : "getProduct",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "productId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProductView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/products/{productId}/publish" : {
+      "post" : {
+        "operationId" : "publish",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "productId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListingView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "listing-admin-controller" ]
+      }
+    },
+    "/v1/store/categories" : {
+      "get" : {
+        "operationId" : "categories",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/CategoryNode"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-store-controller" ]
+      }
+    },
+    "/v1/store/products" : {
+      "get" : {
+        "operationId" : "search",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "params",
+          "required" : true,
+          "schema" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Page"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "listing-store-controller" ]
+      }
+    },
+    "/v1/store/products/{slug}" : {
+      "get" : {
+        "operationId" : "detail",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "slug",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Detail"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "listing-store-controller" ]
+      }
+    }
+  }
+}

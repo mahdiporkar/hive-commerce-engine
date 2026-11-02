@@ -3,6 +3,7 @@ package io.hivecommerce.catalog.api;
 import io.hivecommerce.catalog.application.CatalogAdminService;
 import io.hivecommerce.catalog.application.CatalogCommands;
 import io.hivecommerce.catalog.application.CatalogViews.AttributeView;
+import io.hivecommerce.catalog.application.CatalogViews.CategoryView;
 import io.hivecommerce.catalog.application.CatalogViews.ProductTypeView;
 import io.hivecommerce.catalog.application.CatalogViews.ProductView;
 import io.hivecommerce.catalog.domain.AttributeConstraints;
@@ -10,6 +11,7 @@ import io.hivecommerce.catalog.domain.AttributeFlags;
 import io.hivecommerce.catalog.domain.AttributeOption;
 import io.hivecommerce.catalog.domain.AttributeType;
 import io.hivecommerce.catalog.domain.Product;
+import io.hivecommerce.catalog.domain.ProductKind;
 import io.hivecommerce.platform.identity.UserContext;
 import io.hivecommerce.platform.web.HiveOperation;
 import io.hivecommerce.shared.DomainValidationException;
@@ -51,11 +53,19 @@ class CatalogAdminController {
 
   record SpecBody(String key, boolean required, boolean variantDefining) {}
 
-  record ProductTypeBody(String key, Map<String, String> name, List<SpecBody> attributes) {}
+  record ProductTypeBody(String key, Map<String, String> name, String kind, List<SpecBody> attributes) {}
+
+  record CategoryBody(UUID parentId, String slug, Map<String, String> name, List<String> attributes, Integer position) {}
+
+  record MoveBody(UUID parentId, long revision) {}
+
+  record CategoryAttributesBody(List<String> attributes, long revision) {}
+
+  record RevisionBody(long revision) {}
 
   record VariantBody(String sku, Map<String, Object> attributes) {}
 
-  record ProductBody(String productType, Map<String, String> title, String slug, Map<String, Object> attributes, List<VariantBody> variants) {}
+  record ProductBody(String productType, UUID categoryId, Map<String, String> title, String slug, Map<String, Object> attributes, List<VariantBody> variants) {}
 
   @PostMapping("/attributes")
   @ResponseStatus(HttpStatus.CREATED)
@@ -76,7 +86,7 @@ class CatalogAdminController {
   ProductTypeView createProductType(UserContext user, @RequestBody ProductTypeBody body) {
     var specs = body.attributes() == null ? null
         : body.attributes().stream().map(s -> new CatalogCommands.SpecReference(s.key(), s.required(), s.variantDefining())).toList();
-    return catalog.createProductType(user, new CatalogCommands.CreateProductType(body.key(), text("name", body.name()), specs));
+    return catalog.createProductType(user, new CatalogCommands.CreateProductType(body.key(), text("name", body.name()), kind(body.kind()), specs));
   }
 
   @PostMapping("/product-types/{productTypeKey}/versions/{version}/publish")
@@ -91,7 +101,33 @@ class CatalogAdminController {
   ProductView createProduct(UserContext user, @RequestBody ProductBody body) {
     var variants = body.variants() == null ? null
         : body.variants().stream().map(v -> v == null ? null : new Product.VariantDraft(v.sku(), v.attributes())).toList();
-    return catalog.createProduct(user, new CatalogCommands.CreateProduct(body.productType(), text("title", body.title()), body.slug(), body.attributes(), variants));
+    return catalog.createProduct(user, new CatalogCommands.CreateProduct(body.productType(), body.categoryId(), text("title", body.title()), body.slug(), body.attributes(), variants));
+  }
+
+  @PostMapping("/categories")
+  @ResponseStatus(HttpStatus.CREATED)
+  @HiveOperation("admin-category-create")
+  CategoryView createCategory(UserContext user, @RequestBody CategoryBody body) {
+    return catalog.createCategory(user, new CatalogCommands.CreateCategory(body.parentId(), body.slug(), text("name", body.name()), body.attributes(),
+        body.position() == null ? 0 : body.position()));
+  }
+
+  @PostMapping("/categories/{categoryId}/move")
+  @HiveOperation("admin-category-move")
+  CategoryView moveCategory(UserContext user, @PathVariable UUID categoryId, @RequestBody MoveBody body) {
+    return catalog.moveCategory(user, categoryId, new CatalogCommands.MoveCategory(body.parentId(), body.revision()));
+  }
+
+  @PostMapping("/categories/{categoryId}/attributes")
+  @HiveOperation("admin-category-attributes")
+  CategoryView assignCategoryAttributes(UserContext user, @PathVariable UUID categoryId, @RequestBody CategoryAttributesBody body) {
+    return catalog.assignCategoryAttributes(user, categoryId, body.attributes(), body.revision());
+  }
+
+  @PostMapping("/categories/{categoryId}/archive")
+  @HiveOperation("admin-category-archive")
+  CategoryView archiveCategory(UserContext user, @PathVariable UUID categoryId, @RequestBody RevisionBody body) {
+    return catalog.archiveCategory(user, categoryId, body.revision());
   }
 
   @GetMapping("/products/{productId}")
@@ -108,7 +144,16 @@ class CatalogAdminController {
     }
   }
 
-  private static LocalizedText text(String field, Map<String, String> values) {
+  private static ProductKind kind(String value) {
+    if (value == null) return null;
+    try {
+      return ProductKind.valueOf(value);
+    } catch (IllegalArgumentException e) {
+      throw DomainValidationException.of("kind", "must be one of " + List.of(ProductKind.values()));
+    }
+  }
+
+  static LocalizedText text(String field, Map<String, String> values) {
     if (values == null) throw DomainValidationException.of(field, "is required");
     try {
       return new LocalizedText(values);
