@@ -63,6 +63,10 @@ class JdbcOrderRepository implements OrderRepository {
         .param("status", o.status().name()).param("payment", o.paymentId()).param("id", o.id()).param("tenant", s.tenantId()).param("store", s.storeId())
         .param("revision", o.revision()).update();
     if (updated != 1) throw new OptimisticLockingFailureException("order " + o.id() + " changed concurrently");
+    for (UUID lineId : o.refundedLineIds()) {
+      jdbc.sql("insert into ordering.order_line_refund(line_id, tenant_id, store_id, order_id) values (:line, :tenant, :store, :order) on conflict (line_id) do nothing")
+          .param("line", lineId).param("tenant", s.tenantId()).param("store", s.storeId()).param("order", o.id()).update();
+    }
     for (var so : o.sellerOrders()) {
       jdbc.sql("update ordering.seller_order set status = :status, updated_at = now() where id = :id and tenant_id = :tenant and store_id = :store")
           .param("status", so.status().name()).param("id", so.id()).param("tenant", s.tenantId()).param("store", s.storeId()).update();
@@ -95,7 +99,12 @@ class JdbcOrderRepository implements OrderRepository {
             rs.getObject("payment_id", UUID.class), rs.getLong("revision")})
         .list();
     return rows.stream().map(r -> Order.restore((UUID) r[0], scope, (String) r[1], (UUID) r[2], (UUID) r[3], Order.Status.valueOf((String) r[4]),
-        sellerOrders(scope, (UUID) r[0], ((Money) r[5]).currency()), (Money) r[5], (UUID) r[6], (Long) r[7])).toList();
+        sellerOrders(scope, (UUID) r[0], ((Money) r[5]).currency()), (Money) r[5], (UUID) r[6], refundedLines(scope, (UUID) r[0]), (Long) r[7])).toList();
+  }
+
+  private java.util.Set<UUID> refundedLines(TenantScope scope, UUID orderId) {
+    return new java.util.HashSet<>(jdbc.sql("select line_id from ordering.order_line_refund where order_id = :order and tenant_id = :tenant and store_id = :store")
+        .param("order", orderId).param("tenant", scope.tenantId()).param("store", scope.storeId()).query(UUID.class).list());
   }
 
   private List<Order.SellerOrder> sellerOrders(TenantScope scope, UUID orderId, Currency currency) {

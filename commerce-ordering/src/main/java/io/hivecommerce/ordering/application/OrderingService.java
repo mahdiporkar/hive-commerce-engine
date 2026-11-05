@@ -203,6 +203,30 @@ public class OrderingService implements OrderingApi {
     }
   }
 
+  /** Payment → Ordering: lines named by a completed refund are marked refunded. */
+  @Component
+  static class RefundHandler implements EventHandler {
+    private final OrderingService ordering;
+    private final Clock clock;
+
+    RefundHandler(OrderingService ordering, Clock clock) {
+      this.ordering = ordering;
+      this.clock = clock;
+    }
+
+    public String consumer() { return "ordering.refund-completed"; }
+    public Set<String> eventTypes() { return Set.of("commerce.payment.RefundCompleted"); }
+
+    @SuppressWarnings("unchecked")
+    public void handle(EventEnvelope e) {
+      var p = e.payload();
+      var lines = (List<String>) p.getOrDefault("orderLineIds", List.of());
+      if (lines.isEmpty()) return;
+      var scope = new TenantScope(e.tenantId(), e.storeId());
+      ordering.apply(scope, UUID.fromString((String) p.get("orderId")), o -> lines.forEach(l -> o.recordLineRefund(UUID.fromString(l), (String) p.get("refundId"), clock.instant())));
+    }
+  }
+
   /** Fulfillment → Ordering: shipment and delivery of seller orders. */
   @Component
   static class FulfillmentHandler implements EventHandler {
@@ -215,7 +239,7 @@ public class OrderingService implements OrderingApi {
     }
 
     public String consumer() { return "ordering.fulfillment"; }
-    public Set<String> eventTypes() { return Set.of("commerce.fulfillment.SellerOrderShipped", "commerce.fulfillment.SellerOrderDelivered"); }
+    public Set<String> eventTypes() { return Set.of("commerce.fulfillment.SellerOrderShipped", "commerce.fulfillment.SellerOrderDelivered", "commerce.digital.DigitalDelivered"); }
 
     public void handle(EventEnvelope e) {
       var scope = new TenantScope(e.tenantId(), e.storeId());

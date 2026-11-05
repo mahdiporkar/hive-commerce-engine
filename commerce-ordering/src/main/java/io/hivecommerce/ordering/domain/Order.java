@@ -60,12 +60,14 @@ public final class Order {
   private final List<SellerOrder> sellerOrders;
   private final Money total;
   private UUID paymentId;
+  private final java.util.Set<UUID> refundedLineIds;
   private final long revision;
   private final List<DomainEvent> events = new ArrayList<>();
 
   private Order(UUID id, TenantScope scope, String number, UUID customerId, UUID checkoutAttemptId, Status status, List<SellerOrder> sellerOrders,
-      Money total, UUID paymentId, long revision) {
+      Money total, UUID paymentId, java.util.Set<UUID> refundedLineIds, long revision) {
     this.id = id;
+    this.refundedLineIds = new java.util.HashSet<>(refundedLineIds);
     this.scope = scope;
     this.number = number;
     this.customerId = customerId;
@@ -100,15 +102,15 @@ public final class Order {
       sellerOrders.add(so);
     }
     if (!sum.equals(expectedTotal)) throw new DomainRuleException("ORDER_TOTAL_MISMATCH", "Order total does not equal its lines, tax and shipping");
-    var order = new Order(id, scope, number, customerId, checkoutAttemptId, Status.PLACED, sellerOrders, expectedTotal, null, 0);
+    var order = new Order(id, scope, number, customerId, checkoutAttemptId, Status.PLACED, sellerOrders, expectedTotal, null, java.util.Set.of(), 0);
     order.events.add(new OrderingEvent("OrderPlaced", id.toString(), Map.of("orderId", id.toString(), "number", number, "customerId", customerId.toString(),
         "checkoutAttemptId", checkoutAttemptId.toString(), "total", expectedTotal.amount().toPlainString(), "currency", currency.getCurrencyCode()), now));
     return order;
   }
 
   public static Order restore(UUID id, TenantScope scope, String number, UUID customerId, UUID checkoutAttemptId, Status status, List<SellerOrder> sellerOrders,
-      Money total, UUID paymentId, long revision) {
-    return new Order(id, scope, number, customerId, checkoutAttemptId, status, sellerOrders, total, paymentId, revision);
+      Money total, UUID paymentId, java.util.Set<UUID> refundedLineIds, long revision) {
+    return new Order(id, scope, number, customerId, checkoutAttemptId, status, sellerOrders, total, paymentId, refundedLineIds, revision);
   }
 
   /** Verified payment arrived. Idempotent; a capture for a cancelled order needs a refund instead of fulfillment. */
@@ -134,6 +136,17 @@ public final class Order {
     sellerOrders.replaceAll(so -> so.with(SellerOrderStatus.CANCELLED));
     events.add(new OrderingEvent("OrderCancelled", id.toString(), Map.of("orderId", id.toString(), "checkoutAttemptId", checkoutAttemptId.toString(),
         "reason", reason == null ? "" : reason), now));
+  }
+
+  /** A completed refund covers this line (once per line): consumers revoke entitlements and reverse allocations. */
+  public void recordLineRefund(UUID lineId, String refundId, Instant now) {
+    var owner = sellerOrders.stream().filter(so -> so.lines().stream().anyMatch(l -> l.id().equals(lineId))).findFirst()
+        .orElseThrow(() -> new DomainRuleException("ORDER_LINE_UNKNOWN", "Unknown order line"));
+    if (!refundedLineIds.add(lineId)) return;
+    var line = owner.lines().stream().filter(l -> l.id().equals(lineId)).findFirst().orElseThrow();
+    events.add(new OrderingEvent("OrderLineRefunded", id.toString(), Map.of("orderId", id.toString(), "lineId", lineId.toString(), "sellerOrderId", owner.id().toString(),
+        "sellerId", owner.sellerId().toString(), "refundId", refundId, "lineTotal", line.lineTotal().amount().toPlainString(), "tax", line.tax().amount().toPlainString(),
+        "currency", total.currency().getCurrencyCode()), now));
   }
 
   public void sellerOrderShipped(UUID sellerOrderId, Instant now) {
@@ -201,5 +214,6 @@ public final class Order {
   public List<SellerOrder> sellerOrders() { return List.copyOf(sellerOrders); }
   public Money total() { return total; }
   public UUID paymentId() { return paymentId; }
+  public java.util.Set<UUID> refundedLineIds() { return java.util.Set.copyOf(refundedLineIds); }
   public long revision() { return revision; }
 }

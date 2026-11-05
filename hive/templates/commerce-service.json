@@ -251,6 +251,72 @@
       "method": "POST",
       "pathPattern": "/v1/shop/payments/{paymentId}/verify",
       "access": "HYBRID"
+    },
+    {
+      "key": "admin-asset-create",
+      "method": "POST",
+      "pathPattern": "/v1/admin/assets",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
+    },
+    {
+      "key": "admin-asset-upload",
+      "method": "POST",
+      "pathPattern": "/v1/admin/assets/{assetId}/uploads",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
+    },
+    {
+      "key": "admin-asset-finalize",
+      "method": "POST",
+      "pathPattern": "/v1/admin/assets/{assetId}/uploads/{uploadId}/finalize",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
+    },
+    {
+      "key": "admin-asset-text",
+      "method": "PUT",
+      "pathPattern": "/v1/admin/assets/{assetId}/text",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
+    },
+    {
+      "key": "admin-asset-preview",
+      "method": "PUT",
+      "pathPattern": "/v1/admin/assets/{assetId}/preview",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
+    },
+    {
+      "key": "admin-entitlement-revoke",
+      "method": "POST",
+      "pathPattern": "/v1/admin/entitlements/{entitlementId}/revoke",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.digital",
+      "action": "revoke"
+    },
+    {
+      "key": "shop-library",
+      "method": "GET",
+      "pathPattern": "/v1/shop/library",
+      "access": "HYBRID"
+    },
+    {
+      "key": "shop-download",
+      "method": "POST",
+      "pathPattern": "/v1/shop/library/{entitlementId}/downloads",
+      "access": "HYBRID"
+    },
+    {
+      "key": "store-product-previews",
+      "method": "GET",
+      "pathPattern": "/v1/store/products/{productId}/previews",
+      "access": "PUBLIC"
     }
   ]
 }

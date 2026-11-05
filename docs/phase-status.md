@@ -1,5 +1,51 @@
 # Phase status
 
+## Phase 3 — Digital Commerce (COMPLETE)
+
+Exit criterion: **Scenario B passes** (`DigitalDeliveryIntegrationTest`, real PostgreSQL and real S3-compatible storage): a store sells a PDF; after purchase the buyer gets a signed download; a non-buyer and an expired URL both fail.
+
+Implemented (`commerce-digital-delivery`, schema `digital`):
+- **Storage port** `FileStorage` with an S3-compatible adapter (MinIO client). Private bucket; server-side calls use the internal endpoint, signed URLs the public endpoint.
+- **Upload:** a POST-policy form bound to key, content type and exact size; the browser posts straight to storage (never through the BFF). `finalize` checks size, SHA-256 and the content-sniffed MIME type, and runs the `MalwareScanner` port; only then is a version attached.
+- **Assets:** `DigitalAsset` with immutable numbered `ContentVersion`s, unguessable ids, license terms (download limit, updates included, usage text), a public preview stored apart from paid content.
+- **Entitlements:** created only by the `OrderPaid` consumer, unique per order line and asset. Ownership, revocation and limit are checked on every download. Buyers keep the purchased version, or receive later versions when the license includes updates.
+- **Download:** JSON `{url, expiresAt}` with a TTL capped at 300 s, no 302 (ADR-0008). Small text (prompts) is returned inline after the same checks. Every grant is written to `download_access_log`.
+- **Revocation:** by an operator, or automatically when a refund names the line (`RefundCompleted` → `OrderLineRefunded` → revoke).
+- **Ordering:** digital-only seller orders are delivered when entitlements are granted (`DigitalDelivered`); `order_line_refund` records refunded lines without touching immutable lines.
+- **Hive:** 9 new route operations (6 AUTHENTICATED, 2 HYBRID, 1 PUBLIC). Production guard rules for the storage endpoint and bucket creation.
+
+Database migrations: `digital/V1__digital.sql`, `ordering/V2__order_line_refund.sql`.
+
+Tests Executed:
+```sh
+./mvnw -B install -Dopenapi.write=true    # exit 0, all modules; commerce-app Tests run: 52, Failures: 0, Errors: 0
+```
+
+PASS:
+- **Scenario B:** digital order without shipping; completes on entitlement grant; signed URL returns the exact bytes as an attachment; non-buyer gets an empty library and 404 with the entitlement id; URL expired after its TTL → 403 from storage; object without a signature → 403; license limit of 3 → fourth 409 `DOWNLOAD_LIMIT_REACHED`; 3 access-log rows.
+- **Revocation:** refund naming the line → REVOKED → 409 `ENTITLEMENT_REVOKED`; direct operator revocation.
+- **Upload verification:** wrong checksum, an executable declared as PDF, the EICAR test file, a disallowed type (422), and a file larger than the signed size (refused by storage itself) are all rejected.
+- **Prompts:** text delivered inline only after purchase; public previews contain neither the text, object keys nor asset ids; update rights deliver version 2.
+- **Mixed order:** physical plus digital: entitlement granted, one fulfillment opened, order stays PAID until shipped.
+- **Isolation:** assets require a DIGITAL product; an entitlement row of another store is invisible to its own customer (404).
+
+FAIL (and how fixed): the first test run failed because Docker Desktop had stopped between sessions; not a code problem. Restarted and re-run.
+
+NOT EXECUTED (and why):
+- A real malware scanner: the default adapter recognises only the EICAR test signature and records `NOT_SCANNED` otherwise. It is **not** protection. Production needs a real adapter (for example ClamAV) and `commerce.digital.require-scan=true`.
+- Digital flow through the real Hive BFF (engine-level only; the BFF path is identical to the HYBRID operations proven in Phase 2).
+- Seller-owned assets through the API (Phase 4).
+- AWS S3 itself (only MinIO was run; the form URL assumes path-style addressing).
+
+Known limitations:
+- A signed URL can be shared for its lifetime and delivered content can be copied. No DRM is claimed.
+- The download count is consumed when the URL is issued, so a failed fetch uses one download.
+- `finalize` reads the whole object to hash it, so very large files take correspondingly long within the request.
+
+Open Blockers: none.
+
+Next phase: Phase 4 — Marketplace.
+
 ## Phase 2 — eShop Transaction Flow (COMPLETE)
 
 Exit criterion: **Scenario A passes end to end through Hive** (`tests/e2e/commerce-through-bff.test.mjs`): two signed-in shoppers race for one unique item through the real BFF; exactly one order is placed (the other gets 409 `OUT_OF_STOCK`); payment is verified by a signed provider webhook; fulfillment is recorded and the order completes.

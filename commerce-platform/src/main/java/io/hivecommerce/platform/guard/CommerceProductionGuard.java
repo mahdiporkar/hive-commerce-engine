@@ -28,6 +28,10 @@ public class CommerceProductionGuard {
         .rule("the FAKE payment provider must not be enabled", () -> env.getProperty("commerce.payments.fake.enabled", Boolean.class, false))
         .rule("commerce.payments.return-url must be an https URL when a payment provider is configured",
             () -> !blank(env.getProperty("commerce.payments.provider")) && !https(env.getProperty("commerce.payments.return-url")))
+        .rule("commerce.storage.public-endpoint must be an https URL when storage is configured",
+            () -> !blank(env.getProperty("commerce.storage.endpoint")) && !https(env.getProperty("commerce.storage.public-endpoint")))
+        .rule("commerce.storage.create-bucket must be off (production buckets are created privately by the deployment)",
+            () -> env.getProperty("commerce.storage.create-bucket", Boolean.class, false))
         .rule("the runtime database password must be at least 16 characters", () -> env.getProperty("spring.datasource.password", "").length() < 16)
         .rule("the migration database password must be at least 16 characters", () -> env.getProperty("commerce.migration.password", "").length() < 16)
         .enforce("commerce-engine");
