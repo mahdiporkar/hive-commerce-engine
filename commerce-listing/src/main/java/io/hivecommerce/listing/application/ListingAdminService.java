@@ -54,8 +54,24 @@ public class ListingAdminService {
     });
   }
 
+  /** Moderator approval publishes the seller's listing with a fresh product snapshot. */
   public ListingView approve(UserContext user, UUID listingId) {
-    return change(user, listingId, listing -> listing.approve(clock.instant()));
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> {
+      var listing = listings.findById(scope, listingId).orElseThrow(() -> HiveException.notFound("Listing not found"));
+      listing.approve(clock.instant());
+      listing.publish(clock.instant());
+      var product = catalog.product(scope, listing.productId()).orElseThrow();
+      listings.update(listing);
+      projection.upsert(scope, listing.id(), product, Facets.of(product));
+      listings.appendEvents(scope, listing.pullEvents());
+      return ListingView.of(listing);
+    });
+  }
+
+  public java.util.List<ListingView> pending(UserContext user) {
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> listings.findByStatus(scope, Listing.Status.PENDING_APPROVAL).stream().map(ListingView::of).toList());
   }
 
   public ListingView reject(UserContext user, UUID listingId, String reason) {

@@ -77,6 +77,43 @@ final class DigitalControllers {
     LibraryItem revoke(UserContext user, @PathVariable UUID entitlementId, @RequestBody RevokeBody body) { return digital.revoke(user, entitlementId, body.reason()); }
   }
 
+  /** Seller workspace assets (HYBRID; assets.manage on the owning seller; others get 404). */
+  @RestController
+  @RequestMapping("/v1/seller")
+  static class SellerAssets {
+    private final DigitalService digital;
+
+    SellerAssets(DigitalService digital) {
+      this.digital = digital;
+    }
+
+    @PostMapping("/sellers/{sellerId}/assets")
+    @ResponseStatus(HttpStatus.CREATED)
+    @HiveOperation("seller-asset-create")
+    AssetView create(UserContext user, @PathVariable UUID sellerId, @RequestBody AssetCommand body) { return digital.createSellerAsset(user, sellerId, body); }
+
+    @PostMapping("/assets/{assetId}/uploads")
+    @ResponseStatus(HttpStatus.CREATED)
+    @HiveOperation("seller-asset-upload")
+    UploadView upload(UserContext user, @PathVariable String assetId, @RequestBody UploadBody body) {
+      return digital.requestUpload(user, assetId, digital.sellerAccess(user), body.contentType(), body.size(), body.sha256());
+    }
+
+    @PostMapping("/assets/{assetId}/uploads/{uploadId}/finalize")
+    @HiveOperation("seller-asset-finalize")
+    AssetView finalizeUpload(UserContext user, @PathVariable String assetId, @PathVariable String uploadId) {
+      return digital.finalizeUpload(user, assetId, uploadId, digital.sellerAccess(user));
+    }
+
+    @PutMapping("/assets/{assetId}/text")
+    @HiveOperation("seller-asset-text")
+    AssetView text(UserContext user, @PathVariable String assetId, @RequestBody TextBody body) { return digital.putText(user, assetId, digital.sellerAccess(user), body.content()); }
+
+    @PutMapping("/assets/{assetId}/preview")
+    @HiveOperation("seller-asset-preview")
+    AssetView preview(UserContext user, @PathVariable String assetId, @RequestBody PreviewBody body) { return digital.setPreview(user, assetId, digital.sellerAccess(user), body.preview()); }
+  }
+
   /** Customer library and downloads (HYBRID: own entitlements only). */
   @RestController
   @RequestMapping("/v1/shop")

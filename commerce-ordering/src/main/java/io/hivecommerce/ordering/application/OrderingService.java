@@ -37,8 +37,11 @@ public class OrderingService implements OrderingApi {
   private final OrderRepository orders;
   private final OrderingOutbox outbox;
   private final Clock clock;
+  private final io.hivecommerce.seller.application.published.SellerDirectory sellers;
 
-  public OrderingService(DeploymentScope deployment, TenantTransactions transactions, OrderRepository orders, OrderingOutbox outbox, Clock clock) {
+  public OrderingService(DeploymentScope deployment, TenantTransactions transactions, OrderRepository orders, OrderingOutbox outbox, Clock clock,
+      io.hivecommerce.seller.application.published.SellerDirectory sellers) {
+    this.sellers = sellers;
     this.deployment = deployment;
     this.transactions = transactions;
     this.orders = orders;
@@ -118,9 +121,17 @@ public class OrderingService implements OrderingApi {
         .orElseThrow(() -> HiveException.notFound("Order not found")));
   }
 
-  /** Seller workspace read: only the seller's part of the order. */
-  public Optional<Order> orderOfSellerOrder(TenantScope scope, UUID sellerOrderId) {
-    return orders.findBySellerOrder(scope, sellerOrderId);
+  /** A seller's part of an order: its own lines only; no customer identity and no other seller's data. */
+  public record SellerOrderPart(UUID orderId, String number, SellerOrderView sellerOrder) {}
+
+  public List<SellerOrderPart> sellerOrders(UserContext user, UUID sellerId) {
+    UUID actor = user.requireActor();
+    TenantScope scope = deployment.scope();
+    return transactions.inScope(scope, () -> {
+      if (!sellers.allows(scope, actor, sellerId, "orders.view")) throw HiveException.notFound("Seller not found");
+      return orders.findBySeller(scope, sellerId, 200).stream().flatMap(o -> OrderView.of(o).sellerOrders().stream().filter(so -> so.sellerId().equals(sellerId))
+          .map(so -> new SellerOrderPart(o.id(), o.number(), so))).toList();
+    });
   }
 
   private void operator(UserContext user) {

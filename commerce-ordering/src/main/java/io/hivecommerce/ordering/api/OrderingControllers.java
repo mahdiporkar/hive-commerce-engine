@@ -33,6 +33,21 @@ final class OrderingControllers {
     OrderView myOrder(UserContext user, @PathVariable UUID orderId) { return ordering.myOrder(user, orderId); }
   }
 
+  /** Seller workspace: the seller's part of orders only (HYBRID; orders.view on that seller). */
+  @RestController
+  @RequestMapping("/v1/seller/sellers/{sellerId}")
+  static class SellerOrders {
+    private final OrderingService ordering;
+
+    SellerOrders(OrderingService ordering) {
+      this.ordering = ordering;
+    }
+
+    @GetMapping("/orders")
+    @HiveOperation("seller-orders")
+    List<OrderingService.SellerOrderPart> orders(UserContext user, @PathVariable UUID sellerId) { return ordering.sellerOrders(user, sellerId); }
+  }
+
   /** Operator order views (AUTHENTICATED, commerce.api.orders:view). */
   @RestController
   @RequestMapping("/v1/admin")

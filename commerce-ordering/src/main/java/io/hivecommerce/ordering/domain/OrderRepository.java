@@ -19,5 +19,7 @@ public interface OrderRepository {
 
   List<Order> findRecent(TenantScope scope, int limit);
 
+  List<Order> findBySeller(TenantScope scope, UUID sellerId, int limit);
+
   Optional<Order> findBySellerOrder(TenantScope scope, UUID sellerOrderId);
 }

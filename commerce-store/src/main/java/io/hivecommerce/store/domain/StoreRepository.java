@@ -8,4 +8,7 @@ public interface StoreRepository {
   void insertIfAbsent(Store store);
 
   Optional<Store> find(TenantScope scope);
+
+  /** Persists the mode; fails on a stale revision. */
+  void update(Store store);
 }

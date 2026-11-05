@@ -13,6 +13,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/** Seller workspace fulfillment (HYBRID; orders.view / orders.fulfill on that seller). */
+@RestController
+@RequestMapping("/v1/seller")
+class FulfillmentSellerController {
+  private final FulfillmentService fulfillment;
+
+  FulfillmentSellerController(FulfillmentService fulfillment) {
+    this.fulfillment = fulfillment;
+  }
+
+  @GetMapping("/sellers/{sellerId}/fulfillments")
+  @HiveOperation("seller-fulfillments")
+  List<FulfillmentView> ofSeller(UserContext user, @PathVariable UUID sellerId) { return fulfillment.ofSeller(user, sellerId); }
+
+  @PostMapping("/fulfillments/{fulfillmentId}/ship")
+  @HiveOperation("seller-fulfillment-ship")
+  FulfillmentView ship(UserContext user, @PathVariable UUID fulfillmentId, @RequestBody FulfillmentAdminController.ShipBody body) {
+    return fulfillment.shipAsSeller(user, fulfillmentId, body.carrier(), body.trackingCode());
+  }
+}
+
 /** Operator fulfillment (AUTHENTICATED: commerce.api.orders:view / :fulfill). */
 @RestController
 @RequestMapping("/v1/admin")

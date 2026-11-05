@@ -68,6 +68,10 @@ class SchemaMigrations {
   @DependsOn("checkoutSchema")
   FlywayMigrationInitializer digitalSchema() { return initializer("digital"); }
 
+  @Bean
+  @DependsOn("digitalSchema")
+  FlywayMigrationInitializer financeSchema() { return initializer("finance"); }
+
 
   private FlywayMigrationInitializer initializer(String schema) {
     Flyway flyway = Flyway.configure()

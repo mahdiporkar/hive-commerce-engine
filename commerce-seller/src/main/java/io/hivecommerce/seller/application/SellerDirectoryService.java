@@ -10,11 +10,16 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
-class SellerDirectoryService implements SellerDirectory {
+class SellerDirectoryService implements SellerDirectory, io.hivecommerce.store.application.published.StoreDirectory.ExternalSellers {
   private final SellerRepository sellers;
 
   SellerDirectoryService(SellerRepository sellers) {
     this.sellers = sellers;
+  }
+
+  @Override
+  public boolean anyActive(TenantScope scope) {
+    return sellers.findByStatus(scope, Seller.Status.ACTIVE).stream().anyMatch(s -> s.kind() == Seller.Kind.EXTERNAL);
   }
 
   @Override

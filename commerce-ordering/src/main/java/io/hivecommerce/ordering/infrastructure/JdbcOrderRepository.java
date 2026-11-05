@@ -83,7 +83,12 @@ class JdbcOrderRepository implements OrderRepository {
   public List<Order> findByCustomer(TenantScope scope, UUID customerId, int limit) { return select(scope, "customer_id = :value", customerId, limit); }
 
   @Override
-  public List<Order> findRecent(TenantScope scope, int limit) { return select(scope, ":value::text is null", null, limit); }
+  public List<Order> findRecent(TenantScope scope, int limit) { return select(scope, "true", null, limit); }
+
+  @Override
+  public List<Order> findBySeller(TenantScope scope, UUID sellerId, int limit) {
+    return select(scope, "id in (select order_id from ordering.seller_order where seller_id = :value)", sellerId, limit);
+  }
 
   @Override
   public Optional<Order> findBySellerOrder(TenantScope scope, UUID sellerOrderId) {

@@ -31,6 +31,7 @@
     <module>commerce-fulfillment</module>
     <module>commerce-checkout</module>
     <module>commerce-digital-delivery</module>
+    <module>commerce-finance</module>
     <module>commerce-app</module>
   </modules>
 
@@ -113,6 +114,11 @@
       <dependency>
         <groupId>io.hivecommerce</groupId>
         <artifactId>commerce-digital-delivery</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.hivecommerce</groupId>
+        <artifactId>commerce-finance</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

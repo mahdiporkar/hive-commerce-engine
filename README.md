@@ -6,13 +6,13 @@ Reusable eCommerce and multi-vendor marketplace engine built on the [Hive Platfo
 
 Hive is the platform; this engine is a reusable solution layer; client repositories (for example `gemstone-commerce`, `aidastoor-commerce`) configure, extend, brand and deploy it. Clients consume published engine versions and never fork this code.
 
-**Status: Phases 0–3 complete** (foundation, eShop transaction flow, digital commerce; Scenarios A, B and D). See [phase status](docs/phase-status.md) and [testing](docs/testing/README.md).
+**Status: Phases 0–4 complete** (foundation, eShop flow, digital commerce, marketplace; Scenarios A–E). See [phase status](docs/phase-status.md) and [testing](docs/testing/README.md).
 
 ## Build
 
 ```sh
 tools/build-hive-starter.sh --services              # Hive starter and jars from the pinned commit
-./mvnw -B install                                   # engine + unit, architecture, contract and integration tests (needs Docker)
+./mvnw -B clean install                                 # engine + unit, architecture, contract and integration tests (needs Docker)
 node --test tests/e2e/commerce-through-bff.test.mjs  # through a real Hive BFF and Keycloak
 ```
 

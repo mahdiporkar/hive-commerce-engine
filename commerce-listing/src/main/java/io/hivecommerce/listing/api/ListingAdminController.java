@@ -23,6 +23,10 @@ class ListingAdminController {
 
   record RejectBody(String reason) {}
 
+  @org.springframework.web.bind.annotation.GetMapping("/listings")
+  @HiveOperation("admin-listings")
+  java.util.List<ListingView> pending(UserContext user) { return listings.pending(user); }
+
   @PostMapping("/products/{productId}/publish")
   @HiveOperation("admin-product-publish")
   ListingView publish(UserContext user, @PathVariable UUID productId) {

@@ -29,6 +29,15 @@ class JdbcStoreRepository implements StoreRepository {
   }
 
   @Override
+  public void update(Store store) {
+    int updated = jdbc.sql("""
+        update store.store set mode = :mode, revision = revision + 1, updated_at = now()
+        where id = :store and tenant_id = :tenant and revision = :revision""")
+        .param("mode", store.mode().name()).param("store", store.scope().storeId()).param("tenant", store.scope().tenantId()).param("revision", store.revision()).update();
+    if (updated != 1) throw new org.springframework.dao.OptimisticLockingFailureException("store changed concurrently");
+  }
+
+  @Override
   public Optional<Store> find(TenantScope scope) {
     return jdbc.sql("select key, mode, default_currency, locales, revision from store.store where tenant_id = :tenant and id = :store")
         .param("tenant", scope.tenantId()).param("store", scope.storeId())

@@ -71,6 +71,8 @@ commerce:
       enabled: ${COMMERCE_FAKE_PAYMENTS:false}
       webhook-secret: ${COMMERCE_FAKE_PAYMENTS_SECRET:}
       psp-base-url: ${COMMERCE_FAKE_PSP_URL:http://fake-psp.invalid}
+  finance:
+    settlement-hold: ${COMMERCE_SETTLEMENT_HOLD:P7D}
   catalog:
     max-category-depth: ${COMMERCE_CATALOG_MAX_DEPTH:5}
   hive:

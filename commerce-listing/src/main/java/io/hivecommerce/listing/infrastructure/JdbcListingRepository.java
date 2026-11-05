@@ -55,22 +55,28 @@ class JdbcListingRepository implements ListingRepository {
 
   @Override
   public Optional<Listing> findById(TenantScope scope, UUID id) {
-    return select(scope, "id = :a", id, null);
+    return select(scope, "id = :a", id, null).stream().findFirst();
   }
 
   @Override
   public Optional<Listing> findByProduct(TenantScope scope, UUID productId, String channel) {
-    return select(scope, "product_id = :a and channel = :b", productId, channel);
+    return select(scope, "product_id = :a and channel = :b", productId, channel).stream().findFirst();
   }
 
-  private Optional<Listing> select(TenantScope scope, String condition, Object a, Object b) {
+  @Override
+  public List<Listing> findByStatus(TenantScope scope, Listing.Status status) { return select(scope, "status = :a", status.name(), null); }
+
+  @Override
+  public List<Listing> findBySeller(TenantScope scope, UUID sellerId) { return select(scope, "submitted_by_seller = :a", sellerId, null); }
+
+  private List<Listing> select(TenantScope scope, String condition, Object a, Object b) {
     var statement = jdbc.sql("select id, product_id, channel, submitted_by_seller, status, rejection_reason, revision from listing.listing "
             + "where tenant_id = :tenant and store_id = :store and " + condition)
         .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("a", a);
     if (b != null) statement = statement.param("b", b);
     return statement.query((rs, n) -> Listing.restore(rs.getObject("id", UUID.class), scope, rs.getObject("product_id", UUID.class), rs.getString("channel"),
             rs.getObject("submitted_by_seller", UUID.class), Listing.Status.valueOf(rs.getString("status")), rs.getString("rejection_reason"), rs.getLong("revision")))
-        .optional();
+        .list();
   }
 
   @Override

@@ -1,6 +1,17 @@
 {
   "components" : {
     "schemas" : {
+      "ApplicationBody" : {
+        "properties" : {
+          "displayName" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          }
+        },
+        "type" : "object"
+      },
       "AssetCommand" : {
         "properties" : {
           "downloadLimit" : {
@@ -527,6 +538,31 @@
         },
         "type" : "object"
       },
+      "EarningView" : {
+        "properties" : {
+          "currency" : {
+            "type" : "string"
+          },
+          "net" : {
+            "type" : "number"
+          },
+          "orderId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "refunded" : {
+            "type" : "number"
+          },
+          "sellerOrderId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "FacetCount" : {
         "properties" : {
           "count" : {
@@ -719,6 +755,53 @@
         },
         "type" : "object"
       },
+      "MemberView" : {
+        "properties" : {
+          "actorId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "capabilities" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MembershipSummary" : {
+        "properties" : {
+          "capabilities" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "sellerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ModeBody" : {
+        "properties" : {
+          "mode" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "MoveBody" : {
         "properties" : {
           "parentId" : {
@@ -728,6 +811,14 @@
           "revision" : {
             "format" : "int64",
             "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "NoteBody" : {
+        "properties" : {
+          "note" : {
+            "type" : "string"
           }
         },
         "type" : "object"
@@ -907,6 +998,44 @@
         },
         "type" : "object"
       },
+      "PayoutBody" : {
+        "properties" : {
+          "settlementId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PayoutView" : {
+        "properties" : {
+          "amount" : {
+            "type" : "number"
+          },
+          "currency" : {
+            "type" : "string"
+          },
+          "payoutId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "reference" : {
+            "type" : "string"
+          },
+          "sellerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "settlementId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "PreviewBody" : {
         "properties" : {
           "preview" : {
@@ -940,6 +1069,37 @@
           "variants" : {
             "items" : {
               "$ref" : "#/components/schemas/VariantBody"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "ProductDraft" : {
+        "properties" : {
+          "attributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          },
+          "categoryId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productType" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "variants" : {
+            "items" : {
+              "$ref" : "#/components/schemas/VariantDraft"
             },
             "type" : "array"
           }
@@ -1123,6 +1283,107 @@
         },
         "type" : "object"
       },
+      "RuleCommand" : {
+        "properties" : {
+          "effectiveFrom" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "effectiveTo" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "level" : {
+            "type" : "string"
+          },
+          "ratePercent" : {
+            "type" : "number"
+          },
+          "targetId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "RuleView" : {
+        "properties" : {
+          "effectiveFrom" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "effectiveTo" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "level" : {
+            "type" : "string"
+          },
+          "ratePercent" : {
+            "type" : "number"
+          },
+          "ruleId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "targetId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SellerFinance" : {
+        "properties" : {
+          "available" : {
+            "type" : "number"
+          },
+          "currency" : {
+            "type" : "string"
+          },
+          "earnings" : {
+            "items" : {
+              "$ref" : "#/components/schemas/EarningView"
+            },
+            "type" : "array"
+          },
+          "payouts" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PayoutView"
+            },
+            "type" : "array"
+          },
+          "pending" : {
+            "type" : "number"
+          },
+          "sellerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "settlements" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SettlementView"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "SellerOrderPart" : {
+        "properties" : {
+          "number" : {
+            "type" : "string"
+          },
+          "orderId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "sellerOrder" : {
+            "$ref" : "#/components/schemas/SellerOrderView"
+          }
+        },
+        "type" : "object"
+      },
       "SellerOrderView" : {
         "properties" : {
           "lines" : {
@@ -1143,6 +1404,69 @@
             "type" : "number"
           },
           "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SellerView" : {
+        "properties" : {
+          "displayName" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "members" : {
+            "items" : {
+              "$ref" : "#/components/schemas/MemberView"
+            },
+            "type" : "array"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "sellerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SettlementBody" : {
+        "properties" : {
+          "sellerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SettlementView" : {
+        "properties" : {
+          "amount" : {
+            "type" : "number"
+          },
+          "closedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "currency" : {
+            "type" : "string"
+          },
+          "sellerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "settlementId" : {
+            "format" : "uuid",
             "type" : "string"
           }
         },
@@ -1169,6 +1493,22 @@
           },
           "variantDefining" : {
             "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "StaffBody" : {
+        "properties" : {
+          "actorId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "capabilities" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
           }
         },
         "type" : "object"
@@ -1217,10 +1557,47 @@
         },
         "type" : "object"
       },
+      "StoreSettings" : {
+        "properties" : {
+          "currency" : {
+            "type" : "string"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "locales" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "mode" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "TextBody" : {
         "properties" : {
           "content" : {
             "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "TrialBalance" : {
+        "properties" : {
+          "accounts" : {
+            "additionalProperties" : {
+              "type" : "number"
+            },
+            "type" : "object"
+          },
+          "currency" : {
+            "type" : "string"
+          },
+          "sum" : {
+            "type" : "number"
           }
         },
         "type" : "object"
@@ -1262,6 +1639,18 @@
         "type" : "object"
       },
       "VariantBody" : {
+        "properties" : {
+          "attributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          },
+          "sku" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "VariantDraft" : {
         "properties" : {
           "attributes" : {
             "additionalProperties" : { },
@@ -1402,7 +1791,7 @@
     },
     "/v1/admin/assets" : {
       "post" : {
-        "operationId" : "create_2",
+        "operationId" : "create_3",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -1430,7 +1819,7 @@
     },
     "/v1/admin/assets/{assetId}/preview" : {
       "put" : {
-        "operationId" : "preview",
+        "operationId" : "preview_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "assetId",
@@ -1466,7 +1855,7 @@
     },
     "/v1/admin/assets/{assetId}/text" : {
       "put" : {
-        "operationId" : "text",
+        "operationId" : "text_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "assetId",
@@ -1502,7 +1891,7 @@
     },
     "/v1/admin/assets/{assetId}/uploads" : {
       "post" : {
-        "operationId" : "upload",
+        "operationId" : "upload_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "assetId",
@@ -1538,7 +1927,7 @@
     },
     "/v1/admin/assets/{assetId}/uploads/{uploadId}/finalize" : {
       "post" : {
-        "operationId" : "finalizeUpload",
+        "operationId" : "finalizeUpload_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "assetId",
@@ -1773,6 +2162,266 @@
         "tags" : [ "admin-assets" ]
       }
     },
+    "/v1/admin/finance/balances" : {
+      "get" : {
+        "operationId" : "balances",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "currency",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrialBalance"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/finance/commission-rules" : {
+      "get" : {
+        "operationId" : "rules",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/RuleView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      },
+      "post" : {
+        "operationId" : "createRule",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RuleCommand"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RuleView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/finance/payouts" : {
+      "get" : {
+        "operationId" : "payouts",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "sellerId",
+          "required" : false,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PayoutView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/finance/payouts/{payoutId}/approve" : {
+      "post" : {
+        "operationId" : "approve_2",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "payoutId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PayoutView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/finance/payouts/{payoutId}/paid" : {
+      "post" : {
+        "operationId" : "paid",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "payoutId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NoteBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PayoutView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/finance/payouts/{payoutId}/reject" : {
+      "post" : {
+        "operationId" : "reject_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "payoutId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NoteBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PayoutView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/finance/settlements" : {
+      "get" : {
+        "operationId" : "settlements",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "sellerId",
+          "required" : false,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/SettlementView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      },
+      "post" : {
+        "operationId" : "close",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SettlementBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SettlementView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
     "/v1/admin/fulfillments/{fulfillmentId}/deliver" : {
       "post" : {
         "operationId" : "deliver",
@@ -1802,7 +2451,7 @@
     },
     "/v1/admin/fulfillments/{fulfillmentId}/ship" : {
       "post" : {
-        "operationId" : "ship",
+        "operationId" : "ship_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "fulfillmentId",
@@ -1837,9 +2486,30 @@
         "tags" : [ "fulfillment-admin-controller" ]
       }
     },
+    "/v1/admin/listings" : {
+      "get" : {
+        "operationId" : "pending",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ListingView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "listing-admin-controller" ]
+      }
+    },
     "/v1/admin/listings/{listingId}/approve" : {
       "post" : {
-        "operationId" : "approve",
+        "operationId" : "approve_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "listingId",
@@ -1930,7 +2600,7 @@
     },
     "/v1/admin/offers" : {
       "post" : {
-        "operationId" : "create_1",
+        "operationId" : "create_2",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -1995,7 +2665,7 @@
     },
     "/v1/admin/orders" : {
       "get" : {
-        "operationId" : "orders",
+        "operationId" : "orders_1",
         "responses" : {
           "200" : {
             "content" : {
@@ -2250,6 +2920,788 @@
           }
         },
         "tags" : [ "listing-admin-controller" ]
+      }
+    },
+    "/v1/admin/sellers" : {
+      "get" : {
+        "operationId" : "list",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/SellerView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/sellers/{sellerId}/approve" : {
+      "post" : {
+        "operationId" : "approve",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SellerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/sellers/{sellerId}/reinstate" : {
+      "post" : {
+        "operationId" : "reinstate",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SellerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/sellers/{sellerId}/suspend" : {
+      "post" : {
+        "operationId" : "suspend",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SellerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/sellers/{sellerId}/verify" : {
+      "post" : {
+        "operationId" : "verify_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SellerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin" ]
+      }
+    },
+    "/v1/admin/store" : {
+      "get" : {
+        "operationId" : "settings",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StoreSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "store-admin-controller" ]
+      }
+    },
+    "/v1/admin/store/mode" : {
+      "post" : {
+        "operationId" : "changeMode",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ModeBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StoreSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "store-admin-controller" ]
+      }
+    },
+    "/v1/seller/applications" : {
+      "post" : {
+        "operationId" : "apply",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ApplicationBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SellerView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "workspace" ]
+      }
+    },
+    "/v1/seller/assets/{assetId}/preview" : {
+      "put" : {
+        "operationId" : "preview",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "assetId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PreviewBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AssetView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "seller-assets" ]
+      }
+    },
+    "/v1/seller/assets/{assetId}/text" : {
+      "put" : {
+        "operationId" : "text",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "assetId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TextBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AssetView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "seller-assets" ]
+      }
+    },
+    "/v1/seller/assets/{assetId}/uploads" : {
+      "post" : {
+        "operationId" : "upload",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "assetId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UploadBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UploadView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "seller-assets" ]
+      }
+    },
+    "/v1/seller/assets/{assetId}/uploads/{uploadId}/finalize" : {
+      "post" : {
+        "operationId" : "finalizeUpload",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "assetId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "uploadId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AssetView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "seller-assets" ]
+      }
+    },
+    "/v1/seller/fulfillments/{fulfillmentId}/ship" : {
+      "post" : {
+        "operationId" : "ship",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "fulfillmentId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ShipBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FulfillmentView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "fulfillment-seller-controller" ]
+      }
+    },
+    "/v1/seller/me" : {
+      "get" : {
+        "operationId" : "me",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/MembershipSummary"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "workspace" ]
+      }
+    },
+    "/v1/seller/sellers/{sellerId}/assets" : {
+      "post" : {
+        "operationId" : "create_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AssetCommand"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AssetView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "seller-assets" ]
+      }
+    },
+    "/v1/seller/sellers/{sellerId}/finance" : {
+      "get" : {
+        "operationId" : "overview",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "currency",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SellerFinance"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "seller" ]
+      }
+    },
+    "/v1/seller/sellers/{sellerId}/fulfillments" : {
+      "get" : {
+        "operationId" : "ofSeller",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/FulfillmentView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "fulfillment-seller-controller" ]
+      }
+    },
+    "/v1/seller/sellers/{sellerId}/listings" : {
+      "get" : {
+        "operationId" : "listings",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ListingView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "seller-workspace-controller" ]
+      }
+    },
+    "/v1/seller/sellers/{sellerId}/offers" : {
+      "get" : {
+        "operationId" : "offers",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/OfferView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "seller-workspace-controller" ]
+      },
+      "post" : {
+        "operationId" : "createOffer",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OfferCommand"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OfferView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "seller-workspace-controller" ]
+      }
+    },
+    "/v1/seller/sellers/{sellerId}/orders" : {
+      "get" : {
+        "operationId" : "orders",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/SellerOrderPart"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "seller-orders" ]
+      }
+    },
+    "/v1/seller/sellers/{sellerId}/payouts" : {
+      "post" : {
+        "operationId" : "requestPayout",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PayoutBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PayoutView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "seller" ]
+      }
+    },
+    "/v1/seller/sellers/{sellerId}/staff" : {
+      "post" : {
+        "operationId" : "grant",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StaffBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SellerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "workspace" ]
+      }
+    },
+    "/v1/seller/sellers/{sellerId}/staff/{actorId}" : {
+      "delete" : {
+        "operationId" : "revoke_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "actorId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SellerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "workspace" ]
+      }
+    },
+    "/v1/seller/sellers/{sellerId}/submissions" : {
+      "post" : {
+        "operationId" : "submit",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProductDraft"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListingView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "seller-workspace-controller" ]
       }
     },
     "/v1/shop/carts" : {

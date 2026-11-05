@@ -205,6 +205,30 @@ test('Through Hive: secure catalog administration (Phase 1) and Scenario A check
     assert.ok(!engineLog().includes(denied.body.correlationId));
   });
 
+  await t.test('marketplace operations: Hive denies ungranted operators before the engine; Commerce gates seller onboarding', async () => {
+    for (const [method, path, body] of [
+      ['GET', '/v1/admin/finance/balances?currency=IRR'],
+      ['POST', `/v1/admin/finance/payouts/${crypto.randomUUID()}/approve`],
+      ['POST', '/v1/admin/finance/settlements', {sellerId: crypto.randomUUID()}],
+      ['POST', `/v1/admin/sellers/${crypto.randomUUID()}/approve`],
+      ['POST', `/v1/admin/listings/${crypto.randomUUID()}/approve`],
+      ['POST', '/v1/admin/store/mode', {mode: 'MULTI_VENDOR'}],
+      ['POST', `/v1/admin/entitlements/${crypto.randomUUID()}/revoke`, {reason: 'x'}]]) {
+      // Alice manages catalog and orders but holds none of these actions; Bob holds nothing.
+      for (const caller of [alice, bob]) {
+        const r = await send(caller.bff, method, path, body);
+        assert.equal(r.status, 403, `${method} ${path}: ${JSON.stringify(r.body)}`);
+        assert.ok(!engineLog().includes(r.body.correlationId), `${method} ${path} must not reach the engine`);
+      }
+    }
+    // HYBRID seller workspace: reachable for any session, then decided by Commerce (single-vendor store: closed).
+    const closed = await send(bob.bff, 'POST', '/v1/seller/applications', {displayName: {en: 'Bob Goods'}});
+    assert.equal(closed.status, 409);
+    assert.equal(closed.body.code, 'MARKETPLACE_DISABLED');
+    assert.equal((await send(cookieClient(BFF), 'GET', `/v1/seller/sellers/${crypto.randomUUID()}/orders`)).status, 401);
+    assert.equal((await send(bob.bff, 'GET', `/v1/seller/sellers/${crypto.randomUUID()}/orders`)).status, 404);
+  });
+
   await t.test('revoking the role assignment in Hive denies the operator without any engine change', async () => {
     const assignments = await provision('GET', '/admin/roles/catalog-manager/assignments');
     const assignment = assignments.body.find(a => a.subject === `user:${alice.session.identity.id}` && !a.revokedAt);

@@ -34,8 +34,11 @@ public class FulfillmentService {
   private final JdbcFulfillmentRepository fulfillments;
   private final FulfillmentOutbox outbox;
   private final Clock clock;
+  private final io.hivecommerce.seller.application.published.SellerDirectory sellers;
 
-  public FulfillmentService(DeploymentScope deployment, TenantTransactions transactions, JdbcFulfillmentRepository fulfillments, FulfillmentOutbox outbox, Clock clock) {
+  public FulfillmentService(DeploymentScope deployment, TenantTransactions transactions, JdbcFulfillmentRepository fulfillments, FulfillmentOutbox outbox, Clock clock,
+      io.hivecommerce.seller.application.published.SellerDirectory sellers) {
+    this.sellers = sellers;
     this.deployment = deployment;
     this.transactions = transactions;
     this.fulfillments = fulfillments;
@@ -58,13 +61,18 @@ public class FulfillmentService {
     return change(fulfillmentId, (f, now) -> { f.confirmDelivery(now); return true; }, null, null);
   }
 
-  /** Seller workspace variants: the caller must be allowed to fulfill for the fulfillment's seller (checked by the caller's predicate). */
-  public FulfillmentView shipAsSeller(UUID fulfillmentId, BiPredicate<UUID, String> allowed, String carrier, String trackingCode) {
-    return change(fulfillmentId, (f, now) -> { f.ship(carrier, trackingCode, now); return true; }, allowed, "orders.fulfill");
+  /** Seller workspace: another seller's fulfillment is indistinguishable from a missing one. */
+  public FulfillmentView shipAsSeller(UserContext user, UUID fulfillmentId, String carrier, String trackingCode) {
+    UUID actor = user.requireActor();
+    return change(fulfillmentId, (f, now) -> { f.ship(carrier, trackingCode, now); return true; }, (seller, capability) -> sellers.allows(deployment.scope(), actor, seller, capability), "orders.fulfill");
   }
 
-  public List<FulfillmentView> ofSeller(UUID sellerId) {
-    return transactions.inScope(deployment.scope(), () -> fulfillments.findBySeller(deployment.scope(), sellerId).stream().map(FulfillmentView::of).toList());
+  public List<FulfillmentView> ofSeller(UserContext user, UUID sellerId) {
+    UUID actor = user.requireActor();
+    return transactions.inScope(deployment.scope(), () -> {
+      if (!sellers.allows(deployment.scope(), actor, sellerId, "orders.view")) throw HiveException.notFound("Seller not found");
+      return fulfillments.findBySeller(deployment.scope(), sellerId).stream().map(FulfillmentView::of).toList();
+    });
   }
 
   private FulfillmentView change(UUID id, java.util.function.BiFunction<Fulfillment, java.time.Instant, Boolean> action, BiPredicate<UUID, String> allowed,

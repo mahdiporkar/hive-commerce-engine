@@ -13,6 +13,10 @@ public interface ListingRepository {
 
   Optional<Listing> findById(TenantScope scope, UUID id);
 
+  List<Listing> findByStatus(TenantScope scope, Listing.Status status);
+
+  List<Listing> findBySeller(TenantScope scope, UUID sellerId);
+
   Optional<Listing> findByProduct(TenantScope scope, UUID productId, String channel);
 
   void appendEvents(TenantScope scope, List<DomainEvent> events);

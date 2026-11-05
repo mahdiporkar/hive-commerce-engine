@@ -1,5 +1,62 @@
 # Phase status
 
+## Phase 4 — Marketplace (COMPLETE)
+
+Exit criterion: **Scenario C passes** (`MarketplaceIntegrationTest`): two sellers publish prompts; one cart buys from both; separate seller orders, commissions and ledger entries; neither seller can see the other's data. **Scenario E passes** too (`ModeUpgradeIntegrationTest`).
+
+Implemented:
+- **Seller onboarding (ADR-0004, owner requirement R4):** apply → verify → approve as a pure Commerce workflow with no Hive administration per seller; staff with capabilities; last-owner rule; suspend and reinstate; gated by store mode and the `sellerOnboarding` capability.
+- **Seller workspace (HYBRID, 18 operations):** submissions, listings, offers, the seller's part of orders, shipping, assets, finance, payout requests. Every call checks the membership relation (ADR-0016); a non-member gets 404. `/v1/seller/**` also requires an authenticated identity at the security layer.
+- **Moderation:** seller submissions create a product and a pending listing; moderator approval publishes with a fresh snapshot.
+- **Finance (`commerce-finance`, schema `finance`):**
+  - Commission rules with precedence (product > seller > category, nearest first > store) and effective periods; the internal seller pays none.
+  - Append-only double-entry ledger: triggers refuse changes, a deferred trigger refuses unbalanced entries, the runtime role has no UPDATE, posting is idempotent by `(type, source)`.
+  - Cash in, order allocation, settlement release, payout, cash out, and reversing allocation per refunded line. Balances are always derived.
+  - Earnings with a configurable hold period; settlements; one payout per settlement (unique index), approved once, capped by the available balance, held for suspended sellers.
+- **Scenario E:** operator mode change (`commerce.api.stores:configure`), non-destructive; downgrade refused while external sellers are active.
+- **Hive:** 34 new route operations.
+
+Database migrations: `finance/V1__finance.sql`, `store/V2__outbox.sql`.
+
+Tests Executed:
+```sh
+./mvnw -B clean install -Dopenapi.write=true          # exit 0, 150 tests across all modules, Failures: 0, Errors: 0
+node --test tests/e2e/commerce-through-bff.test.mjs   # exit 0, 12 pass, 0 fail
+```
+
+PASS:
+- **Scenario C:** one order with two seller orders; commission 10 % (store rule) and 20 % (seller rule) = 500,000 on the test amounts; trial balance sums to zero; each seller sees only its own part, without customer identity or the other seller's data.
+- **Seller isolation:** seller B gets 404 on A's offers, orders, finance, listings, fulfillments, offer creation, staff, payouts and assets; a plain customer gets 404; B cannot ship A's fulfillment.
+- **Money:**
+  - settlement 900,000 → payout requested once (second: `PAYOUT_EXISTS`) → approved once → paid;
+  - refund after payout: available balance −900,000, still one payout, entitlement revoked, ledger balanced;
+  - the next sale is netted against the debt, so nothing is payable (`NO_AVAILABLE_BALANCE`);
+  - undelivered physical orders cannot be settled.
+- **Ledger in the database:** UPDATE and DELETE refused by triggers, an unbalanced entry refused at commit, runtime role `permission denied`.
+- **Staff and suspension:** capabilities enforced and revocable; suspension withdraws offers and holds payouts; reinstating releases them.
+- **Scenario E:** before: `MARKETPLACE_DISABLED`; after upgrade: the old order and product are intact, a seller joins and offers the same product beside the store; downgrade → `MODE_DOWNGRADE_BLOCKED`.
+- **Through Hive:** an operator holding other grants and an ungranted user are both denied finance, seller, moderation, store-mode and entitlement operations before the engine is contacted; the HYBRID seller workspace is decided by Commerce (401 anonymous, 404 non-member, 409 closed store).
+
+FAIL (and how fixed):
+- Spurious failures from the VS Code Java extension's background compiler, which wrote partial classes into `target/classes`. Builds now use `clean install`. Not a code defect.
+- A repeat payout request was refused with the wrong reason; `PAYOUT_EXISTS` is now checked first.
+- A test expected `permission denied` without a scope; PostgreSQL fails earlier on the missing RLS setting. Both refuse; the test now sets a scope.
+
+NOT EXECUTED (and why):
+- Seller flows through the real BFF beyond the denial checks (the e2e store is single-vendor; the HYBRID path is the same one Scenario A exercises).
+- Daily PSP reconciliation job (ADR-0007): the sweeper exists; report comparison needs a real PSP adapter.
+- Promotions, coupons, performance metrics, seller reviews.
+- A real payout provider: "paid" records an operator-entered bank reference.
+
+Known limitations:
+- A rejected payout blocks that settlement from a new request (the unique index is strict); a correction needs a follow-up decision.
+- Refunds without named lines move cash but do not reverse seller allocation; operators should name lines. Trial balance still sums to zero.
+- Shipping is not reversed by line refunds.
+
+Open Blockers: none.
+
+Next phase: Phase 5 — client applications.
+
 ## Phase 3 — Digital Commerce (COMPLETE)
 
 Exit criterion: **Scenario B passes** (`DigitalDeliveryIntegrationTest`, real PostgreSQL and real S3-compatible storage): a store sells a PDF; after purchase the buyer gets a signed download; a non-buyer and an expired URL both fail.

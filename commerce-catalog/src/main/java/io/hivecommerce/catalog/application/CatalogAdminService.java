@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
  * the same transaction.
  */
 @Service
-public class CatalogAdminService {
+public class CatalogAdminService implements io.hivecommerce.catalog.application.published.CatalogCommandsApi {
   private final DeploymentScope deployment;
   private final TenantTransactions transactions;
   private final CatalogRepositories.AttributeDefinitions attributes;
@@ -163,6 +163,23 @@ public class CatalogAdminService {
       products.insert(product);
       outbox.append(scope, product.pullEvents());
       return ProductView.of(product);
+    });
+  }
+
+  @Override
+  public UUID createProduct(TenantScope scope, UUID actor, ProductDraft d) {
+    if (d.title() == null) throw DomainValidationException.of("title", "is required");
+    var variants = d.variants() == null ? null : d.variants().stream().map(v -> new Product.VariantDraft(v.sku(), v.attributes())).toList();
+    return transactions.inScope(scope, () -> {
+      var type = productTypes.findByKey(scope, String.valueOf(d.productType())).orElseThrow(() -> DomainValidationException.of("productType", "unknown product type"));
+      if (d.categoryId() != null) {
+        var category = categories.findById(scope, d.categoryId()).orElseThrow(() -> DomainValidationException.of("categoryId", "unknown category"));
+        if (category.status() != Category.Status.ACTIVE) throw DomainValidationException.of("categoryId", "category is archived");
+      }
+      var product = Product.create(Ids.newId(), scope, type, d.categoryId(), new io.hivecommerce.shared.LocalizedText(d.title()), d.slug(), d.attributes(), variants, actor, Ids::newId, clock.instant());
+      products.insert(product);
+      outbox.append(scope, product.pullEvents());
+      return product.id();
     });
   }
 

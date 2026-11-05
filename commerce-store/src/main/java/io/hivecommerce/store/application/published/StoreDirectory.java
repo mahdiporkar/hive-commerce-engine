@@ -9,6 +9,11 @@ public interface StoreDirectory {
     public boolean marketplace() { return !"SINGLE_VENDOR".equals(mode); }
   }
 
+  /** Implemented by the Seller context: lets Store refuse a downgrade without depending on Seller. */
+  interface ExternalSellers {
+    boolean anyActive(TenantScope scope);
+  }
+
   /** Current settings of the store (mode can change at runtime; Scenario E). Must be called inside a scoped transaction. */
   StoreSettings settings(TenantScope scope);
 }

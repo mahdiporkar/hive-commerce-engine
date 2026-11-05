@@ -317,6 +317,250 @@
       "method": "GET",
       "pathPattern": "/v1/store/products/{productId}/previews",
       "access": "PUBLIC"
+    },
+    {
+      "key": "seller-apply",
+      "method": "POST",
+      "pathPattern": "/v1/seller/applications",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-me",
+      "method": "GET",
+      "pathPattern": "/v1/seller/me",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-staff-grant",
+      "method": "POST",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/staff",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-staff-revoke",
+      "method": "DELETE",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/staff/{actorId}",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-submission",
+      "method": "POST",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/submissions",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-listings",
+      "method": "GET",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/listings",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-offer-create",
+      "method": "POST",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/offers",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-offers",
+      "method": "GET",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/offers",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-orders",
+      "method": "GET",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/orders",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-fulfillments",
+      "method": "GET",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/fulfillments",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-fulfillment-ship",
+      "method": "POST",
+      "pathPattern": "/v1/seller/fulfillments/{fulfillmentId}/ship",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-asset-create",
+      "method": "POST",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/assets",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-asset-upload",
+      "method": "POST",
+      "pathPattern": "/v1/seller/assets/{assetId}/uploads",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-asset-finalize",
+      "method": "POST",
+      "pathPattern": "/v1/seller/assets/{assetId}/uploads/{uploadId}/finalize",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-asset-text",
+      "method": "PUT",
+      "pathPattern": "/v1/seller/assets/{assetId}/text",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-asset-preview",
+      "method": "PUT",
+      "pathPattern": "/v1/seller/assets/{assetId}/preview",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-finance",
+      "method": "GET",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/finance",
+      "access": "HYBRID"
+    },
+    {
+      "key": "seller-payout-request",
+      "method": "POST",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/payouts",
+      "access": "HYBRID"
+    },
+    {
+      "key": "admin-sellers",
+      "method": "GET",
+      "pathPattern": "/v1/admin/sellers",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.sellers",
+      "action": "view"
+    },
+    {
+      "key": "admin-seller-verify",
+      "method": "POST",
+      "pathPattern": "/v1/admin/sellers/{sellerId}/verify",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.sellers",
+      "action": "approve"
+    },
+    {
+      "key": "admin-seller-approve",
+      "method": "POST",
+      "pathPattern": "/v1/admin/sellers/{sellerId}/approve",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.sellers",
+      "action": "approve"
+    },
+    {
+      "key": "admin-seller-suspend",
+      "method": "POST",
+      "pathPattern": "/v1/admin/sellers/{sellerId}/suspend",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.sellers",
+      "action": "suspend"
+    },
+    {
+      "key": "admin-seller-reinstate",
+      "method": "POST",
+      "pathPattern": "/v1/admin/sellers/{sellerId}/reinstate",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.sellers",
+      "action": "suspend"
+    },
+    {
+      "key": "admin-listings",
+      "method": "GET",
+      "pathPattern": "/v1/admin/listings",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.moderation",
+      "action": "review"
+    },
+    {
+      "key": "admin-store",
+      "method": "GET",
+      "pathPattern": "/v1/admin/store",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.stores",
+      "action": "view"
+    },
+    {
+      "key": "admin-store-mode",
+      "method": "POST",
+      "pathPattern": "/v1/admin/store/mode",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.stores",
+      "action": "configure"
+    },
+    {
+      "key": "admin-commission-rule-create",
+      "method": "POST",
+      "pathPattern": "/v1/admin/finance/commission-rules",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.finance",
+      "action": "settle"
+    },
+    {
+      "key": "admin-commission-rules",
+      "method": "GET",
+      "pathPattern": "/v1/admin/finance/commission-rules",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.finance",
+      "action": "view"
+    },
+    {
+      "key": "admin-finance-balances",
+      "method": "GET",
+      "pathPattern": "/v1/admin/finance/balances",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.finance",
+      "action": "view"
+    },
+    {
+      "key": "admin-settlement-close",
+      "method": "POST",
+      "pathPattern": "/v1/admin/finance/settlements",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.finance",
+      "action": "settle"
+    },
+    {
+      "key": "admin-settlements",
+      "method": "GET",
+      "pathPattern": "/v1/admin/finance/settlements",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.finance",
+      "action": "view"
+    },
+    {
+      "key": "admin-payouts",
+      "method": "GET",
+      "pathPattern": "/v1/admin/finance/payouts",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.finance",
+      "action": "view"
+    },
+    {
+      "key": "admin-payout-approve",
+      "method": "POST",
+      "pathPattern": "/v1/admin/finance/payouts/{payoutId}/approve",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.finance",
+      "action": "approve_payout"
+    },
+    {
+      "key": "admin-payout-reject",
+      "method": "POST",
+      "pathPattern": "/v1/admin/finance/payouts/{payoutId}/reject",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.finance",
+      "action": "approve_payout"
+    },
+    {
+      "key": "admin-payout-paid",
+      "method": "POST",
+      "pathPattern": "/v1/admin/finance/payouts/{payoutId}/paid",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.finance",
+      "action": "approve_payout"
     }
   ]
 }
