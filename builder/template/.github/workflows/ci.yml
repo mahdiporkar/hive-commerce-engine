@@ -1,0 +1,28 @@
+# Runs this store's tests against the pinned engine release. It never deploys.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Fetch and verify the pinned engine release
+        run: node tools/fetch-engine.mjs
+      - name: Contract tests against the engine release
+        run: node --test tests/contract/*.test.mjs
+      - name: Storefront
+        working-directory: storefront
+        run: npm ci --no-audit --no-fund && npm run build

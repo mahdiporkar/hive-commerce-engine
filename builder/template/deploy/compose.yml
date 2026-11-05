@@ -1,0 +1,80 @@
+# {{displayName}}: everything this store owns. Its database, bucket and domain belong to this store alone. Hive runs from
+# its own distribution (one Hive per store) and is reached through HIVE_BFF_URL and the JWT settings. Values come from
+# deploy/.env, which is never committed. See deploy/env.example.
+name: {{storeKey}}
+
+services:
+  db:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_DB: commerce
+      POSTGRES_USER: commerce_owner
+      POSTGRES_PASSWORD: ${COMMERCE_DB_OWNER_PASSWORD:?}
+    volumes: [db:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U commerce_owner -d commerce]
+      interval: 5s
+      retries: 30
+
+  storage:
+    image: ${STORAGE_IMAGE:?}
+    command: server /data --address :9000
+    environment:
+      MINIO_ROOT_USER: ${COMMERCE_STORAGE_ACCESS_KEY:?}
+      MINIO_ROOT_PASSWORD: ${COMMERCE_STORAGE_SECRET_KEY:?}
+    volumes: [storage:/data]
+
+  engine:
+    build:
+      context: ..
+      dockerfile: deploy/engine.Dockerfile
+      args:
+        ENGINE_IMAGE: ${ENGINE_IMAGE:?}
+    env_file: [store.env]
+    environment:
+      COMMERCE_DB_URL: jdbc:postgresql://db:5432/commerce
+      COMMERCE_DB_USER: commerce_app
+      COMMERCE_DB_PASSWORD: ${COMMERCE_DB_PASSWORD:?}
+      COMMERCE_DB_OWNER_USER: commerce_owner
+      COMMERCE_DB_OWNER_PASSWORD: ${COMMERCE_DB_OWNER_PASSWORD:?}
+      COMMERCE_JWT_ISSUER: ${COMMERCE_JWT_ISSUER:?}
+      COMMERCE_JWT_JWKS_URI: ${COMMERCE_JWT_JWKS_URI:?}
+      COMMERCE_PAYMENT_PROVIDER: ${COMMERCE_PAYMENT_PROVIDER:?}
+      COMMERCE_PAYMENT_RETURN_URL: https://{{domain}}/{{defaultLocale}}/checkout/return
+      COMMERCE_STORAGE_ENDPOINT: http://storage:9000
+      COMMERCE_STORAGE_PUBLIC_ENDPOINT: ${COMMERCE_STORAGE_PUBLIC_ENDPOINT:?}
+      COMMERCE_STORAGE_ACCESS_KEY: ${COMMERCE_STORAGE_ACCESS_KEY:?}
+      COMMERCE_STORAGE_SECRET_KEY: ${COMMERCE_STORAGE_SECRET_KEY:?}
+      COMMERCE_STORAGE_BUCKET: {{storeKey}}-assets
+    depends_on:
+      db: {condition: service_healthy}
+
+  admin-mfes:
+    build:
+      context: ..
+      dockerfile: deploy/admin-mfes.Dockerfile
+      args:
+        ENGINE_VERSION: ${ENGINE_VERSION:?}
+
+  storefront:
+    build:
+      context: ..
+      dockerfile: deploy/storefront.Dockerfile
+    environment:
+      HIVE_BFF_URL: ${HIVE_BFF_URL:?}
+      STORE_ORIGIN: https://{{domain}}
+
+  gateway:
+    image: nginxinc/nginx-unprivileged:1.29-alpine
+    environment:
+      STORE_DOMAIN: {{domain}}
+      HIVE_BFF_URL: ${HIVE_BFF_URL:?}
+      NGINX_ENVSUBST_FILTER: ^(STORE_DOMAIN|HIVE_BFF_URL)$$
+    volumes:
+      - ./gateway.conf.template:/etc/nginx/templates/default.conf.template:ro
+    ports: ["${STORE_HTTP_PORT:-8080}:8080"]
+    depends_on: [storefront, engine]
+
+volumes:
+  db:
+  storage:

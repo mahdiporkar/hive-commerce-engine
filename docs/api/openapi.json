@@ -37,6 +37,32 @@
         },
         "type" : "object"
       },
+      "AssetVersionView" : {
+        "properties" : {
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "mimeType" : {
+            "type" : "string"
+          },
+          "scanStatus" : {
+            "type" : "string"
+          },
+          "sha256" : {
+            "type" : "string"
+          },
+          "size" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "version" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "AssetView" : {
         "properties" : {
           "assetId" : {
@@ -68,7 +94,7 @@
           },
           "versions" : {
             "items" : {
-              "$ref" : "#/components/schemas/VersionView"
+              "$ref" : "#/components/schemas/AssetVersionView"
             },
             "type" : "array"
           }
@@ -1513,6 +1539,45 @@
         },
         "type" : "object"
       },
+      "SpecView" : {
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "max" : {
+            "type" : "number"
+          },
+          "maxLength" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "min" : {
+            "type" : "number"
+          },
+          "options" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "required" : {
+            "type" : "boolean"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "units" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "variantDefining" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
       "StaffBody" : {
         "properties" : {
           "actorId" : {
@@ -1696,22 +1761,18 @@
       },
       "VersionView" : {
         "properties" : {
-          "createdAt" : {
+          "attributes" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SpecView"
+            },
+            "type" : "array"
+          },
+          "publishedAt" : {
             "format" : "date-time",
             "type" : "string"
           },
-          "mimeType" : {
+          "status" : {
             "type" : "string"
-          },
-          "scanStatus" : {
-            "type" : "string"
-          },
-          "sha256" : {
-            "type" : "string"
-          },
-          "size" : {
-            "format" : "int64",
-            "type" : "integer"
           },
           "version" : {
             "format" : "int32",

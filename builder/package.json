@@ -1,0 +1,10 @@
+{
+  "name": "@hive-commerce/builder",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Commerce Builder: validates store configuration and catalog schemas, scaffolds new store repositories and seeds catalogs through the engine API. Not a visual site builder.",
+  "bin": {"commerce-builder": "cli.mjs"},
+  "exports": {".": "./index.mjs"},
+  "files": ["cli.mjs", "index.mjs", "template"],
+  "scripts": {"test": "node --test test/*.test.mjs"}
+}

@@ -52,10 +52,10 @@ jobs:
           docker build -t "$IMAGE" .
           docker push "$IMAGE"
           docker inspect --format '{{index .RepoDigests 0}}' "$IMAGE" | tee image-digest.txt
-      - name: Attach the admin bundles, Hive templates and image digest to the release
+      - name: Attach the release artifacts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tar -czf admin-mfes.tar.gz -C admin-mfes/dist modules
-          tar -czf hive-templates.tar.gz hive/templates hive/register.mjs hive/HIVE_REVISION
-          gh release create "$GITHUB_REF_NAME" --generate-notes admin-mfes.tar.gz hive-templates.tar.gz image-digest.txt docs/api/openapi.json
+          tools/package-release.sh "${GITHUB_REF_NAME#v}" release-out
+          cp image-digest.txt release-out/
+          gh release create "$GITHUB_REF_NAME" --generate-notes release-out/*

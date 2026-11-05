@@ -1,0 +1,7 @@
+.engine/
+.local/
+node_modules/
+.next/
+target/
+deploy/.env
+*.log

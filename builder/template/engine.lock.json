@@ -1,0 +1,6 @@
+{
+  "repository": "{{engineRepository}}",
+  "version": "{{engineVersion}}",
+  "image": "ghcr.io/{{engineRepository}}:{{engineVersion}}",
+  "imageDigest": null
+}

@@ -32,6 +32,11 @@ jobs:
         run: tools/build-hive-starter.sh --services
       - name: Unit, architecture, contract and integration tests
         run: ./mvnw -B install
+      - name: Admin micro-frontends (bundle, SRI, schema-generated forms)
+        run: tools/build-admin-mfes.sh
+      - name: Storefront SDK
+        working-directory: storefront-sdk
+        run: npm ci --no-audit --no-fund && npm test
       - name: Through-Hive end-to-end tests (real BFF, authorization, OpenFGA, Keycloak)
         run: node --test tests/e2e/*.test.mjs
       - name: Keep logs on failure

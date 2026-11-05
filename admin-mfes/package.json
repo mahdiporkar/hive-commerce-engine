@@ -1,0 +1,19 @@
+{
+  "name": "@hive-commerce/admin-mfes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared commerce administration micro-frontends (Hive ES modules, one per admin area).",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node build.mjs && node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "jsdom": "26.1.0"
+  }
+}

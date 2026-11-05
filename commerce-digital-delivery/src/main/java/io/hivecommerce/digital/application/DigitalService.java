@@ -96,13 +96,13 @@ public class DigitalService {
 
   // ---------------------------------------------------------------- views
 
-  public record VersionView(int version, long size, String mimeType, String sha256, String scanStatus, Instant createdAt) {}
+  public record AssetVersionView(int version, long size, String mimeType, String sha256, String scanStatus, Instant createdAt) {}
 
   public record AssetView(String assetId, UUID productId, UUID sellerId, String kind, String title, Integer downloadLimit, boolean updatesIncluded,
-      String preview, List<VersionView> versions) {
+      String preview, List<AssetVersionView> versions) {
     static AssetView of(DigitalAsset a) {
       return new AssetView(a.id(), a.productId(), a.ownerSellerId(), a.kind().name(), a.title(), a.license().downloadLimit(), a.license().updatesIncluded(),
-          a.previewText(), a.versions().stream().map(v -> new VersionView(v.number(), v.size(), v.mimeType(), v.sha256(), v.scanStatus(), v.createdAt())).toList());
+          a.previewText(), a.versions().stream().map(v -> new AssetVersionView(v.number(), v.size(), v.mimeType(), v.sha256(), v.scanStatus(), v.createdAt())).toList());
     }
   }
 

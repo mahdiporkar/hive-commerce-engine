@@ -1,0 +1,18 @@
+# One origin per store: the browser talks to the storefront and to Hive's BFF on the same host, so session and CSRF stay
+# first-party. Payment webhooks reach the engine directly and never pass through the BFF.
+server {
+  listen 8080;
+  server_name ${STORE_DOMAIN};
+  client_max_body_size 2m;
+
+  proxy_set_header Host $http_host;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+  location /api/ { proxy_pass ${HIVE_BFF_URL}; }
+  location /auth/ { proxy_pass ${HIVE_BFF_URL}; }
+  location /oauth2/ { proxy_pass ${HIVE_BFF_URL}; }
+  location /login/ { proxy_pass ${HIVE_BFF_URL}; }
+  location /hooks/ { proxy_pass http://engine:8090; }
+  location / { proxy_pass http://storefront:3000; }
+}
