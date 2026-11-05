@@ -43,9 +43,11 @@ public class SellerService {
   private final StoreDirectory stores;
   private final Clock clock;
   private final boolean onboardingEnabled;
+  private final io.hivecommerce.platform.extensions.ExtensionRegistry extensions;
 
   public SellerService(DeploymentScope deployment, TenantTransactions transactions, SellerRepository sellers, SellerDirectory directory, StoreDirectory stores, Clock clock,
-      @Value("${commerce.capabilities.seller-onboarding:false}") boolean onboardingEnabled) {
+      @Value("${commerce.capabilities.seller-onboarding:false}") boolean onboardingEnabled, io.hivecommerce.platform.extensions.ExtensionRegistry extensions) {
+    this.extensions = extensions;
     this.deployment = deployment;
     this.transactions = transactions;
     this.sellers = sellers;
@@ -109,7 +111,12 @@ public class SellerService {
     return transactions.inScope(scope, () -> sellers.findByStatus(scope, parsed).stream().map(SellerView::of).toList());
   }
 
-  public SellerView verify(UserContext user, UUID id) { return decide(user, id, s -> s.verify(clock.instant())); }
+  public SellerView verify(UserContext user, UUID id) {
+    return decide(user, id, s -> {
+      extensions.reviewSeller(deployment.scope(), s.id());
+      s.verify(clock.instant());
+    });
+  }
 
   public SellerView approve(UserContext user, UUID id) { return decide(user, id, s -> s.approve(clock.instant())); }
 

@@ -130,6 +130,18 @@ class CatalogAdminController {
     return catalog.archiveCategory(user, categoryId, body.revision());
   }
 
+  @GetMapping("/attributes")
+  @HiveOperation("admin-attributes")
+  List<AttributeView> attributes(UserContext user) { return catalog.listAttributes(user); }
+
+  @GetMapping("/product-types")
+  @HiveOperation("admin-product-types")
+  List<ProductTypeView> productTypes(UserContext user) { return catalog.listProductTypes(user); }
+
+  @GetMapping("/products")
+  @HiveOperation("admin-products")
+  List<ProductView> products(UserContext user) { return catalog.listProducts(user); }
+
   @GetMapping("/products/{productId}")
   @HiveOperation("admin-product-get")
   ProductView getProduct(UserContext user, @PathVariable UUID productId) {

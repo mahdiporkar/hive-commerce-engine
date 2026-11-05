@@ -68,10 +68,20 @@ final class JdbcCatalogRepositories {
     @Override
     public List<AttributeDefinition> findByKeys(TenantScope scope, List<String> keys) {
       if (keys.isEmpty()) return List.of();
-      return jdbc.sql("""
+      return select(scope, jdbc.sql("""
           select id, key, type, labels, options, constraints, flags, revision from catalog.attribute_definition
-          where tenant_id = :tenant and store_id = :store and key in (:keys) and archived_at is null""")
-          .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("keys", keys)
+          where tenant_id = :tenant and store_id = :store and key in (:keys) and archived_at is null""").param("keys", keys));
+    }
+
+    @Override
+    public List<AttributeDefinition> findAll(TenantScope scope) {
+      return select(scope, jdbc.sql("""
+          select id, key, type, labels, options, constraints, flags, revision from catalog.attribute_definition
+          where tenant_id = :tenant and store_id = :store and archived_at is null order by key"""));
+    }
+
+    private List<AttributeDefinition> select(TenantScope scope, JdbcClient.StatementSpec statement) {
+      return statement.param("tenant", scope.tenantId()).param("store", scope.storeId())
           .query((rs, n) -> AttributeDefinition.restore(rs.getObject("id", UUID.class), scope, rs.getString("key"), AttributeType.valueOf(rs.getString("type")),
               json.text(rs.getString("labels")), json.options(rs.getString("options")), json.constraints(json.map(rs.getString("constraints"))),
               json.flags(json.map(rs.getString("flags"))), rs.getLong("revision")))
@@ -131,6 +141,13 @@ final class JdbcCatalogRepositories {
 
     @Override
     public Optional<ProductType> findById(TenantScope scope, UUID id) { return find(scope, "id = :value", id); }
+
+    @Override
+    public List<ProductType> findAll(TenantScope scope) {
+      return jdbc.sql("select key from catalog.product_type where tenant_id = :tenant and store_id = :store and archived_at is null order by key")
+          .param("tenant", scope.tenantId()).param("store", scope.storeId()).query(String.class).list().stream()
+          .map(key -> findByKey(scope, key).orElseThrow()).toList();
+    }
 
     private Optional<ProductType> find(TenantScope scope, String condition, Object value) {
       return jdbc.sql("select id, key, name, kind, revision from catalog.product_type where tenant_id = :tenant and store_id = :store and " + condition)
@@ -281,6 +298,13 @@ final class JdbcCatalogRepositories {
       } catch (DuplicateKeyException e) {
         throw conflict(e, Map.of("product_variant_sku_uk", "SKU_TAKEN", "product_slug_uk", "SLUG_TAKEN"));
       }
+    }
+
+    @Override
+    public List<Product> findRecent(TenantScope scope, int limit) {
+      return jdbc.sql("select id from catalog.product where tenant_id = :tenant and store_id = :store order by created_at desc limit :limit")
+          .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("limit", limit).query(UUID.class).list().stream()
+          .map(id -> findById(scope, id).orElseThrow()).toList();
     }
 
     @Override

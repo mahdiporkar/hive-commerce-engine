@@ -18,6 +18,8 @@ public final class CatalogRepositories {
     void insert(AttributeDefinition definition);
 
     List<AttributeDefinition> findByKeys(TenantScope scope, List<String> keys);
+
+    List<AttributeDefinition> findAll(TenantScope scope);
   }
 
   public interface ProductTypes {
@@ -29,6 +31,8 @@ public final class CatalogRepositories {
     Optional<ProductType> findByKey(TenantScope scope, String key);
 
     Optional<ProductType> findById(TenantScope scope, UUID id);
+
+    List<ProductType> findAll(TenantScope scope);
   }
 
   public interface Categories {
@@ -56,6 +60,8 @@ public final class CatalogRepositories {
     Optional<Product> findById(TenantScope scope, UUID id);
 
     Optional<Product> findByVariantId(TenantScope scope, UUID variantId);
+
+    List<Product> findRecent(TenantScope scope, int limit);
   }
 
   /** Transactional outbox of this context (ADR-0002): written in the same transaction as the aggregate change. */

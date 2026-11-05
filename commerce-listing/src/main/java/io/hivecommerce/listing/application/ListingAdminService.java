@@ -26,9 +26,11 @@ public class ListingAdminService {
   private final ListingProjection projection;
   private final CatalogQueries catalog;
   private final Clock clock;
+  private final io.hivecommerce.platform.extensions.ExtensionRegistry extensions;
 
   public ListingAdminService(DeploymentScope deployment, TenantTransactions transactions, ListingRepository listings, ListingProjection projection,
-      CatalogQueries catalog, Clock clock) {
+      CatalogQueries catalog, Clock clock, io.hivecommerce.platform.extensions.ExtensionRegistry extensions) {
+    this.extensions = extensions;
     this.deployment = deployment;
     this.transactions = transactions;
     this.listings = listings;
@@ -42,6 +44,7 @@ public class ListingAdminService {
     TenantScope scope = operatorScope(user);
     return transactions.inScope(scope, () -> {
       var product = catalog.product(scope, productId).orElseThrow(() -> HiveException.notFound("Product not found"));
+      extensions.reviewForPublication(scope, productId, new io.hivecommerce.spi.ProductFacts(product.productTypeKey(), product.kind(), product.attributes(), product.variants().stream().map(v -> v.attributes()).toList()));
       var listing = listings.findByProduct(scope, productId, Listing.DEFAULT_CHANNEL).orElse(null);
       boolean created = listing == null;
       if (created) listing = Listing.byOperator(Ids.newId(), scope, productId, clock.instant());
@@ -59,9 +62,10 @@ public class ListingAdminService {
     TenantScope scope = operatorScope(user);
     return transactions.inScope(scope, () -> {
       var listing = listings.findById(scope, listingId).orElseThrow(() -> HiveException.notFound("Listing not found"));
+      var product = catalog.product(scope, listing.productId()).orElseThrow();
+      extensions.reviewForPublication(scope, listing.productId(), new io.hivecommerce.spi.ProductFacts(product.productTypeKey(), product.kind(), product.attributes(), product.variants().stream().map(v -> v.attributes()).toList()));
       listing.approve(clock.instant());
       listing.publish(clock.instant());
-      var product = catalog.product(scope, listing.productId()).orElseThrow();
       listings.update(listing);
       projection.upsert(scope, listing.id(), product, Facets.of(product));
       listings.appendEvents(scope, listing.pullEvents());

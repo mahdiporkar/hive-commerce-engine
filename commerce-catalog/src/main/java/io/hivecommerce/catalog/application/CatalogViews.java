@@ -15,14 +15,21 @@ import java.util.UUID;
 public final class CatalogViews {
   private CatalogViews() {}
 
-  public record AttributeView(UUID id, String key, String type, Map<String, String> labels, List<String> options, long revision) {
+  public record AttributeView(UUID id, String key, String type, Map<String, String> labels, List<String> options, Map<String, Map<String, String>> optionLabels, long revision) {
     static AttributeView of(AttributeDefinition d) {
-      return new AttributeView(d.id(), d.key(), d.type().name(), d.labels().values(), d.rule().optionCodes(), d.revision());
+      var optionLabels = new java.util.LinkedHashMap<String, Map<String, String>>();
+      d.options().forEach(o -> optionLabels.put(o.code(), o.labels().values()));
+      return new AttributeView(d.id(), d.key(), d.type().name(), d.labels().values(), d.rule().optionCodes(), optionLabels, d.revision());
     }
   }
 
-  public record SpecView(String key, String type, boolean required, boolean variantDefining) {
-    static SpecView of(AttributeSpec s) { return new SpecView(s.key(), s.rule().type().name(), s.required(), s.variantDefining()); }
+  /** Everything a generated product form needs for one attribute (master prompt §18.1: forms come from the schema). */
+  public record SpecView(String key, String type, boolean required, boolean variantDefining, List<String> options, List<String> units, java.math.BigDecimal min,
+      java.math.BigDecimal max, Integer maxLength) {
+    static SpecView of(AttributeSpec s) {
+      var c = s.rule().constraints();
+      return new SpecView(s.key(), s.rule().type().name(), s.required(), s.variantDefining(), s.rule().optionCodes(), c.units(), c.min(), c.max(), c.maxLength());
+    }
   }
 
   public record VersionView(int version, String status, Instant publishedAt, List<SpecView> attributes) {

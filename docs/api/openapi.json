@@ -119,6 +119,15 @@
             },
             "type" : "object"
           },
+          "optionLabels" : {
+            "additionalProperties" : {
+              "additionalProperties" : {
+                "type" : "string"
+              },
+              "type" : "object"
+            },
+            "type" : "object"
+          },
           "options" : {
             "items" : {
               "type" : "string"
@@ -504,6 +513,13 @@
       },
       "DetailWithOffers" : {
         "properties" : {
+          "extensions" : {
+            "additionalProperties" : {
+              "additionalProperties" : { },
+              "type" : "object"
+            },
+            "type" : "object"
+          },
           "offers" : {
             "items" : {
               "$ref" : "#/components/schemas/OfferView"
@@ -1959,6 +1975,25 @@
       }
     },
     "/v1/admin/attributes" : {
+      "get" : {
+        "operationId" : "attributes",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/AttributeView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      },
       "post" : {
         "operationId" : "defineAttribute",
         "requestBody" : {
@@ -2160,6 +2195,97 @@
           }
         },
         "tags" : [ "admin-assets" ]
+      }
+    },
+    "/v1/admin/extensions/{extensionKey}/{subjectType}/{subjectId}" : {
+      "get" : {
+        "operationId" : "get",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "extensionKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "subjectType",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "subjectId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "additionalProperties" : { },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "extension-admin-controller" ]
+      },
+      "put" : {
+        "operationId" : "put",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "extensionKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "subjectType",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "subjectId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "additionalProperties" : { },
+                "type" : "object"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "additionalProperties" : { },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "extension-admin-controller" ]
       }
     },
     "/v1/admin/finance/balances" : {
@@ -2779,6 +2905,25 @@
       }
     },
     "/v1/admin/product-types" : {
+      "get" : {
+        "operationId" : "productTypes",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProductTypeView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      },
       "post" : {
         "operationId" : "createProductType",
         "requestBody" : {
@@ -2841,6 +2986,25 @@
       }
     },
     "/v1/admin/products" : {
+      "get" : {
+        "operationId" : "products",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProductView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      },
       "post" : {
         "operationId" : "createProduct",
         "requestBody" : {

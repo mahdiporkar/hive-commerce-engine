@@ -1,0 +1,61 @@
+# Publishes one engine version when a v* tag is pushed (ADR-0012). It never deploys: clients bump their pin through a PR.
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          server-id: github
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build the Hive starter from the pinned commit
+        env:
+          GIT_CONFIG_COUNT: ${{ secrets.HIVE_PLATFORM_TOKEN != '' && '1' || '0' }}
+          GIT_CONFIG_KEY_0: url.https://x-access-token:${{ secrets.HIVE_PLATFORM_TOKEN }}@github.com/.insteadOf
+          GIT_CONFIG_VALUE_0: https://github.com/
+        run: tools/build-hive-starter.sh
+      - name: Set the release version
+        run: ./mvnw -B -q versions:set -DnewVersion="${GITHUB_REF_NAME#v}" -DgenerateBackupPoms=false
+      - name: Test and package
+        run: ./mvnw -B clean install
+      - name: Build the admin micro-frontends
+        run: tools/build-admin-mfes.sh
+      - name: Publish the extension SPI
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./mvnw -B -q -N -pl . deploy -DskipTests -DaltDeploymentRepository=github::https://maven.pkg.github.com/${{ github.repository }} && ./mvnw -B -q -pl commerce-spi deploy -DskipTests -DaltDeploymentRepository=github::https://maven.pkg.github.com/${{ github.repository }}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish the engine image
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_REF_NAME#v}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          docker inspect --format '{{index .RepoDigests 0}}' "$IMAGE" | tee image-digest.txt
+      - name: Attach the admin bundles, Hive templates and image digest to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tar -czf admin-mfes.tar.gz -C admin-mfes/dist modules
+          tar -czf hive-templates.tar.gz hive/templates hive/register.mjs hive/HIVE_REVISION
+          gh release create "$GITHUB_REF_NAME" --generate-notes admin-mfes.tar.gz hive-templates.tar.gz image-digest.txt docs/api/openapi.json

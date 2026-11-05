@@ -561,6 +561,46 @@
       "access": "AUTHENTICATED",
       "resourceKey": "commerce.api.finance",
       "action": "approve_payout"
+    },
+    {
+      "key": "admin-attributes",
+      "method": "GET",
+      "pathPattern": "/v1/admin/attributes",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "read"
+    },
+    {
+      "key": "admin-product-types",
+      "method": "GET",
+      "pathPattern": "/v1/admin/product-types",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "read"
+    },
+    {
+      "key": "admin-products",
+      "method": "GET",
+      "pathPattern": "/v1/admin/products",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "read"
+    },
+    {
+      "key": "admin-extension-get",
+      "method": "GET",
+      "pathPattern": "/v1/admin/extensions/{extensionKey}/{subjectType}/{subjectId}",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "read"
+    },
+    {
+      "key": "admin-extension-put",
+      "method": "PUT",
+      "pathPattern": "/v1/admin/extensions/{extensionKey}/{subjectType}/{subjectId}",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
     }
   ]
 }

@@ -19,6 +19,7 @@
 
   <modules>
     <module>commerce-shared-kernel</module>
+    <module>commerce-spi</module>
     <module>commerce-platform</module>
     <module>commerce-store</module>
     <module>commerce-catalog</module>
@@ -135,6 +136,11 @@
         <groupId>org.springdoc</groupId>
         <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
         <version>${springdoc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.hivecommerce</groupId>
+        <artifactId>commerce-spi</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>io.hiveplatform</groupId>

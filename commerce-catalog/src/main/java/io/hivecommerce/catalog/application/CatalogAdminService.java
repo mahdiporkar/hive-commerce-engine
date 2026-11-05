@@ -50,10 +50,13 @@ public class CatalogAdminService implements io.hivecommerce.catalog.application.
   private final CatalogRepositories.Outbox outbox;
   private final Clock clock;
   private final int maxCategoryDepth;
+  private final io.hivecommerce.platform.extensions.ExtensionRegistry extensions;
 
   public CatalogAdminService(DeploymentScope deployment, TenantTransactions transactions, CatalogRepositories.AttributeDefinitions attributes,
       CatalogRepositories.ProductTypes productTypes, CatalogRepositories.Categories categories, CatalogRepositories.Products products,
-      CatalogRepositories.Outbox outbox, Clock clock, @Value("${commerce.catalog.max-category-depth:5}") int maxCategoryDepth) {
+      CatalogRepositories.Outbox outbox, Clock clock, @Value("${commerce.catalog.max-category-depth:5}") int maxCategoryDepth,
+      io.hivecommerce.platform.extensions.ExtensionRegistry extensions) {
+    this.extensions = extensions;
     this.deployment = deployment;
     this.transactions = transactions;
     this.attributes = attributes;
@@ -160,6 +163,7 @@ public class CatalogAdminService implements io.hivecommerce.catalog.application.
       }
       var product = Product.create(Ids.newId(), scope, type, command.categoryId(), command.title(), command.slug(), command.attributes(), command.variants(),
           actor, Ids::newId, clock.instant());
+      extensions.validateProduct(facts(type, product));
       products.insert(product);
       outbox.append(scope, product.pullEvents());
       return ProductView.of(product);
@@ -177,16 +181,36 @@ public class CatalogAdminService implements io.hivecommerce.catalog.application.
         if (category.status() != Category.Status.ACTIVE) throw DomainValidationException.of("categoryId", "category is archived");
       }
       var product = Product.create(Ids.newId(), scope, type, d.categoryId(), new io.hivecommerce.shared.LocalizedText(d.title()), d.slug(), d.attributes(), variants, actor, Ids::newId, clock.instant());
+      extensions.validateProduct(facts(type, product));
       products.insert(product);
       outbox.append(scope, product.pullEvents());
       return product.id();
     });
   }
 
+  public List<AttributeView> listAttributes(UserContext user) {
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> attributes.findAll(scope).stream().map(AttributeView::of).toList());
+  }
+
+  public List<ProductTypeView> listProductTypes(UserContext user) {
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> productTypes.findAll(scope).stream().map(ProductTypeView::of).toList());
+  }
+
+  public List<ProductView> listProducts(UserContext user) {
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> products.findRecent(scope, 200).stream().map(ProductView::of).toList());
+  }
+
   public ProductView getProduct(UserContext user, UUID productId) {
     TenantScope scope = operatorScope(user);
     return transactions.inScope(scope, () -> products.findById(scope, productId).map(ProductView::of)
         .orElseThrow(() -> HiveException.notFound("Product not found")));
+  }
+
+  private static io.hivecommerce.spi.ProductFacts facts(ProductType type, Product product) {
+    return new io.hivecommerce.spi.ProductFacts(type.key(), type.kind().name(), product.attributes(), product.variants().stream().map(Product.Variant::attributes).toList());
   }
 
   /** Layer 2 for operators: an authenticated actor whose Hive tenant is the deployment's tenant. */

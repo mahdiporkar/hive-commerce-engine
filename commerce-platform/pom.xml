@@ -16,6 +16,10 @@
       <artifactId>commerce-shared-kernel</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.hivecommerce</groupId>
+      <artifactId>commerce-spi</artifactId>
+    </dependency>
+    <dependency>
       <groupId>io.hiveplatform</groupId>
       <artifactId>hive-spring-boot-starter</artifactId>
     </dependency>

@@ -30,9 +30,11 @@ public class ListingStorefrontService {
   private final ListingProjection projection;
   private final CatalogQueries catalog;
   private final OfferService offerService;
+  private final io.hivecommerce.platform.extensions.ExtensionRegistry extensions;
 
   public ListingStorefrontService(DeploymentScope deployment, TenantTransactions transactions, ListingProjection projection, CatalogQueries catalog,
-      OfferService offerService) {
+      OfferService offerService, io.hivecommerce.platform.extensions.ExtensionRegistry extensions) {
+    this.extensions = extensions;
     this.offerService = offerService;
     this.deployment = deployment;
     this.transactions = transactions;
@@ -69,12 +71,14 @@ public class ListingStorefrontService {
   }
 
   /** Product detail with its active offers (price and current availability). */
-  public record DetailWithOffers(Detail product, List<OfferService.OfferView> offers) {}
+  public record DetailWithOffers(Detail product, List<OfferService.OfferView> offers, Map<String, Map<String, Object>> extensions) {}
 
   public DetailWithOffers bySlug(UserContext user, String slug) {
     return transactions.inScope(deployment.scope(), () -> {
       var detail = projection.bySlug(deployment.scope(), slug).orElseThrow(() -> HiveException.notFound("Product not found"));
-      return new DetailWithOffers(detail, offerService.offersOfProduct(deployment.scope(), detail.productId()));
+      var snapshot = catalog.product(deployment.scope(), detail.productId()).orElseThrow();
+      return new DetailWithOffers(detail, offerService.offersOfProduct(deployment.scope(), detail.productId()),
+          extensions.present(deployment.scope(), detail.productId(), new io.hivecommerce.spi.ProductFacts(snapshot.productTypeKey(), snapshot.kind(), snapshot.attributes(), snapshot.variants().stream().map(v -> v.attributes()).toList())));
     });
   }
 
