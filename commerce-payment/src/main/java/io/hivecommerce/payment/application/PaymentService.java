@@ -163,6 +163,14 @@ public class PaymentService implements PaymentApi {
   public record RefundView(UUID refundId, UUID paymentId, BigDecimal amount, String status) {}
 
   /** Operator refund (Layer 1: commerce.api.orders:refund). Idempotent per key; never exceeds the captured amount. */
+  /** Operator: the latest payments, without any provider credential or raw provider payload. */
+  public List<PaymentView> recentPayments(UserContext user) {
+    user.requireActor();
+    if (!deployment.tenantId().equals(user.tenantId())) throw HiveException.forbidden("This identity belongs to another tenant");
+    TenantScope scope = deployment.scope();
+    return transactions.inScope(scope, () -> payments.findRecent(scope, 200).stream().map(PaymentView::of).toList());
+  }
+
   public RefundView refundOrder(UserContext user, UUID orderId, String idempotencyKey, BigDecimal amount, List<UUID> orderLineIds) {
     user.requireActor();
     if (!deployment.tenantId().equals(user.tenantId())) throw HiveException.forbidden("This identity belongs to another tenant");

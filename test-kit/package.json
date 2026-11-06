@@ -1,6 +1,6 @@
 {
   "name": "@hive-commerce/test-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
   "description": "End-to-end harness shared by the engine and its client repositories: real Hive, Keycloak, engine, PostgreSQL and object storage, all local and throwaway.",

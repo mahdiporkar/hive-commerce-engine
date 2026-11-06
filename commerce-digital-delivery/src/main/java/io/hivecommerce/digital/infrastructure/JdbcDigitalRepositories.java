@@ -59,6 +59,9 @@ final class JdbcDigitalRepositories {
     @Override
     public List<DigitalAsset> findByProduct(TenantScope scope, UUID productId) { return select(scope, "product_id = :value", productId); }
 
+    @Override
+    public List<DigitalAsset> findBySeller(TenantScope scope, UUID sellerId) { return select(scope, "owner_seller_id = :value", sellerId); }
+
     private List<DigitalAsset> select(TenantScope scope, String condition, Object value) {
       var rows = jdbc.sql("select id, owner_seller_id, product_id, kind, title, download_limit, updates_included, license_usage, preview_text, revision "
               + "from digital.digital_asset where tenant_id = :tenant and store_id = :store and " + condition + " order by created_at")

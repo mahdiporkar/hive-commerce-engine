@@ -62,7 +62,7 @@ public class CommerceConfigurationValidator {
     ObjectNode hive = root.putObject("hive");
     hive.put("routeKey", env.getProperty("commerce.hive.route-key", ""));
     ObjectNode capabilities = root.putObject("capabilities");
-    for (String capability : new String[] {"physical-products", "digital-products", "seller-onboarding", "commissions"}) {
+    for (String capability : new String[] {"physical-products", "digital-products", "seller-onboarding", "commissions", "reviews"}) {
       String value = env.getProperty("commerce.capabilities." + capability);
       String key = toCamel(capability);
       if (value == null) continue;

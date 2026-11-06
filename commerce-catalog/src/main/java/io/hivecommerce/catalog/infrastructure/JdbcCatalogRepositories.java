@@ -308,6 +308,22 @@ final class JdbcCatalogRepositories {
     }
 
     @Override
+    public void updateSchema(Product p) {
+      int updated = jdbc.sql("""
+          update catalog.product set schema_version = :version, attributes = cast(:attributes as jsonb), revision = revision + 1, updated_at = now()
+          where id = :id and tenant_id = :tenant and store_id = :store and revision = :revision""")
+          .param("version", p.schemaVersion()).param("attributes", json.write(p.attributes())).param("id", p.id())
+          .param("tenant", p.scope().tenantId()).param("store", p.scope().storeId()).param("revision", p.revision()).update();
+      if (updated != 1) throw new OptimisticLockingFailureException("product " + p.id() + " changed concurrently");
+      for (var v : p.variants()) {
+        jdbc.sql("""
+            update catalog.product_variant set attributes = cast(:attributes as jsonb)
+            where id = :id and tenant_id = :tenant and store_id = :store""")
+            .param("attributes", json.write(v.attributes())).param("id", v.id()).param("tenant", p.scope().tenantId()).param("store", p.scope().storeId()).update();
+      }
+    }
+
+    @Override
     public Optional<Product> findByVariantId(TenantScope scope, UUID variantId) {
       return jdbc.sql("select product_id from catalog.product_variant where id = :id and tenant_id = :tenant and store_id = :store")
           .param("id", variantId).param("tenant", scope.tenantId()).param("store", scope.storeId()).query(UUID.class).optional()
@@ -330,6 +346,56 @@ final class JdbcCatalogRepositories {
               new Slug(rs.getString("slug")), json.map(rs.getString("attributes")), variants, Product.Status.valueOf(rs.getString("status")),
               rs.getObject("created_by", UUID.class), rs.getLong("revision")))
           .optional();
+    }
+  }
+
+  @Repository
+  static class Presentation implements CatalogRepositories.Presentation {
+    private static final com.fasterxml.jackson.core.type.TypeReference<List<io.hivecommerce.catalog.domain.ProductMedia>> MEDIA = new com.fasterxml.jackson.core.type.TypeReference<>() {};
+    private final JdbcClient jdbc;
+    private final CatalogJson json;
+    private final com.fasterxml.jackson.databind.ObjectMapper mapper;
+
+    Presentation(JdbcClient jdbc, CatalogJson json, com.fasterxml.jackson.databind.ObjectMapper mapper) {
+      this.jdbc = jdbc;
+      this.json = json;
+      this.mapper = mapper;
+    }
+
+    @Override
+    public List<io.hivecommerce.catalog.domain.ProductMedia> productMedia(TenantScope scope, UUID productId) {
+      return jdbc.sql("select media from catalog.product where id = :id and tenant_id = :tenant and store_id = :store")
+          .param("id", productId).param("tenant", scope.tenantId()).param("store", scope.storeId()).query(String.class).optional().map(text -> {
+            try {
+              return mapper.readValue(text, MEDIA);
+            } catch (java.io.IOException e) {
+              throw new IllegalStateException("Unreadable product media", e);
+            }
+          }).orElse(List.of());
+    }
+
+    @Override
+    public void saveProductMedia(TenantScope scope, UUID productId, List<io.hivecommerce.catalog.domain.ProductMedia> media) {
+      jdbc.sql("update catalog.product set media = cast(:media as jsonb), updated_at = now() where id = :id and tenant_id = :tenant and store_id = :store")
+          .param("media", json.write(media)).param("id", productId).param("tenant", scope.tenantId()).param("store", scope.storeId()).update();
+    }
+
+    @Override
+    public io.hivecommerce.catalog.domain.CategorySeo categorySeo(TenantScope scope, UUID categoryId) {
+      return jdbc.sql("select seo from catalog.category where id = :id and tenant_id = :tenant and store_id = :store")
+          .param("id", categoryId).param("tenant", scope.tenantId()).param("store", scope.storeId()).query(String.class).optional().map(text -> {
+            try {
+              return mapper.readValue(text, io.hivecommerce.catalog.domain.CategorySeo.class);
+            } catch (java.io.IOException e) {
+              throw new IllegalStateException("Unreadable category metadata", e);
+            }
+          }).orElse(new io.hivecommerce.catalog.domain.CategorySeo(Map.of(), Map.of()));
+    }
+
+    @Override
+    public void saveCategorySeo(TenantScope scope, UUID categoryId, io.hivecommerce.catalog.domain.CategorySeo seo) {
+      jdbc.sql("update catalog.category set seo = cast(:seo as jsonb), updated_at = now() where id = :id and tenant_id = :tenant and store_id = :store")
+          .param("seo", json.write(seo)).param("id", categoryId).param("tenant", scope.tenantId()).param("store", scope.storeId()).update();
     }
   }
 

@@ -47,7 +47,7 @@ public class SecurityConfiguration {
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/actuator/health/**").permitAll()
             .requestMatchers("/actuator/**").denyAll()
-            .requestMatchers("/v1/admin/**", "/v1/seller/**").authenticated()
+            .requestMatchers("/v1/admin/**", "/v1/seller/**", "/v1/shop/products/*/reviews").authenticated()
             .anyRequest().permitAll())
         .oauth2ResourceServer(server -> server.jwt(jwt -> jwt.decoder(decoder)).authenticationEntryPoint(entryPoint))
         .exceptionHandling(handling -> handling.authenticationEntryPoint(entryPoint))

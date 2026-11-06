@@ -86,6 +86,26 @@ class JdbcOrderRepository implements OrderRepository {
   public List<Order> findRecent(TenantScope scope, int limit) { return select(scope, "true", null, limit); }
 
   @Override
+  public boolean hasPaidFor(TenantScope scope, UUID customerId, UUID productId) {
+    return jdbc.sql("""
+        select count(*) from ordering.customer_order o
+        join ordering.seller_order s on s.order_id = o.id
+        join ordering.order_line l on l.seller_order_id = s.id
+        where o.tenant_id = :tenant and o.store_id = :store and o.customer_id = :customer and l.product_id = :product and o.status in ('PAID', 'COMPLETED')
+          and not exists (select 1 from ordering.order_line_refund r where r.line_id = l.id)""")
+        .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("customer", customerId).param("product", productId).query(Long.class).single() > 0;
+  }
+
+  @Override
+  public List<CustomerSummary> customers(TenantScope scope, int limit) {
+    return jdbc.sql("""
+        select customer_id, count(*) orders, max(created_at) last_order_at from ordering.customer_order
+        where tenant_id = :tenant and store_id = :store group by customer_id order by last_order_at desc limit :limit""")
+        .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("limit", limit)
+        .query((rs, n) -> new CustomerSummary(rs.getObject("customer_id", UUID.class), rs.getLong("orders"), rs.getTimestamp("last_order_at").toInstant())).list();
+  }
+
+  @Override
   public List<Order> findBySeller(TenantScope scope, UUID sellerId, int limit) {
     return select(scope, "id in (select order_id from ordering.seller_order where seller_id = :value)", sellerId, limit);
   }

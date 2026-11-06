@@ -1,11 +1,11 @@
 'use client';
 import {useCallback, useEffect, useState} from 'react';
-import {CommerceError, formatMoney, localized, loginUrl, type Category} from '@hive-commerce/storefront-sdk';
+import {CommerceError, formatMoney, localized, loginUrl, type Category, type SellerAsset, type SellerListing} from '@hive-commerce/storefront-sdk';
 import {shop} from '@/lib/shop';
 import {messagesFor} from '@/lib/messages';
 import {attribute, attributeLabel, store, taxonomy, type AttributeSpec} from '@/lib/store';
 
-const EMPTY_SALE = {slug: '', price: '', stock: '', content: '', preview: '', title: ''};
+const EMPTY_SALE = {price: '', stock: '', content: '', preview: '', title: '', license: ''};
 
 function coerce(type: string | undefined, value: string): unknown {
   if (value === '') return undefined;
@@ -30,7 +30,8 @@ export function SellerWorkspace({locale, categories}: {locale: string; categorie
   const m = messagesFor(locale);
   const [state, setState] = useState<'loading' | 'anonymous' | 'ready' | 'error'>('loading');
   const [memberships, setMemberships] = useState<{sellerId: string; role: string}[]>([]);
-  const [listings, setListings] = useState<any[]>([]);
+  const [listings, setListings] = useState<SellerListing[]>([]);
+  const [assets, setAssets] = useState<SellerAsset[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
   const [finance, setFinance] = useState<{pending: number; available: number} | null>(null);
   const [name, setName] = useState('');
@@ -46,7 +47,8 @@ export function SellerWorkspace({locale, categories}: {locale: string; categorie
     setMemberships(mine);
     if (mine[0]) {
       const seller = shop.seller(mine[0].sellerId);
-      const [l, o, f] = await Promise.all([seller.listings().catch(() => []), seller.offers().catch(() => []), seller.finance(store.currency).catch(() => null)]);
+      const [l, o, f, a] = await Promise.all([seller.listings().catch(() => []), seller.offers().catch(() => []), seller.finance(store.currency).catch(() => null), seller.assets().catch(() => [])]);
+      setAssets(a);
       setListings(l);
       setOffers(o);
       setFinance(f);
@@ -108,29 +110,31 @@ export function SellerWorkspace({locale, categories}: {locale: string; categorie
         <ul className="lines">
           {listings.map(l => {
             const s = sale[l.listingId] ?? EMPTY_SALE;
+            const asset = assets.find(a => a.productId === l.productId && a.kind === 'TEXT');
             return (
               <li key={l.listingId} className="stack" data-testid="seller-listing" data-status={l.status}>
-                <span className="muted"><code>{l.productId}</code> · {m.status}: {l.status} {l.rejectionReason ? `(${l.rejectionReason})` : ''}</span>
+                <strong>{localized(l.title, locale)}</strong>
+                <span className="muted"><code>{l.slug}</code> · {m.status}: {l.status} {l.rejectionReason ? `(${l.rejectionReason})` : ''}</span>
                 {digitalType ? <div className="stack">
-                  <label>{m.productTitle}<input name="asset-title" value={s.title} onChange={e => patch(l.listingId, {title: e.target.value})} /></label>
+                  {asset ? <p className="muted" data-testid="asset-versions">{m.versions}: {asset.versions.map((v: any) => `v${v.version}`).join(', ') || '–'}</p> : <label>{m.productTitle}<input name="asset-title" value={s.title} onChange={e => patch(l.listingId, {title: e.target.value})} /></label>}
+                  {asset ? null : <label>{m.licenseTerms}<input name="asset-license" maxLength={500} value={s.license} onChange={e => patch(l.listingId, {license: e.target.value})} /></label>}
                   <label>{m.contentText}<textarea name="asset-content" rows={4} value={s.content} onChange={e => patch(l.listingId, {content: e.target.value})} /></label>
                   <label>{m.previewText}<textarea name="asset-preview" rows={2} value={s.preview} onChange={e => patch(l.listingId, {preview: e.target.value})} /></label>
-                  <button className="secondary" onClick={() => run(async () => {
-                    const asset = await seller.createAsset({productId: l.productId, kind: 'TEXT', title: s.title});
-                    await seller.setText(asset.assetId, s.content);
-                    if (s.preview) await seller.setPreview(asset.assetId, s.preview);
-                  }, m.saved)}>{m.saveContent}</button>
+                  <button className="secondary" data-testid="asset-save" onClick={() => run(async () => {
+                    const target = asset ?? await seller.createAsset({productId: l.productId, kind: 'TEXT', title: s.title || localized(l.title, locale), licenseUsage: s.license || undefined});
+                    if (s.content) await seller.setText(target.assetId, s.content);
+                    if (s.preview) await seller.setPreview(target.assetId, s.preview);
+                    patch(l.listingId, {content: ''});
+                  }, m.saved)}>{asset ? m.newVersion : m.saveContent}</button>
+                  <label>{m.uploadFile}<input type="file" name="asset-file" onChange={e => { const file = e.target.files?.[0]; if (file) void run(async () => {
+                    const target = assets.find(a => a.productId === l.productId && a.kind === 'FILE') ?? await seller.createAsset({productId: l.productId, kind: 'FILE', title: s.title || file.name, licenseUsage: s.license || undefined});
+                    await seller.uploadFile(target.assetId, file);
+                  }, m.saved); }} /></label>
                 </div> : null}
-                {l.status === 'PUBLISHED' ? <div className="stack">
-                  <label>{m.slug}<input name="offer-slug" value={s.slug} onChange={e => patch(l.listingId, {slug: e.target.value})} /></label>
+                {l.status === 'PUBLISHED' && !offers.some(o => o.productId === l.productId) ? <div className="stack">
                   <label>{m.price} ({store.currency})<input name="offer-price" type="number" min={0} value={s.price} onChange={e => patch(l.listingId, {price: e.target.value})} /></label>
                   {digitalType ? null : <label>{m.stock}<input name="offer-stock" type="number" min={0} value={s.stock} onChange={e => patch(l.listingId, {stock: e.target.value})} /></label>}
-                  <button onClick={() => run(async () => {
-                    const response = await fetch(`/${locale}/sell/variant/${encodeURIComponent(s.slug)}`);
-                    if (!response.ok) throw new CommerceError(response.status, 'NOT_FOUND', m.notFound);
-                    const {variantId} = await response.json();
-                    await seller.createOffer({variantId, amount: Number(s.price), currency: store.currency, ...(digitalType ? {} : {quantity: Number(s.stock)})});
-                  }, m.saved)}>{m.createOffer}</button>
+                  <button data-testid="offer-create" onClick={() => run(() => seller.createOffer({variantId: l.variantIds[0], amount: Number(s.price), currency: store.currency, ...(digitalType ? {} : {quantity: Number(s.stock)})}), m.saved)}>{m.createOffer}</button>
                 </div> : null}
               </li>
             );

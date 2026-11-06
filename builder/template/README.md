@@ -21,7 +21,20 @@ seller, commission and settlement logic stay in the engine.
 node tools/fetch-engine.mjs            # verifies and unpacks the pinned release into .engine/
 (cd storefront && npm ci && npm run build)
 node --test tests/contract/*.test.mjs
-node --test tests/e2e/*.test.mjs       # Docker, Java 21; HIVE_SOURCE_DIR points at built Hive services
+node --test tests/e2e/acceptance.test.mjs   # Docker, Java 21; HIVE_SOURCE_DIR points at built Hive services
+```
+
+## Upgrade the engine
+
+Upgrades happen through a pull request that changes [engine.lock.json](engine.lock.json). Before merging, run the candidate
+against this store. It upgrades a running store, buys through it, and rolls back on the same data:
+
+```bash
+ENGINE_VERSION=<candidate> node tools/fetch-engine.mjs
+ENGINE_VERSION=<candidate> node --test tests/contract/*.test.mjs
+ENGINE_VERSION=<candidate> node tools/build-extensions.mjs
+ENGINE_CANDIDATE=<candidate> node --test tests/e2e/upgrade.test.mjs
+(cd storefront && npm install ../.engine/sdk/storefront-sdk.tgz)    # after bumping the lock: pins the new SDK bytes
 ```
 
 `ENGINE_RELEASE_DIR=<dir>` makes `fetch-engine` read a locally packaged release instead of the published one.

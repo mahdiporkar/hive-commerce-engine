@@ -5,6 +5,7 @@ import {messagesFor} from '@/lib/messages';
 import {attributeLabel, attributeValue, orderedAttributes, origin, store} from '@/lib/store';
 import {Offers} from '@/components/Offers';
 import {ProductExtras} from '@/components/ProductExtras';
+import {Reviews} from '@/components/Reviews';
 
 type Props = {params: Promise<{locale: string; slug: string}>};
 const pageUrl = (locale: string, slug: string) => `${origin()}/${locale}/products/${slug}`;
@@ -24,6 +25,7 @@ export default async function ProductPage({params}: Props) {
   const detail = await orNotFound(catalog().product(slug));
   const {product, offers} = detail;
   const previews = product.kind === 'DIGITAL' ? await catalog().previews(product.productId) : [];
+  const reviews = store.capabilities.reviews ? await catalog().reviews(product.productId) : null;
   const title = localized(product.title, locale);
   const crumbs = [{name: m.home, url: `${origin()}/${locale}`}, {name: m.products, url: `${origin()}/${locale}/products`}, {name: title, url: pageUrl(locale, slug)}];
   return (
@@ -34,6 +36,7 @@ export default async function ProductPage({params}: Props) {
       <h1>{title}</h1>
       <div className="product">
         <div className="stack">
+          {detail.media?.length ? <div className="gallery" data-testid="gallery">{detail.media.filter(i => i.kind === 'IMAGE').map(i => <img key={i.url} src={i.url} alt={localized(i.alt, locale) || title} loading="lazy" />)}</div> : null}
           <section className="panel">
             <h2>{m.details}</h2>
             <dl className="spec">
@@ -42,6 +45,7 @@ export default async function ProductPage({params}: Props) {
           </section>
           <ProductExtras detail={detail} locale={locale} />
           {previews.map((p, i) => p.preview ? <section className="panel" key={i}><h2>{m.preview}: {p.title}</h2><pre className="protected">{p.preview}</pre></section> : null)}
+          {reviews ? <Reviews productId={product.productId} reviews={reviews} locale={locale} /> : null}
         </div>
         <Offers detail={detail} offers={offers} locale={locale} />
       </div>

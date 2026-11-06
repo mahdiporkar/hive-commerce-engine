@@ -1,6 +1,6 @@
 {
   "name": "@hive-commerce/storefront-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Headless client for Hive Commerce storefronts: same-origin BFF calls, cart, checkout, seller workspace and SEO helpers. Holds no commerce rules.",
   "exports": {".": {"types": "./dist/index.d.ts", "default": "./dist/index.js"}},

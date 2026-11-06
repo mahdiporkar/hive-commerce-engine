@@ -49,12 +49,16 @@ function ProductTypes({context, types, attributes, reload}: ReactMicroAppProps &
     <div className="row"><button disabled={action.busy} onClick={save}>{t(context, 'create')}</button></div><Outcome action={action} />
     <Table columns={['Key', 'Kind', 'Versions', t(context, 'actions')]} empty={t(context, 'empty')} rows={types.map(pt => [<code>{pt.key}</code>, pt.kind,
       pt.versions.map((v: any) => `v${v.version} ${v.status}`).join(', '),
-      pt.versions.filter((v: any) => v.status === 'DRAFT').map((v: any) => <button key={v.version} className="secondary" onClick={() => action.run(() => api('POST', `/v1/admin/product-types/${pt.key}/versions/${v.version}/publish`), 'Schema published')}>Publish v{v.version}</button>)])} />
+      <span className="row">
+        {pt.versions.filter((v: any) => v.status === 'DRAFT').map((v: any) => <button key={v.version} className="secondary" onClick={() => action.run(() => api('POST', `/v1/admin/product-types/${pt.key}/versions/${v.version}/publish`), 'Schema published')}>Publish v{v.version}</button>)}
+        {pt.versions.every((v: any) => v.status === 'PUBLISHED') ? <button className="secondary" disabled={!Object.keys(picked).length} title="Uses the attributes ticked above" onClick={() => action.run(() => api('POST', `/v1/admin/product-types/${pt.key}/versions`, {attributes: Object.entries(picked).map(([key, v]) => ({key, ...v}))}), 'New version drafted')}>Draft next version</button> : null}
+      </span>])} />
   </section>;
 }
 
 function Categories({context, categories, reload}: ReactMicroAppProps & {categories: any[]; reload: () => unknown}) {
   const [form, setForm] = useState({slug: '', name: '', parentId: ''});
+  const [seo, setSeo] = useState({title: '', description: ''});
   const action = useAction(reload);
   return <section><h3>Categories</h3>
     <div className="grid">
@@ -64,7 +68,12 @@ function Categories({context, categories, reload}: ReactMicroAppProps & {categor
     </div>
     <div className="row"><button disabled={action.busy} onClick={() => action.run(() => api('POST', '/v1/admin/categories', {slug: form.slug, name: {[context.locale?.split('-')[0] || 'en']: form.name}, parentId: form.parentId || null}), 'Category created')}>{t(context, 'create')}</button></div>
     <Outcome action={action} />
-    <Table columns={['Name', 'Slug', 'Depth']} empty={t(context, 'empty')} rows={categories.map(c => [text(context, c.name), <code>{c.slug}</code>, c.depth])} />
+    <div className="grid">
+      <label>Search title<input name="seo-title" maxLength={70} value={seo.title} onChange={e => setSeo({...seo, title: e.target.value})} /></label>
+      <label>Search description<input name="seo-description" maxLength={320} value={seo.description} onChange={e => setSeo({...seo, description: e.target.value})} /></label>
+    </div>
+    <Table columns={['Name', 'Slug', 'Depth', 'Search title', t(context, 'actions')]} empty={t(context, 'empty')} rows={categories.map(c => [text(context, c.name), <code>{c.slug}</code>, c.depth, text(context, c.seo?.title),
+      <button className="secondary" disabled={!seo.title} onClick={() => { const locale = context.locale?.split('-')[0] || 'en'; return action.run(() => api('PUT', `/v1/admin/categories/${c.id}/seo`, {title: {[locale]: seo.title}, description: {[locale]: seo.description}}), 'Metadata saved'); }}>Save metadata</button>])} />
   </section>;
 }
 
@@ -74,6 +83,7 @@ function Products({context, types, attributes, categories, products, reload}: Re
   const [head, setHead] = useState({title: '', slug: '', categoryId: ''});
   const [values, setValues] = useState<Values>({});
   const [variants, setVariants] = useState<{sku: string; values: Values}[]>([{sku: '', values: {}}]);
+  const [mediaUrl, setMediaUrl] = useState('');
   const action = useAction(reload);
   const type = published.find(pt => pt.key === typeKey);
   const schema = useMemo(() => type ? [...type.versions].filter((v: any) => v.status === 'PUBLISHED').pop() : null, [type]);
@@ -102,8 +112,17 @@ function Products({context, types, attributes, categories, products, reload}: Re
       </div>
     </> : null}
     <Outcome action={action} />
-    <Table columns={['Title', 'Slug', 'SKUs', t(context, 'status'), t(context, 'actions')]} empty={t(context, 'empty')} rows={products.map(p => [text(context, p.title), <code>{p.slug}</code>, p.variants.map((v: any) => v.sku).join(', '), p.status,
-      p.status === 'DRAFT' ? <button className="secondary" onClick={() => action.run(() => api('POST', `/v1/admin/products/${p.id}/publish`), 'Published')}>Publish</button> : null])} />
+    <label>Image link, added to the selected product<input name="media-url" placeholder="https://" value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} /></label>
+    <Table columns={['Title', 'Slug', 'SKUs', 'Schema', t(context, 'status'), t(context, 'actions')]} empty={t(context, 'empty')} rows={products.map(p => {
+      const type = types.find(pt => pt.id === p.productTypeId);
+      const latest = Math.max(0, ...(type?.versions ?? []).filter((v: any) => v.status === 'PUBLISHED').map((v: any) => v.version));
+      return [text(context, p.title), <code>{p.slug}</code>, p.variants.map((v: any) => v.sku).join(', '), `v${p.schemaVersion}`, p.status, <span className="row">
+        <button className="secondary" onClick={() => context.events.publish('commerce:product-selected', {productId: p.id})}>Select</button>
+        {p.status === 'DRAFT' ? <button className="secondary" onClick={() => action.run(() => api('POST', `/v1/admin/products/${p.id}/publish`), 'Published')}>Publish</button> : null}
+        {latest > p.schemaVersion ? <button className="secondary" onClick={() => action.run(() => api('POST', `/v1/admin/products/${p.id}/schema-migration`, {revision: p.revision, attributes: {}}), `Migrated to v${latest}`)}>Migrate to v{latest}</button> : null}
+        <button className="secondary" disabled={!mediaUrl} onClick={() => action.run(() => api('PUT', `/v1/admin/products/${p.id}/media`, {media: [{url: mediaUrl}]}), 'Media saved')}>Set image</button>
+      </span>];
+    })} />
   </section>;
 }
 

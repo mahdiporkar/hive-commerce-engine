@@ -366,8 +366,28 @@
             "format" : "int32",
             "type" : "integer"
           },
+          "seo" : {
+            "$ref" : "#/components/schemas/Seo"
+          },
           "slug" : {
             "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CategorySeo" : {
+        "properties" : {
+          "description" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
           }
         },
         "type" : "object"
@@ -497,6 +517,23 @@
         },
         "type" : "object"
       },
+      "CustomerSummary" : {
+        "properties" : {
+          "customerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "lastOrderAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "orders" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "Detail" : {
         "properties" : {
           "attributes" : {
@@ -546,6 +583,12 @@
             },
             "type" : "object"
           },
+          "media" : {
+            "items" : {
+              "$ref" : "#/components/schemas/MediaItem"
+            },
+            "type" : "array"
+          },
           "offers" : {
             "items" : {
               "$ref" : "#/components/schemas/OfferView"
@@ -576,6 +619,17 @@
           "version" : {
             "format" : "int32",
             "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "DraftVersionBody" : {
+        "properties" : {
+          "attributes" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SpecBody"
+            },
+            "type" : "array"
           }
         },
         "type" : "object"
@@ -797,6 +851,34 @@
         },
         "type" : "object"
       },
+      "MediaBody" : {
+        "properties" : {
+          "media" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ProductMedia"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "MediaItem" : {
+        "properties" : {
+          "alt" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "MemberView" : {
         "properties" : {
           "actorId" : {
@@ -832,6 +914,19 @@
           "sellerId" : {
             "format" : "uuid",
             "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MigrateBody" : {
+        "properties" : {
+          "attributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
           }
         },
         "type" : "object"
@@ -1148,6 +1243,44 @@
         },
         "type" : "object"
       },
+      "ProductMedia" : {
+        "properties" : {
+          "alt" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ProductReviews" : {
+        "properties" : {
+          "averageRating" : {
+            "type" : "number"
+          },
+          "count" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "reviews" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PublicReview"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
       "ProductTypeBody" : {
         "properties" : {
           "attributes" : {
@@ -1263,6 +1396,22 @@
         },
         "type" : "object"
       },
+      "PublicReview" : {
+        "properties" : {
+          "body" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "rating" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "RefundBody" : {
         "properties" : {
           "amount" : {
@@ -1303,6 +1452,45 @@
       "RejectBody" : {
         "properties" : {
           "reason" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ReviewBody" : {
+        "properties" : {
+          "body" : {
+            "type" : "string"
+          },
+          "rating" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "ReviewView" : {
+        "properties" : {
+          "body" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "productId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "rating" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "reviewId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "status" : {
             "type" : "string"
           }
         },
@@ -1411,6 +1599,48 @@
         },
         "type" : "object"
       },
+      "SellerListingView" : {
+        "properties" : {
+          "channel" : {
+            "type" : "string"
+          },
+          "listingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "rejectionReason" : {
+            "type" : "string"
+          },
+          "revision" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "variantIds" : {
+            "items" : {
+              "format" : "uuid",
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
       "SellerOrderPart" : {
         "properties" : {
           "number" : {
@@ -1478,6 +1708,23 @@
           },
           "status" : {
             "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "Seo" : {
+        "properties" : {
+          "description" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
           }
         },
         "type" : "object"
@@ -2219,6 +2466,64 @@
           }
         },
         "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/categories/{categoryId}/seo" : {
+      "put" : {
+        "operationId" : "seo",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "categoryId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CategorySeo"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CategorySeo"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/customers" : {
+      "get" : {
+        "operationId" : "customers",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/CustomerSummary"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin-orders" ]
       }
     },
     "/v1/admin/entitlements/{entitlementId}/revoke" : {
@@ -2965,6 +3270,27 @@
         "tags" : [ "admin-refunds" ]
       }
     },
+    "/v1/admin/payments" : {
+      "get" : {
+        "operationId" : "payments",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PaymentView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "admin-refunds" ]
+      }
+    },
     "/v1/admin/product-types" : {
       "get" : {
         "operationId" : "productTypes",
@@ -2992,6 +3318,42 @@
             "application/json" : {
               "schema" : {
                 "$ref" : "#/components/schemas/ProductTypeBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProductTypeView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/product-types/{productTypeKey}/versions" : {
+      "post" : {
+        "operationId" : "draftVersion",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "productTypeKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DraftVersionBody"
               }
             }
           },
@@ -3120,6 +3482,46 @@
         "tags" : [ "catalog-admin-controller" ]
       }
     },
+    "/v1/admin/products/{productId}/media" : {
+      "put" : {
+        "operationId" : "media",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "productId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MediaBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProductMedia"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
     "/v1/admin/products/{productId}/publish" : {
       "post" : {
         "operationId" : "publish",
@@ -3145,6 +3547,84 @@
           }
         },
         "tags" : [ "listing-admin-controller" ]
+      }
+    },
+    "/v1/admin/products/{productId}/schema-migration" : {
+      "post" : {
+        "operationId" : "migrate",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "productId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MigrateBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProductView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "catalog-admin-controller" ]
+      }
+    },
+    "/v1/admin/reviews" : {
+      "get" : {
+        "operationId" : "recent",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ReviewView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "reviews" ]
+      }
+    },
+    "/v1/admin/reviews/{reviewId}/hide" : {
+      "post" : {
+        "operationId" : "hide",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "reviewId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "tags" : [ "reviews" ]
       }
     },
     "/v1/admin/sellers" : {
@@ -3293,6 +3773,27 @@
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/StoreSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "store-admin-controller" ]
+      }
+    },
+    "/v1/admin/store/capabilities" : {
+      "get" : {
+        "operationId" : "capabilities",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "boolean"
+                  },
+                  "type" : "object"
                 }
               }
             },
@@ -3558,6 +4059,34 @@
       }
     },
     "/v1/seller/sellers/{sellerId}/assets" : {
+      "get" : {
+        "operationId" : "assets",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sellerId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/AssetView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "seller-assets" ]
+      },
       "post" : {
         "operationId" : "create_1",
         "parameters" : [ {
@@ -3676,7 +4205,7 @@
               "*/*" : {
                 "schema" : {
                   "items" : {
-                    "$ref" : "#/components/schemas/ListingView"
+                    "$ref" : "#/components/schemas/SellerListingView"
                   },
                   "type" : "array"
                 }
@@ -4229,6 +4758,43 @@
         "tags" : [ "shop-payments" ]
       }
     },
+    "/v1/shop/products/{productId}/reviews" : {
+      "post" : {
+        "operationId" : "write",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "productId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReviewBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReviewView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "reviews" ]
+      }
+    },
     "/v1/store/categories" : {
       "get" : {
         "operationId" : "categories",
@@ -4307,6 +4873,33 @@
           }
         },
         "tags" : [ "store-previews" ]
+      }
+    },
+    "/v1/store/products/{productId}/reviews" : {
+      "get" : {
+        "operationId" : "forProduct",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "productId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProductReviews"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "reviews" ]
       }
     },
     "/v1/store/products/{slug}" : {

@@ -14,11 +14,15 @@ public interface CatalogQueries {
 
   /** What other contexts need to know about a product: identity, presentation, kind and filterable facets. */
   record ProductSnapshot(UUID productId, UUID categoryId, String productTypeKey, String kind, Map<String, String> title, String slug,
-      Map<String, Object> attributes, List<String> filterableKeys, List<VariantSnapshot> variants) {}
+      Map<String, Object> attributes, List<String> filterableKeys, List<VariantSnapshot> variants, List<MediaItem> media) {}
+
+  record MediaItem(String url, String kind, Map<String, String> alt) {}
+
+  record Seo(Map<String, String> title, Map<String, String> description) {}
 
   record VariantSnapshot(UUID variantId, UUID productId, String sku, Map<String, Object> attributes) {}
 
-  record CategoryNode(UUID id, UUID parentId, String slug, Map<String, String> name, List<String> attributes, int position, int depth) {}
+  record CategoryNode(UUID id, UUID parentId, String slug, Map<String, String> name, List<String> attributes, int position, int depth, Seo seo) {}
 
   Optional<ProductSnapshot> product(TenantScope scope, UUID productId);
 

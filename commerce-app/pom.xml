@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.hivecommerce</groupId>
     <artifactId>hive-commerce-engine</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
   </parent>
   <artifactId>commerce-app</artifactId>
   <description>Deployable engine: wiring, schema migrations, architecture and integration tests.</description>

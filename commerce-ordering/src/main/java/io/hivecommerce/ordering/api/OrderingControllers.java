@@ -12,6 +12,39 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 final class OrderingControllers {
+  record ReviewBody(int rating, String body) {}
+
+  /** Reviews: public reads, verified-purchase writes (HYBRID, decided by Commerce), operator moderation. */
+  @RestController
+  @RequestMapping("/v1")
+  static class Reviews {
+    private final io.hivecommerce.ordering.application.ReviewService reviews;
+
+    Reviews(io.hivecommerce.ordering.application.ReviewService reviews) {
+      this.reviews = reviews;
+    }
+
+    @GetMapping("/store/products/{productId}/reviews")
+    @HiveOperation("store-product-reviews")
+    io.hivecommerce.ordering.application.ReviewService.ProductReviews forProduct(UserContext user, @PathVariable UUID productId) { return reviews.forProduct(productId); }
+
+    @org.springframework.web.bind.annotation.PostMapping("/shop/products/{productId}/reviews")
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+    @HiveOperation("shop-review-write")
+    io.hivecommerce.ordering.application.ReviewService.ReviewView write(UserContext user, @PathVariable UUID productId, @org.springframework.web.bind.annotation.RequestBody ReviewBody body) {
+      return reviews.write(user, productId, body.rating(), body.body());
+    }
+
+    @GetMapping("/admin/reviews")
+    @HiveOperation("admin-reviews")
+    List<io.hivecommerce.ordering.application.ReviewService.ReviewView> recent(UserContext user) { return reviews.recent(user); }
+
+    @org.springframework.web.bind.annotation.PostMapping("/admin/reviews/{reviewId}/hide")
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
+    @HiveOperation("admin-review-hide")
+    void hide(UserContext user, @PathVariable UUID reviewId) { reviews.hide(user, reviewId); }
+  }
+
   private OrderingControllers() {}
 
   /** Customer order history (HYBRID: Commerce requires a signed-in customer and returns only their orders). */
@@ -57,6 +90,10 @@ final class OrderingControllers {
     AdminOrders(OrderingService ordering) {
       this.ordering = ordering;
     }
+
+    @GetMapping("/customers")
+    @HiveOperation("admin-customers")
+    List<io.hivecommerce.ordering.domain.OrderRepository.CustomerSummary> customers(UserContext user) { return ordering.customers(user); }
 
     @GetMapping("/orders")
     @HiveOperation("admin-orders")

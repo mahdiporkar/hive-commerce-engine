@@ -115,6 +115,12 @@ public class OrderingService implements OrderingApi {
     return transactions.inScope(deployment.scope(), () -> orders.findRecent(deployment.scope(), 200).stream().map(OrderView::of).toList());
   }
 
+  /** Operator: who has ordered. Commerce knows customers by their Hive identity only; profiles stay in Hive. */
+  public List<OrderRepository.CustomerSummary> customers(UserContext user) {
+    operator(user);
+    return transactions.inScope(deployment.scope(), () -> orders.customers(deployment.scope(), 200));
+  }
+
   public OrderView storeOrder(UserContext user, UUID orderId) {
     operator(user);
     return transactions.inScope(deployment.scope(), () -> orders.findById(deployment.scope(), orderId).map(OrderView::of)

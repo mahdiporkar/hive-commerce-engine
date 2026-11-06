@@ -16,9 +16,11 @@ class CatalogQueryService implements CatalogQueries {
   private final CatalogRepositories.ProductTypes productTypes;
   private final CatalogRepositories.AttributeDefinitions attributes;
   private final CatalogRepositories.Categories categories;
+  private final CatalogRepositories.Presentation presentation;
 
-  CatalogQueryService(CatalogRepositories.Products products, CatalogRepositories.ProductTypes productTypes,
+  CatalogQueryService(CatalogRepositories.Presentation presentation, CatalogRepositories.Products products, CatalogRepositories.ProductTypes productTypes,
       CatalogRepositories.AttributeDefinitions attributes, CatalogRepositories.Categories categories) {
+    this.presentation = presentation;
     this.products = products;
     this.productTypes = productTypes;
     this.attributes = attributes;
@@ -34,7 +36,8 @@ class CatalogQueryService implements CatalogQueries {
       variantKeys.forEach(k -> { if (!all.contains(k)) all.add(k); });
       List<String> filterable = attributes.findByKeys(scope, all).stream().filter(d -> d.flags().filterable()).map(AttributeDefinition::key).sorted().toList();
       return new ProductSnapshot(p.id(), p.categoryId(), type.key(), type.kind().name(), p.title().values(), p.slug().value(), p.attributes(), filterable,
-          p.variants().stream().map(v -> new VariantSnapshot(v.id(), p.id(), v.sku(), v.attributes())).toList());
+          p.variants().stream().map(v -> new VariantSnapshot(v.id(), p.id(), v.sku(), v.attributes())).toList(),
+          presentation.productMedia(scope, p.id()).stream().map(m -> new MediaItem(m.url(), m.kind(), m.alt())).toList());
     }));
   }
 
@@ -53,6 +56,9 @@ class CatalogQueryService implements CatalogQueries {
   @Override
   public List<CategoryNode> activeCategories(TenantScope scope) {
     return categories.findActive(scope).stream()
-        .map(c -> new CategoryNode(c.id(), c.parentId(), c.slug().value(), c.name().values(), c.attributeKeys(), c.position(), c.depth())).toList();
+        .map(c -> {
+          var seo = presentation.categorySeo(scope, c.id());
+          return new CategoryNode(c.id(), c.parentId(), c.slug().value(), c.name().values(), c.attributeKeys(), c.position(), c.depth(), new Seo(seo.title(), seo.description()));
+        }).toList();
   }
 }

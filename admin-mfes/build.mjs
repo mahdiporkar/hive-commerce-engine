@@ -23,6 +23,8 @@ export const MODULES = [
   {area: 'sellers', label: {en: 'Sellers', fa: 'فروشندگان'}, order: 30},
   {area: 'finance', label: {en: 'Finance', fa: 'مالی'}, order: 40},
   {area: 'digital', label: {en: 'Digital assets', fa: 'دارایی‌های دیجیتال'}, order: 50},
+  {area: 'payments', label: {en: 'Payments', fa: 'پرداخت‌ها'}, order: 25},
+  {area: 'customers', label: {en: 'Customers', fa: 'مشتریان'}, order: 28},
   {area: 'settings', label: {en: 'Store settings', fa: 'تنظیمات فروشگاه'}, order: 60},
 ];
 
@@ -46,7 +48,7 @@ for (const {area, label, order} of MODULES) {
   }, null, 2) + '\n');
   writeFileSync(join(out, 'mf-manifest.json'), JSON.stringify({
     schemaVersion: '1.0.0', manifestVersion: VERSION, contractVersion: '1.1.0', runtimeVersion: '1.0.0', applicationKey: '{{applicationKey}}', moduleKey, displayName: label.en,
-    resourceManifestVersion: VERSION, artifact: {url: `{{modulesBaseUrl}}/${moduleKey}/entry.js`, integrity, format: 'ES_MODULE'}, styleIsolation: 'SHADOW_DOM',
+    resourceManifestVersion: VERSION, artifact: {url: `{{modulesBaseUrl}}/${VERSION}/${moduleKey}/entry.js`, integrity, format: 'ES_MODULE'}, styleIsolation: 'SHADOW_DOM',
     routes: [{key: 'home', path: `/admin/commerce/${area}`, access: 'AUTHENTICATED', resource: page, action: 'view', navigation: {label: label.en, order}}],
   }, null, 2) + '\n');
 }

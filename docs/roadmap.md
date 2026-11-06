@@ -23,8 +23,8 @@ Exit criteria for Phase 1: step 1. For Phase 2: steps 2–7 plus Scenario A (two
 | 2 (complete) | Cart, checkout, reservations, orders, payment port + fake provider, webhook ingress + inbox, verification, fulfillment, order history, refunds (ledger moved to Phase 4) | Scenario A |
 | 3 (complete) | Storage port + MinIO, upload/finalize, entitlements, signed downloads, prompt inline delivery | Scenario B |
 | 4 (complete) | Seller onboarding (ADR-0004), memberships, offers, moderation, order splitting, commissions, settlements, payouts | Scenario C, E |
-| 5 | B and C: Hive install, application registration, Next.js storefronts, taxonomy seeds, deployment | both run independently |
-| 6 | Gemstone verification and PromptVerification extensions | outside core |
-| 7 | Commerce builder admin tooling | — |
+| 5 (complete except publishing) | B and C: Hive install, application registration, Next.js storefronts, taxonomy seeds, deployment | both run independently |
+| 6 (complete) | Gemstone verification and PromptVerification extensions | outside core |
+| 7 (complete) | Commerce Builder: new stores, schemas, capabilities, themes | a third store from configuration alone |
 
-Handicraft Scenario D (configuration-only fixture) runs from Phase 1 onwards as a regression test. Scenario F (contract tests and rollback) starts with the first published engine version (Phase 5).
+Handicraft Scenario D (configuration-only fixture) runs from Phase 1 onwards as a regression test. Scenario F (contract tests, upgrade and rollback) runs from each store repository; see [the release policy](deployment/release-policy.md).

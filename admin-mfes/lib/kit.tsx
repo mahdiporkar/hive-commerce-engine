@@ -44,19 +44,19 @@ export const text = (context: HiveMountContext, values?: Record<string, string> 
 
 // Logical properties only, so RTL and LTR share every rule. Shadow DOM keeps these from leaking into the host.
 const CSS = `
-:host,.hc{font:14px/1.5 system-ui,sans-serif;color:#1f2933}
+:host,.hc{font:14px/1.5 system-ui,sans-serif;color:#1f2933;--hc-accent:var(--hive-accent,#1d4ed8);--hc-border:var(--hive-border,#d9dee4);--hc-muted:var(--hive-muted,#f5f7f9)}
 .hc{padding:16px;display:grid;gap:16px}
 .hc h2{margin:0;font-size:18px}.hc h3{margin:0;font-size:15px}
-.hc section{border:1px solid #d9dee4;border-radius:8px;padding:16px;display:grid;gap:12px;background:#fff}
+.hc section{border:1px solid var(--hc-border);border-radius:8px;padding:16px;display:grid;gap:12px;background:#fff}
 .hc table{border-collapse:collapse;inline-size:100%}
 .hc th,.hc td{text-align:start;padding:6px 8px;border-block-end:1px solid #e6e9ed;vertical-align:top}
-.hc th{font-weight:600;background:#f5f7f9}
+.hc th{font-weight:600;background:var(--hc-muted)}
 .hc label{display:grid;gap:4px;font-weight:500}
 .hc input,.hc select,.hc textarea{font:inherit;padding:6px 8px;border:1px solid #bcc4cc;border-radius:6px;min-inline-size:0;background:#fff}
 .hc .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
 .hc .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.hc button{font:inherit;padding:6px 12px;border:1px solid #1d4ed8;background:#1d4ed8;color:#fff;border-radius:6px;cursor:pointer}
-.hc button.secondary{background:#fff;color:#1d4ed8}
+.hc button{font:inherit;padding:6px 12px;border:1px solid var(--hc-accent);background:var(--hc-accent);color:#fff;border-radius:6px;cursor:pointer}
+.hc button.secondary{background:#fff;color:var(--hc-accent)}
 .hc button:disabled{opacity:.5;cursor:not-allowed}
 .hc .error{color:#991b1b;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:8px 12px}
 .hc .ok{color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;padding:8px 12px}

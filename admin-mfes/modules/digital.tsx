@@ -1,5 +1,5 @@
 // Digital asset administration for the store's own products: create, upload directly to storage, finalize, previews.
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {createReactMicroApp, type ReactMicroAppProps} from '@hive-platform/react';
 import {api, Outcome, Shell, t, useAction} from '../lib/kit';
 
@@ -15,6 +15,8 @@ function DigitalAdmin({context}: ReactMicroAppProps) {
   const [preview, setPreview] = useState('');
   const [entitlement, setEntitlement] = useState({id: '', reason: ''});
   const action = useAction();
+  // Another module's selection fills the product here; the modules know each other only through this event.
+  useEffect(() => context.events.subscribe<{productId: string}>('commerce:product-selected', event => setForm(f => ({...f, productId: event.payload.productId}))), [context.events]);
   const upload = (file: File) => action.run(async () => {
     const form = await api<any>('POST', `/v1/admin/assets/${asset.assetId}/uploads`, {contentType: file.type, size: file.size, sha256: await sha256(file)});
     // Directly to storage with the signed form: large files never pass through the BFF (ADR-0008).
@@ -29,7 +31,7 @@ function DigitalAdmin({context}: ReactMicroAppProps) {
     <Outcome action={action} />
     <section><h3>New asset</h3>
       <div className="grid">
-        <label>Product id<input value={form.productId} onChange={e => setForm({...form, productId: e.target.value})} /></label>
+        <label>Product id<input name="product-id" value={form.productId} onChange={e => setForm({...form, productId: e.target.value})} /></label>
         <label>Kind<select value={form.kind} onChange={e => setForm({...form, kind: e.target.value})}><option>FILE</option><option>TEXT</option></select></label>
         <label>Title<input value={form.title} onChange={e => setForm({...form, title: e.target.value})} /></label>
         <label>Download limit<input type="number" min={1} value={form.downloadLimit} onChange={e => setForm({...form, downloadLimit: e.target.value})} /></label>

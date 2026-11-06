@@ -1,17 +1,110 @@
 {
   "description": "Default operator roles of a commerce store. Grants are Hive resource actions (Layer 1, ADR-0016); seller access needs no role here because sellers are authorized by Commerce memberships (ADR-0004).",
   "roles": [
-    {"key": "commerce-catalog-manager", "displayName": "Catalog manager", "description": "Manages attributes, product types, categories and products",
-     "grants": {"commerce.api.catalog": ["read", "create", "update", "publish", "archive", "configure"], "commerce.admin.catalog": ["view"]}},
-    {"key": "commerce-order-manager", "displayName": "Order manager", "description": "Views, fulfills, cancels and refunds orders",
-     "grants": {"commerce.api.orders": ["view", "fulfill", "cancel", "refund"], "commerce.admin.orders": ["view"]}},
-    {"key": "commerce-seller-manager", "displayName": "Seller manager", "description": "Approves sellers and moderates listings",
-     "grants": {"commerce.api.sellers": ["view", "approve", "suspend"], "commerce.api.moderation": ["review", "decide"], "commerce.admin.sellers": ["view"]}},
-    {"key": "commerce-finance-manager", "displayName": "Finance manager", "description": "Manages commissions, settlements and payouts",
-     "grants": {"commerce.api.finance": ["view", "settle", "approve_payout"], "commerce.admin.finance": ["view"]}},
-    {"key": "commerce-digital-manager", "displayName": "Digital asset manager", "description": "Manages store assets and revokes entitlements",
-     "grants": {"commerce.api.digital": ["view", "revoke"], "commerce.admin.digital": ["view"]}},
-    {"key": "commerce-store-admin", "displayName": "Store administrator", "description": "Configures the store",
-     "grants": {"commerce.api.stores": ["view", "configure"], "commerce.admin.settings": ["view"]}}
+    {
+      "key": "commerce-catalog-manager",
+      "displayName": "Catalog manager",
+      "description": "Manages attributes, product types, categories and products",
+      "grants": {
+        "commerce.api.catalog": [
+          "read",
+          "create",
+          "update",
+          "publish",
+          "archive",
+          "configure"
+        ],
+        "commerce.admin.catalog": [
+          "view"
+        ]
+      }
+    },
+    {
+      "key": "commerce-order-manager",
+      "displayName": "Order manager",
+      "description": "Views, fulfills, cancels and refunds orders",
+      "grants": {
+        "commerce.api.orders": [
+          "view",
+          "fulfill",
+          "cancel",
+          "refund"
+        ],
+        "commerce.admin.orders": [
+          "view"
+        ],
+        "commerce.admin.payments": [
+          "view"
+        ],
+        "commerce.admin.customers": [
+          "view"
+        ],
+        "commerce.api.customers": [
+          "view"
+        ]
+      }
+    },
+    {
+      "key": "commerce-seller-manager",
+      "displayName": "Seller manager",
+      "description": "Approves sellers and moderates listings",
+      "grants": {
+        "commerce.api.sellers": [
+          "view",
+          "approve",
+          "suspend"
+        ],
+        "commerce.api.moderation": [
+          "review",
+          "decide"
+        ],
+        "commerce.admin.sellers": [
+          "view"
+        ]
+      }
+    },
+    {
+      "key": "commerce-finance-manager",
+      "displayName": "Finance manager",
+      "description": "Manages commissions, settlements and payouts",
+      "grants": {
+        "commerce.api.finance": [
+          "view",
+          "settle",
+          "approve_payout"
+        ],
+        "commerce.admin.finance": [
+          "view"
+        ]
+      }
+    },
+    {
+      "key": "commerce-digital-manager",
+      "displayName": "Digital asset manager",
+      "description": "Manages store assets and revokes entitlements",
+      "grants": {
+        "commerce.api.digital": [
+          "view",
+          "revoke"
+        ],
+        "commerce.admin.digital": [
+          "view"
+        ]
+      }
+    },
+    {
+      "key": "commerce-store-admin",
+      "displayName": "Store administrator",
+      "description": "Configures the store",
+      "grants": {
+        "commerce.api.stores": [
+          "view",
+          "configure"
+        ],
+        "commerce.admin.settings": [
+          "view"
+        ]
+      }
+    }
   ]
 }

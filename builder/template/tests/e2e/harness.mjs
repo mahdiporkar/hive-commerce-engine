@@ -6,6 +6,7 @@ import {closeSync, existsSync, mkdirSync, openSync, readFileSync, writeFileSync}
 import {createServer} from 'node:http';
 import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
+import {assembleAdminBundles} from '../../tools/assemble-admin-bundles.mjs';
 import {registerStore} from '../../tools/register.mjs';
 import {seedStore} from '../../tools/seed.mjs';
 
@@ -63,7 +64,7 @@ export function buildStorefront() {
 export async function startStore(t) {
   buildStorefront();
   const environment = await kit.startEnvironment(t);
-  const modulesHost = await serveDirectory(join(engineDir, 'admin-mfes/modules'), kit.PORTS.modules);
+  const modulesHost = await serveDirectory(assembleAdminBundles(), kit.PORTS.modules);
   const psp = await startFakePspPage();
   t.after(() => { modulesHost.close(); psp.close(); });
   await registerStore({authorization: `http://127.0.0.1:${kit.PORTS.authorization}`, password: environment.provisioningPassword, engineUrl: kit.ENGINE, modulesUrl: kit.MODULES_URL});

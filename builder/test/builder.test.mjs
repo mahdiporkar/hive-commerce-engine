@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import {existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync} from 'node:fs';
+import {existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
 import test from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {engineEnvironment, newStore, seedCatalog, TEMPLATE_DIR, validateCatalog, validateStore} from '../index.mjs';
+import {execFileSync} from 'node:child_process';
+import {contrast, engineEnvironment, newStore, schemaDiff, seedCatalog, TEMPLATE_DIR, validateCatalog, validateStore} from '../index.mjs';
 
 const store = {key: 'demo-store', displayName: {en: 'Demo', fa: 'نمونه'}, locales: ['fa', 'en'], defaultLocale: 'fa', currency: 'IRR', mode: 'SINGLE_VENDOR',
   capabilities: {physicalProducts: true, digitalProducts: false, sellerOnboarding: false, commissions: false},
@@ -77,6 +78,46 @@ test('new-store generates a repository holding no engine source and refuses to o
     assert.equal(walk(out).filter(f => f.endsWith('.java')).length, 0, 'no Java source is copied');
     for (const file of walk(out)) assert.ok(!/\{\{(storeKey|engineVersion|displayName|domain)\}\}/.test(readFileSync(file, 'utf8')), `unrendered placeholder in ${file}`);
     assert.throws(() => newStore(store, out, {engineVersion: '9.9.9'}), /never overwrites/);
+  } finally { rmSync(out, {recursive: true, force: true}); }
+});
+
+test('a theme people cannot read is refused', () => {
+  assert.equal(Math.round(contrast('#000000', '#ffffff')), 21);
+  assert.ok(validateStore({...store, theme: {...store.theme, text: '#eeeeee'}}).some(p => p.includes('text on surface')));
+  assert.ok(validateStore({...store, theme: {...store.theme, accentText: '#223344'}}).some(p => p.includes('accentText on accent')));
+});
+
+test('a schema change names what it means for existing products', () => {
+  const before = [{key: 'a', required: false}, {key: 'b', required: true}];
+  assert.equal(schemaDiff(before, [...before, {key: 'c', required: false}]).needsMigration, false);
+  const required = schemaDiff(before, [{key: 'a', required: true}, {key: 'b', required: true}, {key: 'c', required: true}]);
+  assert.deepEqual(required.requiresValues, ['c', 'a']);
+  assert.equal(required.needsMigration, true);
+  assert.deepEqual(schemaDiff(before, [before[1]]).removed, ['a']);
+});
+
+test('capabilities and themes are edited through validation; a bad edit leaves the file alone', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'set-'));
+  const file = join(dir, 'store.json');
+  const cli = join(dirname(fileURLToPath(import.meta.url)), '..', 'cli.mjs');
+  try {
+    writeFileSync(file, JSON.stringify(store));
+    execFileSync(process.execPath, [cli, 'set', '--store', file, 'capabilities.reviews=true', 'theme.accent=#000000'], {stdio: 'pipe'});
+    assert.equal(JSON.parse(readFileSync(file, 'utf8')).capabilities.reviews, true);
+    assert.throws(() => execFileSync(process.execPath, [cli, 'set', '--store', file, 'mode=MULTI_VENDOR'], {stdio: 'pipe'}));
+    assert.equal(JSON.parse(readFileSync(file, 'utf8')).mode, 'SINGLE_VENDOR');
+    assert.throws(() => execFileSync(process.execPath, [cli, 'set', '--store', file, 'key=other'], {stdio: 'pipe'}));
+  } finally { rmSync(dir, {recursive: true, force: true}); }
+});
+
+test('a third store comes from configuration alone: the handicraft fixture passes the same review', () => {
+  const fixture = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'fixtures/handicraft/catalog.json'), 'utf8'));
+  const handicraft = {...store, key: 'handicraft', locales: ['fa', 'en']};
+  assert.deepEqual(validateCatalog(handicraft, fixture), []);
+  const out = mkdtempSync(join(tmpdir(), 'store-'));
+  try {
+    newStore(handicraft, out, {engineVersion: '9.9.9', taxonomy: {attributes: fixture.attributes, productTypes: fixture.productTypes, categories: fixture.categories}, products: {products: fixture.products}});
+    assert.equal(JSON.parse(readFileSync(join(out, 'storefront/config/store.json'), 'utf8')).key, 'handicraft');
   } finally { rmSync(out, {recursive: true, force: true}); }
 });
 

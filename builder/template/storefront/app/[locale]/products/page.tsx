@@ -8,9 +8,11 @@ import {ProductGrid} from '@/components/ProductGrid';
 type Props = {params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>};
 const one = (v: string | string[] | undefined) => Array.isArray(v) ? v[0] : v;
 
-export async function generateMetadata({params}: Props): Promise<Metadata> {
+export async function generateMetadata({params, searchParams}: Props): Promise<Metadata> {
   const {locale} = await params;
-  return {title: messagesFor(locale).products, alternates: {canonical: `${origin()}/${locale}/products`, languages: Object.fromEntries(store.locales.map(l => [l, `${origin()}/${l}/products`]))}};
+  const selected = one((await searchParams).category);
+  const category = selected ? (await catalog().categories()).find(c => c.id === selected) : undefined;
+  return {title: localized(category?.seo?.title, locale) || localized(category?.name, locale) || messagesFor(locale).products, description: localized(category?.seo?.description, locale) || undefined, alternates: {canonical: `${origin()}/${locale}/products`, languages: Object.fromEntries(store.locales.map(l => [l, `${origin()}/${l}/products`]))}};
 }
 
 export default async function Products({params, searchParams}: Props) {

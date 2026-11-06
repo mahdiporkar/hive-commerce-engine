@@ -601,6 +601,96 @@
       "access": "AUTHENTICATED",
       "resourceKey": "commerce.api.catalog",
       "action": "update"
+    },
+    {
+      "key": "admin-product-type-draft",
+      "method": "POST",
+      "pathPattern": "/v1/admin/product-types/{productTypeKey}/versions",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "configure"
+    },
+    {
+      "key": "admin-product-migrate",
+      "method": "POST",
+      "pathPattern": "/v1/admin/products/{productId}/schema-migration",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
+    },
+    {
+      "key": "admin-product-media",
+      "method": "PUT",
+      "pathPattern": "/v1/admin/products/{productId}/media",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
+    },
+    {
+      "key": "admin-category-seo",
+      "method": "PUT",
+      "pathPattern": "/v1/admin/categories/{categoryId}/seo",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.catalog",
+      "action": "update"
+    },
+    {
+      "key": "seller-assets",
+      "method": "GET",
+      "pathPattern": "/v1/seller/sellers/{sellerId}/assets",
+      "access": "HYBRID"
+    },
+    {
+      "key": "admin-payments",
+      "method": "GET",
+      "pathPattern": "/v1/admin/payments",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.orders",
+      "action": "view"
+    },
+    {
+      "key": "admin-customers",
+      "method": "GET",
+      "pathPattern": "/v1/admin/customers",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.customers",
+      "action": "view"
+    },
+    {
+      "key": "store-product-reviews",
+      "method": "GET",
+      "pathPattern": "/v1/store/products/{productId}/reviews",
+      "access": "PUBLIC"
+    },
+    {
+      "key": "shop-review-write",
+      "method": "POST",
+      "pathPattern": "/v1/shop/products/{productId}/reviews",
+      "access": "HYBRID"
+    },
+    {
+      "key": "admin-reviews",
+      "method": "GET",
+      "pathPattern": "/v1/admin/reviews",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.moderation",
+      "action": "review"
+    },
+    {
+      "key": "admin-review-hide",
+      "method": "POST",
+      "pathPattern": "/v1/admin/reviews/{reviewId}/hide",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.moderation",
+      "action": "decide"
+    },
+    {
+      "key": "admin-store-capabilities",
+      "method": "GET",
+      "pathPattern": "/v1/admin/store/capabilities",
+      "access": "AUTHENTICATED",
+      "resourceKey": "commerce.api.stores",
+      "action": "view"
     }
   ]
 }

@@ -10,7 +10,7 @@ const en = {
   yes: 'Yes', no: 'No', preview: 'Preview', included: 'What you get', loading: 'Loading…', tryAgain: 'Something went wrong. Please try again.', notFound: 'This page does not exist.',
   sellTitle: 'Your seller workspace', applyTitle: 'Become a seller', applyHint: 'Applications are reviewed by the store before you can list products.', sellerName: 'Shop name', applyAction: 'Apply',
   submitProduct: 'Submit a product', productType: 'Product type', productTitle: 'Title', slug: 'Web address', sku: 'SKU', category: 'Category', submit: 'Submit for review',
-  yourListings: 'Your listings', createOffer: 'Put on sale', price: 'Price', stock: 'Stock', contentText: 'Protected content', previewText: 'Public preview', saveContent: 'Save content', saved: 'Saved', waitingApproval: 'Waiting for approval', yourFinance: 'Your balance', pendingBalance: 'On hold', availableBalance: 'Available',
+  yourListings: 'Your listings', createOffer: 'Put on sale', price: 'Price', stock: 'Stock', contentText: 'Protected content', previewText: 'Public preview', saveContent: 'Save content', saved: 'Saved', waitingApproval: 'Waiting for approval', reviews: 'Reviews', noReviews: 'No reviews yet.', writeReview: 'Write a review', rating: 'Rating', reviewText: 'Your review', sendReview: 'Send review', reviewThanks: 'Thank you for your review.', reviewNeedsPurchase: 'Only customers who bought this product can review it.', reviewExists: 'You have already reviewed this product.', versions: 'Versions', newVersion: 'Save as a new version', uploadFile: 'Upload a file', licenseTerms: 'License terms', yourFinance: 'Your balance', pendingBalance: 'On hold', availableBalance: 'Available',
 };
 type Messages = typeof en;
 
@@ -25,7 +25,7 @@ const fa: Messages = {
   yes: 'بله', no: 'خیر', preview: 'پیش‌نمایش', included: 'آنچه دریافت می‌کنید', loading: 'در حال بارگذاری…', tryAgain: 'مشکلی پیش آمد. دوباره تلاش کنید.', notFound: 'این صفحه وجود ندارد.',
   sellTitle: 'میز کار فروشنده', applyTitle: 'فروشنده شوید', applyHint: 'درخواست‌ها پیش از ثبت محصول توسط فروشگاه بررسی می‌شوند.', sellerName: 'نام فروشگاه', applyAction: 'ارسال درخواست',
   submitProduct: 'ثبت محصول', productType: 'نوع محصول', productTitle: 'عنوان', slug: 'نشانی وب', sku: 'شناسهٔ کالا', category: 'دسته‌بندی', submit: 'ارسال برای بررسی',
-  yourListings: 'محصولات شما', createOffer: 'عرضه برای فروش', price: 'قیمت', stock: 'موجودی', contentText: 'محتوای محافظت‌شده', previewText: 'پیش‌نمایش عمومی', saveContent: 'ذخیرهٔ محتوا', saved: 'ذخیره شد', waitingApproval: 'در انتظار تأیید', yourFinance: 'موجودی شما', pendingBalance: 'در انتظار', availableBalance: 'قابل برداشت',
+  yourListings: 'محصولات شما', createOffer: 'عرضه برای فروش', price: 'قیمت', stock: 'موجودی', contentText: 'محتوای محافظت‌شده', previewText: 'پیش‌نمایش عمومی', saveContent: 'ذخیرهٔ محتوا', saved: 'ذخیره شد', waitingApproval: 'در انتظار تأیید', reviews: 'نظرها', noReviews: 'هنوز نظری ثبت نشده است.', writeReview: 'نوشتن نظر', rating: 'امتیاز', reviewText: 'نظر شما', sendReview: 'ارسال نظر', reviewThanks: 'از نظر شما سپاسگزاریم.', reviewNeedsPurchase: 'فقط خریداران این محصول می‌توانند نظر بدهند.', reviewExists: 'شما قبلاً برای این محصول نظر داده‌اید.', versions: 'نسخه‌ها', newVersion: 'ذخیره به‌عنوان نسخهٔ جدید', uploadFile: 'بارگذاری فایل', licenseTerms: 'شرایط مجوز', yourFinance: 'موجودی شما', pendingBalance: 'در انتظار', availableBalance: 'قابل برداشت',
 };
 
 const ar: Messages = {
@@ -39,7 +39,7 @@ const ar: Messages = {
   yes: 'نعم', no: 'لا', preview: 'معاينة', included: 'ما ستحصل عليه', loading: 'جارٍ التحميل…', tryAgain: 'حدث خطأ. حاول مرة أخرى.', notFound: 'هذه الصفحة غير موجودة.',
   sellTitle: 'مساحة البائع', applyTitle: 'كن بائعًا', applyHint: 'تتم مراجعة الطلبات قبل إدراج المنتجات.', sellerName: 'اسم المتجر', applyAction: 'تقديم الطلب',
   submitProduct: 'إرسال منتج', productType: 'نوع المنتج', productTitle: 'العنوان', slug: 'عنوان الويب', sku: 'رمز المنتج', category: 'الفئة', submit: 'إرسال للمراجعة',
-  yourListings: 'منتجاتك', createOffer: 'عرض للبيع', price: 'السعر', stock: 'المخزون', contentText: 'المحتوى المحمي', previewText: 'معاينة عامة', saveContent: 'حفظ المحتوى', saved: 'تم الحفظ', waitingApproval: 'بانتظار الموافقة', yourFinance: 'رصيدك', pendingBalance: 'قيد الانتظار', availableBalance: 'متاح',
+  yourListings: 'منتجاتك', createOffer: 'عرض للبيع', price: 'السعر', stock: 'المخزون', contentText: 'المحتوى المحمي', previewText: 'معاينة عامة', saveContent: 'حفظ المحتوى', saved: 'تم الحفظ', waitingApproval: 'بانتظار الموافقة', reviews: 'التقييمات', noReviews: 'لا توجد تقييمات بعد.', writeReview: 'اكتب تقييمًا', rating: 'التقييم', reviewText: 'تقييمك', sendReview: 'إرسال التقييم', reviewThanks: 'شكرًا على تقييمك.', reviewNeedsPurchase: 'يمكن فقط لمن اشترى هذا المنتج تقييمه.', reviewExists: 'لقد قيّمت هذا المنتج من قبل.', versions: 'الإصدارات', newVersion: 'حفظ كإصدار جديد', uploadFile: 'رفع ملف', licenseTerms: 'شروط الترخيص', yourFinance: 'رصيدك', pendingBalance: 'قيد الانتظار', availableBalance: 'متاح',
 };
 
 const all: Record<string, Messages> = {en, fa, ar};

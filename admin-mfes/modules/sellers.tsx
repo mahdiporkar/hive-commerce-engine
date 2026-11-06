@@ -10,7 +10,8 @@ function SellersAdmin({context}: ReactMicroAppProps) {
   const [status, setStatus] = useState('APPLIED');
   const sellers = useLoad(() => api<any[]>('GET', `/v1/admin/sellers?status=${status}`), [status]);
   const listings = useLoad(() => api<any[]>('GET', '/v1/admin/listings'));
-  const action = useAction(() => Promise.all([sellers.reload(), listings.reload()]));
+  const reviews = useLoad(() => api<any[]>('GET', '/v1/admin/reviews'));
+  const action = useAction(() => Promise.all([sellers.reload(), listings.reload(), reviews.reload()]));
   const [reason, setReason] = useState('');
   return <Shell context={context} title="Sellers">
     <Outcome action={action} />
@@ -28,6 +29,11 @@ function SellersAdmin({context}: ReactMicroAppProps) {
           <button disabled={action.busy} onClick={() => action.run(() => api('POST', `/v1/admin/listings/${l.listingId}/approve`), 'Approved and published')}>Approve</button>
           <button className="secondary" disabled={action.busy || !reason} onClick={() => action.run(() => api('POST', `/v1/admin/listings/${l.listingId}/reject`, {reason}), 'Rejected')}>Reject</button>
         </span>])} />
+    </section>
+    <section><h3>Reviews</h3>
+      <Problem error={reviews.error} />
+      <Table columns={['Rating', 'Review', t(context, 'status'), t(context, 'actions')]} empty={t(context, 'empty')} rows={(reviews.data ?? []).map(r => [r.rating, r.body, r.status,
+        r.status === 'VISIBLE' ? <button className="secondary" disabled={action.busy} onClick={() => action.run(() => api('POST', `/v1/admin/reviews/${r.reviewId}/hide`), 'Hidden')}>Hide</button> : null])} />
     </section>
   </Shell>;
 }

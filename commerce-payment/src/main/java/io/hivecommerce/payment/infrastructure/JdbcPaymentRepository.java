@@ -74,6 +74,13 @@ class JdbcPaymentRepository implements PaymentRepository {
   }
 
   @Override
+  public List<Payment> findRecent(TenantScope scope, int limit) {
+    return jdbc.sql("select id from payment.payment where tenant_id = :tenant and store_id = :store order by created_at desc limit :limit")
+        .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("limit", limit).query(java.util.UUID.class).list().stream()
+        .map(id -> findById(scope, id).orElseThrow()).toList();
+  }
+
+  @Override
   public boolean recordWebhook(TenantScope scope, String provider, String eventId, String ref, String body) {
     return jdbc.sql("""
         insert into payment.webhook_inbox(id, tenant_id, store_id, provider, provider_event_id, provider_ref, body)

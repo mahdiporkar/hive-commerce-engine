@@ -16,6 +16,9 @@ public final class ApiClient {
   public record Caller(String token, UUID hiveUserId, String tenant) {
     public static Caller anonymous() { return new Caller(null, null, null); }
 
+    /** A new signed-in shopper. */
+    public static Caller customer() { return operator(); }
+
     public static Caller operator() {
       return new Caller(EngineTestSupport.IDP.token("kc-" + UUID.randomUUID()), UUID.randomUUID(), "default");
     }

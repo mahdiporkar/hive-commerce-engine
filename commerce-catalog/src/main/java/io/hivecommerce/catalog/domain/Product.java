@@ -1,6 +1,7 @@
 package io.hivecommerce.catalog.domain;
 
 import io.hivecommerce.catalog.domain.event.ProductCreated;
+import io.hivecommerce.catalog.domain.event.ProductSchemaMigrated;
 import io.hivecommerce.shared.DomainEvent;
 import io.hivecommerce.shared.DomainRuleException;
 import io.hivecommerce.shared.LocalizedText;
@@ -124,6 +125,28 @@ public final class Product {
   public static Product restore(UUID id, TenantScope scope, UUID productTypeId, UUID categoryId, int schemaVersion, LocalizedText title, Slug slug, Map<String, Object> attributes,
       List<Variant> variants, Status status, UUID createdBy, long revision) {
     return new Product(id, scope, productTypeId, categoryId, schemaVersion, title, slug, attributes, variants, status, createdBy, revision);
+  }
+
+  /**
+   * The same product validated against the type's latest published schema (master prompt §9: never silently). Product
+   * values may be supplied for attributes the new version requires; variants keep their ids and must still be valid.
+   */
+  public Product migratedTo(ProductType type, Map<String, Object> changes, Instant now) {
+    SchemaVersion schema = type.latestPublished().orElseThrow(() -> new DomainRuleException("SCHEMA_NOT_PUBLISHED", "Product type " + type.key() + " has no published schema version"));
+    if (schema.number() == schemaVersion) throw new DomainRuleException("SCHEMA_CURRENT", "This product already uses version " + schemaVersion);
+    var v = new Violations();
+    var merged = new java.util.HashMap<>(attributes);
+    if (changes != null) merged.putAll(changes);
+    var normalized = schema.normalizeProductAttributes(merged, v);
+    var migrated = new ArrayList<Variant>();
+    for (int i = 0; i < variants.size(); i++) {
+      var variant = variants.get(i);
+      migrated.add(new Variant(variant.id(), variant.sku(), schema.normalizeVariantAttributes(variant.attributes(), "variants[" + i + "].attributes", v)));
+    }
+    v.throwIfAny();
+    var product = new Product(id, scope, productTypeId, categoryId, schema.number(), title, slug, normalized, migrated, status, createdBy, revision);
+    product.events.add(new ProductSchemaMigrated(id, type.key(), schemaVersion, schema.number(), now));
+    return product;
   }
 
   public List<DomainEvent> pullEvents() {

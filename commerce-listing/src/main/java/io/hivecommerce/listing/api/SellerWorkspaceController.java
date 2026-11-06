@@ -36,7 +36,7 @@ class SellerWorkspaceController {
 
   @GetMapping("/listings")
   @HiveOperation("seller-listings")
-  List<ListingView> listings(UserContext user, @PathVariable UUID sellerId) { return submissions.listings(user, sellerId); }
+  List<SellerSubmissionService.SellerListingView> listings(UserContext user, @PathVariable UUID sellerId) { return submissions.listings(user, sellerId); }
 
   @PostMapping("/offers")
   @ResponseStatus(HttpStatus.CREATED)

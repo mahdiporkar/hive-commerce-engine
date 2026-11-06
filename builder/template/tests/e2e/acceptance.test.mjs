@@ -32,5 +32,10 @@ test(`${store.key}: storefront through Hive`, {timeout: 1800000}, async t => {
     assert.ok([401, 403].includes((await fetch(`${kit.ENGINE}/v1/store/categories`)).status));
   });
 
+  await t.test('this store has its own database and bucket: nothing of another store is here', async () => {
+    assert.equal(stack.engineSql('select string_agg(key, \',\') from store.store'), store.key);
+    if (store.capabilities.digitalProducts) assert.match(stack.engineLog(), new RegExp(`Serving store key=${store.key}`));
+  });
+
   await journeys(t, {stack, browser});
 });

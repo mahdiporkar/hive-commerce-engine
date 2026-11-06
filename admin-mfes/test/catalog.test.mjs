@@ -7,7 +7,7 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 import {JSDOM} from 'jsdom';
 
 const DIST = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'modules');
-const AREAS = ['catalog', 'orders', 'sellers', 'finance', 'digital', 'settings'];
+const AREAS = ['catalog', 'orders', 'payments', 'customers', 'sellers', 'finance', 'digital', 'settings'];
 
 const dom = new JSDOM('<!doctype html><div id="host"></div>', {url: 'http://127.0.0.1/admin'});
 for (const k of ['window', 'document', 'HTMLElement', 'Node', 'Event', 'MutationObserver']) globalThis[k] = k === 'window' ? dom.window : dom.window[k];
@@ -83,6 +83,25 @@ test('catalog: the product form is generated from the schema and posts typed val
   assert.deepEqual(post.body.attributes, {carat: 1.25});
   assert.deepEqual(post.body.variants, [{sku: 'RUBY-1', attributes: {cut: 'oval'}}]);
   await instance.unmount();
+});
+
+test('selecting a product tells other modules through Hive events; the digital module listens and never imports catalog', async () => {
+  const listeners = new Map();
+  const events = {publish: (name, payload) => (listeners.get(name) ?? []).forEach(l => l({name, payload})), subscribe: (name, l) => { listeners.set(name, [...(listeners.get(name) ?? []), l]); return () => {}; }};
+  globalThis.fetch = async url => new Response(JSON.stringify(url.endsWith('/v1/admin/products') ? [{id: 'p-1', title: {en: 'One'}, slug: 'one', variants: [], status: 'DRAFT', schemaVersion: 1, productType: 'x'}] : []), {status: 200});
+  const load = async area => (await import(pathToFileURL(join(DIST, `commerce-admin-${area}`, 'entry.js')).href)).default;
+  const host = document.getElementById('host');
+  host.innerHTML = '<div id="a"></div><div id="b"></div>';
+  const digital = (await load('digital')).create(), catalog = (await load('catalog')).create();
+  await digital.mount(host.querySelector('#a'), {...context('digital'), events});
+  await catalog.mount(host.querySelector('#b'), {...context('catalog'), events});
+  await settle();
+  [...host.querySelectorAll('button')].find(b => b.textContent === 'Select').click();
+  await settle();
+  assert.equal(host.querySelector('#a input[name=product-id]').value, 'p-1');
+  await digital.unmount();
+  await catalog.unmount();
+  host.innerHTML = '';
 });
 
 test('a denied call is shown to the operator, never swallowed', async () => {

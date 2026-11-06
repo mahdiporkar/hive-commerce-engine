@@ -13,8 +13,10 @@ import io.hivecommerce.catalog.domain.AttributeDefinition;
 import io.hivecommerce.catalog.domain.AttributeSpec;
 import io.hivecommerce.catalog.domain.CatalogRepositories;
 import io.hivecommerce.catalog.domain.Category;
+import io.hivecommerce.catalog.domain.CategorySeo;
 import io.hivecommerce.catalog.domain.Product;
 import io.hivecommerce.catalog.domain.ProductKind;
+import io.hivecommerce.catalog.domain.ProductMedia;
 import io.hivecommerce.catalog.domain.ProductType;
 import io.hivecommerce.platform.identity.UserContext;
 import io.hivecommerce.platform.tenancy.DeploymentScope;
@@ -48,15 +50,17 @@ public class CatalogAdminService implements io.hivecommerce.catalog.application.
   private final CatalogRepositories.Categories categories;
   private final CatalogRepositories.Products products;
   private final CatalogRepositories.Outbox outbox;
+  private final CatalogRepositories.Presentation presentation;
   private final Clock clock;
   private final int maxCategoryDepth;
   private final io.hivecommerce.platform.extensions.ExtensionRegistry extensions;
 
   public CatalogAdminService(DeploymentScope deployment, TenantTransactions transactions, CatalogRepositories.AttributeDefinitions attributes,
       CatalogRepositories.ProductTypes productTypes, CatalogRepositories.Categories categories, CatalogRepositories.Products products,
-      CatalogRepositories.Outbox outbox, Clock clock, @Value("${commerce.catalog.max-category-depth:5}") int maxCategoryDepth,
+      CatalogRepositories.Presentation presentation, CatalogRepositories.Outbox outbox, Clock clock, @Value("${commerce.catalog.max-category-depth:5}") int maxCategoryDepth,
       io.hivecommerce.platform.extensions.ExtensionRegistry extensions) {
     this.extensions = extensions;
+    this.presentation = presentation;
     this.deployment = deployment;
     this.transactions = transactions;
     this.attributes = attributes;
@@ -87,6 +91,52 @@ public class CatalogAdminService implements io.hivecommerce.catalog.application.
       productTypes.insert(type);
       outbox.append(scope, type.pullEvents());
       return ProductTypeView.of(type);
+    });
+  }
+
+  /** A change to a product type is a new version: a draft until it is published; existing products keep theirs. */
+  public ProductTypeView draftSchemaVersion(UserContext user, String productTypeKey, List<CatalogCommands.SpecReference> specs) {
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> {
+      var type = productTypes.findByKey(scope, productTypeKey).orElseThrow(() -> HiveException.notFound("Product type not found"));
+      type.draftNextVersion(resolveSpecs(scope, specs));
+      productTypes.update(type);
+      return ProductTypeView.of(type);
+    });
+  }
+
+  /** Moves one product to the latest published schema, explicitly and with validation; nothing migrates by itself. */
+  public ProductView migrateProduct(UserContext user, UUID productId, java.util.Map<String, Object> changes, long revision) {
+    TenantScope scope = operatorScope(user);
+    return transactions.inScope(scope, () -> {
+      var product = products.findById(scope, productId).orElseThrow(() -> HiveException.notFound("Product not found"));
+      if (product.revision() != revision) throw new org.springframework.dao.OptimisticLockingFailureException("product " + productId + " changed concurrently");
+      var type = productTypes.findById(scope, product.productTypeId()).orElseThrow();
+      var migrated = product.migratedTo(type, changes, clock.instant());
+      extensions.validateProduct(facts(type, migrated));
+      products.updateSchema(migrated);
+      outbox.append(scope, migrated.pullEvents());
+      return products.findById(scope, productId).map(ProductView::of).orElseThrow();
+    });
+  }
+
+  public List<ProductMedia> setProductMedia(UserContext user, UUID productId, List<ProductMedia> media) {
+    TenantScope scope = operatorScope(user);
+    var validated = ProductMedia.validated(media);
+    return transactions.inScope(scope, () -> {
+      products.findById(scope, productId).orElseThrow(() -> HiveException.notFound("Product not found"));
+      presentation.saveProductMedia(scope, productId, validated);
+      return validated;
+    });
+  }
+
+  public CategorySeo setCategorySeo(UserContext user, UUID categoryId, CategorySeo seo) {
+    TenantScope scope = operatorScope(user);
+    var validated = CategorySeo.validated(seo);
+    return transactions.inScope(scope, () -> {
+      categories.findById(scope, categoryId).orElseThrow(() -> HiveException.notFound("Category not found"));
+      presentation.saveCategorySeo(scope, categoryId, validated);
+      return validated;
     });
   }
 

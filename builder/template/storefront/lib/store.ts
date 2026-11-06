@@ -3,7 +3,7 @@ import taxonomyJson from '@/config/taxonomy.json';
 import {localized, type Localized} from '@hive-commerce/storefront-sdk';
 
 export const store = storeJson as {key: string; displayName: Localized; tagline?: Localized; locales: string[]; defaultLocale: string; currency: string; mode: string;
-  capabilities: {physicalProducts: boolean; digitalProducts: boolean; sellerOnboarding: boolean; commissions: boolean}; theme: Record<string, string | number>; domain: string};
+  capabilities: {physicalProducts: boolean; digitalProducts: boolean; sellerOnboarding: boolean; commissions: boolean; reviews?: boolean}; theme: Record<string, string | number>; domain: string};
 
 export interface AttributeSpec {key: string; required?: boolean; variantDefining?: boolean}
 export interface Attribute {key: string; type: string; labels: Localized; options?: {code: string; labels: Localized}[]; flags?: {filterable?: boolean}; constraints?: {units?: string[]; min?: number; max?: number; maxLength?: number}}

@@ -16,6 +16,8 @@ public final class DigitalRepositories {
     Optional<DigitalAsset> findById(TenantScope scope, String id);
 
     List<DigitalAsset> findByProduct(TenantScope scope, UUID productId);
+
+    List<DigitalAsset> findBySeller(TenantScope scope, UUID sellerId);
   }
 
   public interface Uploads {

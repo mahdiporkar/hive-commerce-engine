@@ -21,6 +21,8 @@ public interface PaymentRepository {
 
   List<Payment> findInitiatedBefore(TenantScope scope, Instant before);
 
+  List<Payment> findRecent(TenantScope scope, int limit);
+
   /** Records a provider callback once; returns false when (provider, eventId) was already received (replay). */
   boolean recordWebhook(TenantScope scope, String provider, String eventId, String providerRef, String body);
 }

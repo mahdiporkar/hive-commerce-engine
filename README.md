@@ -6,7 +6,7 @@ Reusable eCommerce and multi-vendor marketplace engine built on the [Hive Platfo
 
 Hive is the platform; this engine is a reusable solution layer; client repositories (for example `gemstone-commerce`, `aidastoor-commerce`) configure, extend, brand and deploy it. Clients consume published engine versions and never fork this code.
 
-**Status: Phases 0–4 complete** (foundation, eShop flow, digital commerce, marketplace; Scenarios A–E). See [phase status](docs/phase-status.md) and [testing](docs/testing/README.md).
+**Status: Phases 0–7 complete, with publishing awaiting approval.** Scenarios A–F pass locally. See [phase status](docs/phase-status.md).
 
 ## Build
 
@@ -18,7 +18,8 @@ node --test tests/e2e/commerce-through-bff.test.mjs  # through a real Hive BFF a
 
 ## Documentation
 
-- [Architecture overview](docs/architecture/overview.md)
+- [Create a store](docs/deployment/new-store.md), [release policy](docs/deployment/release-policy.md), [upgrade and rollback](docs/deployment/upgrade-guide.md), [release notes](docs/deployment/release-notes.md)
+- [Architecture overview](docs/architecture/overview.md) and [key flows](docs/architecture/flows.md)
 - [Hive integration: verified capability matrix and gaps](docs/architecture/hive-integration.md)
 - [Security and two-layer authorization](docs/architecture/security.md)
 - [Route operations and resource vocabulary](docs/architecture/route-operations.md)

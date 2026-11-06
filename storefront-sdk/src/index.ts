@@ -7,8 +7,13 @@ export type Localized = Record<string, string>;
 export interface Card {listingId: string; productId: string; slug: string; title: Localized; categoryId: string | null; kind: string; attributes: Record<string, unknown>}
 export interface Page {items: Card[]; total: number; page: number; size: number; facets: {key: string; value: string; count: number}[]}
 export interface Offer {offerId: string; productId: string; variantId: string; sellerId: string; price: number; currency: string; condition: string; available: number; uniqueItem: boolean; digital: boolean; status: string}
-export interface ProductDetail {product: Card & {variants: Record<string, unknown>[]}; offers: Offer[]; extensions: Record<string, Record<string, unknown>>}
-export interface Category {id: string; slug: string; name: Localized; parentId: string | null; depth: number; position: number; attributes: string[]}
+export interface Media {url: string; kind: string; alt: Localized}
+export interface ProductDetail {product: Card & {variants: Record<string, unknown>[]}; offers: Offer[]; extensions: Record<string, Record<string, unknown>>; media: Media[]}
+export interface ProductReviews {enabled: boolean; count: number; averageRating: number | null; reviews: {rating: number; body: string; createdAt: string}[]}
+export interface SellerListing {listingId: string; productId: string; status: string; rejectionReason: string | null; slug: string | null; title: Localized; variantIds: string[]}
+export interface SellerAsset {assetId: string; productId: string; kind: string; title: string; downloadLimit: number | null; updatesIncluded: boolean; preview: string | null; versions: {version: number; size: number; mimeType: string; scanStatus: string; createdAt: string}[]}
+export interface PublicContext {locale: string; direction: string; branding?: {name?: string}}
+export interface Category {id: string; slug: string; name: Localized; parentId: string | null; depth: number; position: number; attributes: string[]; seo: {title: Localized; description: Localized}}
 export interface Preview {kind: string; title: string; preview: string | null}
 export interface CartLine {itemId: string; offerId: string; productId: string; productSlug: string; title: Localized; sku: string; unitPrice: number; currency: string; quantity: number; uniqueItem: boolean; purchasable: boolean}
 export interface Cart {cartId: string; status: string; lines: CartLine[]; totals: {subtotal: number; tax: number; shipping: number; total: number; currency: string}}
@@ -50,6 +55,9 @@ export function publicCatalog({bffOrigin, fetchImpl = (...a) => fetch(...a), ini
     search: (query?: SearchQuery) => get<Page>(`/v1/store/products${searchParams(query)}`),
     product: (slug: string) => get<ProductDetail>(`/v1/store/products/${encodeURIComponent(slug)}`),
     previews: (productId: string) => get<Preview[]>(`/v1/store/products/${encodeURIComponent(productId)}/previews`),
+    reviews: (productId: string) => get<ProductReviews>(`/v1/store/products/${encodeURIComponent(productId)}/reviews`),
+    /** Hive's public context: its default locale and direction, for the storefront's language decision. */
+    context: () => fetchImpl(`${bffOrigin}/api/public/context`, {...init, credentials: 'omit', headers: {Accept: 'application/json'}}).then(r => read<PublicContext>(r)),
   };
 }
 
@@ -84,14 +92,27 @@ export function createShop({origin = '', fetchImpl = (...a) => fetch(...a), toke
     const base = `/v1/seller/sellers/${encodeURIComponent(sellerId)}`;
     return {
       submit: (draft: {productType: string; categoryId?: string | null; title: Localized; slug: string; attributes: Record<string, unknown>; variants: {sku: string; attributes: Record<string, unknown>}[]}) => send<any>('POST', `${base}/submissions`, draft),
-      listings: () => send<any[]>('GET', `${base}/listings`),
+      listings: () => send<SellerListing[]>('GET', `${base}/listings`),
+      assets: () => send<SellerAsset[]>('GET', `${base}/assets`),
       createOffer: (offer: {variantId: string; amount: number; currency: string; quantity?: number | null; condition?: string; sellerSku?: string; uniqueItem?: boolean}) => send<Offer>('POST', `${base}/offers`, offer),
       offers: () => send<Offer[]>('GET', `${base}/offers`),
       orders: () => send<any[]>('GET', `${base}/orders`),
       fulfillments: () => send<any[]>('GET', `${base}/fulfillments`),
       finance: (currency: string) => send<{pending: number; available: number; currency: string; earnings: any[]; settlements: any[]}>('GET', `${base}/finance?currency=${encodeURIComponent(currency)}`),
       createAsset: (asset: {productId: string; kind: 'FILE' | 'TEXT'; title: string; downloadLimit?: number | null; updatesIncluded?: boolean; licenseUsage?: string}) => send<any>('POST', `${base}/assets`, asset),
-      setText: (assetId: string, content: string) => send<any>('PUT', `/v1/seller/assets/${assetId}/text`, {content}),
+      setText: (assetId: string, content: string) => send<SellerAsset>('PUT', `/v1/seller/assets/${assetId}/text`, {content}),
+      /** Sends a file directly to storage with a signed form, then asks the engine to verify it. It never passes through the BFF. */
+      uploadFile: async (assetId: string, file: File) => {
+        const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+        const sha256 = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+        const form = await send<{url: string; uploadId: string; fields: Record<string, string>}>('POST', `/v1/seller/assets/${assetId}/uploads`, {contentType: file.type, size: file.size, sha256});
+        const body = new FormData();
+        for (const [name, value] of Object.entries(form.fields)) body.append(name, value);
+        body.append('file', file);
+        const stored = await fetchImpl(form.url, {method: 'POST', body});
+        if (!stored.ok) throw new CommerceError(stored.status, 'STORAGE_REFUSED', 'Storage refused the upload');
+        return send<SellerAsset>('POST', `/v1/seller/assets/${assetId}/uploads/${form.uploadId}/finalize`);
+      },
       setPreview: (assetId: string, preview: string) => send<any>('PUT', `/v1/seller/assets/${assetId}/preview`, {preview}),
     };
   };
@@ -124,6 +145,7 @@ export function createShop({origin = '', fetchImpl = (...a) => fetch(...a), toke
     order: (orderId: string) => send<any>('GET', `/v1/shop/orders/${orderId}`),
     library: () => send<any[]>('GET', '/v1/shop/library'),
     download: (entitlementId: string) => send<{url: string | null; expiresAt: string | null; content: string | null; mimeType: string | null; version: number}>('POST', `/v1/shop/library/${entitlementId}/downloads`),
+    writeReview: (productId: string, rating: number, body: string) => send<any>('POST', `/v1/shop/products/${productId}/reviews`, {rating, body}),
     sellerMe: () => send<any>('GET', '/v1/seller/me'),
     applyAsSeller: (displayName: Localized) => send<any>('POST', '/v1/seller/applications', {displayName}),
     seller,
@@ -145,8 +167,9 @@ export function formatMoney(amount: number | null | undefined, currency: string 
 }
 
 /** schema.org Product with one Offer per purchasable offer. Only what the catalog states: no ratings, no invented claims. */
-export function productJsonLd(detail: ProductDetail, {url, locale, description, image}: {url: string; locale: string; description?: string; image?: string}) {
+export function productJsonLd(detail: ProductDetail, {url, locale, description, image: givenImage}: {url: string; locale: string; description?: string; image?: string}) {
   const {product, offers} = detail;
+  const image = givenImage ?? detail.media?.find(m => m.kind === 'IMAGE')?.url;
   return {
     '@context': 'https://schema.org', '@type': 'Product', name: localized(product.title, locale), url, sku: product.productId,
     ...(description ? {description} : {}), ...(image ? {image} : {}),

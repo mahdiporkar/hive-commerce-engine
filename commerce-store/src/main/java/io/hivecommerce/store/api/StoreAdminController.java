@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/admin")
 class StoreAdminController {
   private final StoreAdminService stores;
+  private final org.springframework.core.env.Environment environment;
 
-  StoreAdminController(StoreAdminService stores) {
+  StoreAdminController(StoreAdminService stores, org.springframework.core.env.Environment environment) {
     this.stores = stores;
+    this.environment = environment;
   }
 
   record ModeBody(String mode) {}
@@ -25,6 +27,18 @@ class StoreAdminController {
   @GetMapping("/store")
   @HiveOperation("admin-store")
   StoreDirectory.StoreSettings settings(UserContext user) { return stores.settings(user); }
+
+  /** What this deployment switched on in its configuration. Read-only: capabilities change through deployment, not through the UI. */
+  @GetMapping("/store/capabilities")
+  @HiveOperation("admin-store-capabilities")
+  java.util.Map<String, Boolean> capabilities(UserContext user) {
+    stores.settings(user);
+    var out = new java.util.LinkedHashMap<String, Boolean>();
+    for (String name : java.util.List.of("physical-products", "digital-products", "seller-onboarding", "commissions", "reviews")) {
+      out.put(name, environment.getProperty("commerce.capabilities." + name, Boolean.class, false));
+    }
+    return out;
+  }
 
   @PostMapping("/store/mode")
   @HiveOperation("admin-store-mode")

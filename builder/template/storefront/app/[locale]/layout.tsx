@@ -3,6 +3,7 @@ import type {ReactNode} from 'react';
 import {notFound} from 'next/navigation';
 import {directionOf, localized} from '@hive-commerce/storefront-sdk';
 import {isLocale, store} from '@/lib/store';
+import {catalog} from '@/lib/catalog';
 import {messagesFor} from '@/lib/messages';
 import {AccountLinks} from '@/components/AccountLinks';
 import '../globals.css';
@@ -22,8 +23,11 @@ export default async function LocaleLayout({children, params}: {children: ReactN
   const {locale} = await params;
   if (!isLocale(locale)) notFound();
   const m = messagesFor(locale);
+  // Hive's context decides direction for its own locale. A store's other languages take the direction of their script.
+  const hive = await catalog().context().catch(() => null);
+  const direction = hive?.locale?.split('-')[0] === locale && hive.direction ? hive.direction.toLowerCase() as 'rtl' | 'ltr' : directionOf(locale);
   return (
-    <html lang={locale} dir={directionOf(locale)}>
+    <html lang={locale} dir={direction}>
       <head><style dangerouslySetInnerHTML={{__html: tokens}} /></head>
       <body>
         <header className="site-header">

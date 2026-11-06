@@ -87,6 +87,10 @@ final class DigitalControllers {
       this.digital = digital;
     }
 
+    @GetMapping("/sellers/{sellerId}/assets")
+    @HiveOperation("seller-assets")
+    java.util.List<AssetView> assets(UserContext user, @PathVariable UUID sellerId) { return digital.sellerAssets(user, sellerId); }
+
     @PostMapping("/sellers/{sellerId}/assets")
     @ResponseStatus(HttpStatus.CREATED)
     @HiveOperation("seller-asset-create")

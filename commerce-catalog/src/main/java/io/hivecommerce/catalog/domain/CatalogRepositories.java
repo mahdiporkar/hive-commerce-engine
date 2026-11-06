@@ -57,6 +57,9 @@ public final class CatalogRepositories {
   public interface Products {
     void insert(Product product);
 
+    /** Saves a schema migration; fails when the product changed since it was read. */
+    void updateSchema(Product product);
+
     Optional<Product> findById(TenantScope scope, UUID id);
 
     Optional<Product> findByVariantId(TenantScope scope, UUID variantId);
@@ -65,6 +68,17 @@ public final class CatalogRepositories {
   }
 
   /** Transactional outbox of this context (ADR-0002): written in the same transaction as the aggregate change. */
+  /** Public presentation data, kept apart from the aggregates' invariants. */
+  public interface Presentation {
+    List<ProductMedia> productMedia(TenantScope scope, UUID productId);
+
+    void saveProductMedia(TenantScope scope, UUID productId, List<ProductMedia> media);
+
+    CategorySeo categorySeo(TenantScope scope, UUID categoryId);
+
+    void saveCategorySeo(TenantScope scope, UUID categoryId, CategorySeo seo);
+  }
+
   public interface Outbox {
     void append(TenantScope scope, List<DomainEvent> events);
   }

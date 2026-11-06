@@ -8,6 +8,14 @@
 | Engine integration | part of `./mvnw -B install` (`EngineIntegrationTest`) | Docker | Real PostgreSQL with forced RLS and a runtime role that owns nothing; real JWT validation via JWKS; allowed operator flow; anonymous, forged, invalid-token, wrong-tenant, binding-mismatch and wrong-operation callers denied; cross-store reads return 404; no DELETE; published schemas immutable |
 | Through Hive (e2e) | `node --test tests/e2e/commerce-through-bff.test.mjs` | Docker, Java 21, Node 22+, built jars (below) | Real Hive BFF + authorization + OpenFGA + Keycloak: granted operator creates a product through `/api/routes/commerce/...`; ungranted and anonymous callers are denied by Hive **before the engine is contacted** (checked in the engine's access log); CSRF enforced; forged identity rejected; revocation effective |
 
+| Admin bundles | `tools/build-admin-mfes.sh` | Node 22+, built Hive source | Bundles honour the Hive contract, SRI, schema-generated forms, events between modules, denied calls shown (real bundle in a DOM with a stubbed server) |
+| Storefront SDK | `cd storefront-sdk && npm test` | Node 22+ | No cookies on public reads, CSRF, guest cart token, truthful JSON-LD |
+| Commerce Builder | `cd builder && npm test` | Node 22+ | Store and catalog review, seeding order, scaffold holds no engine source, core free of industry words |
+| Admin through Hive | `node --test tests/e2e/admin-mfes.test.mjs` | Docker, Java 21, built jars | Idempotent registration, bundles byte-identical through the gateway, navigation follows grants |
+| Store contract | `node --test tests/contract/*.test.mjs` in a store | Node 22+, fetched release | The store needs only what this release publishes (OpenAPI, Hive templates, bundles); no duplicated logic; no secrets |
+| Store acceptance | `node --test tests/e2e/acceptance.test.mjs` in a store | Docker, Java 21, Edge or Chromium | The whole store through a real browser, Hive and Keycloak |
+| Upgrade and rollback (Scenario F) | `ENGINE_CANDIDATE=<v> node --test tests/e2e/upgrade.test.mjs` in a store | As above, both releases fetched | Upgrade and rollback on one database with purchases on each side |
+
 ## Preparing the end-to-end suite
 
 ```sh

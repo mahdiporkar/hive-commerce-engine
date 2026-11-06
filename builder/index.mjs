@@ -11,6 +11,31 @@ const KEY = /^[a-z][a-z0-9-]{1,30}$/;
 const ATTRIBUTE_KEY = /^[a-z][a-z0-9_]{0,62}$/;
 const COLOR = /^#[0-9a-fA-F]{6}$/;
 
+/** WCAG 2 contrast ratio of two #rrggbb colors. */
+export function contrast(a, b) {
+  const luminance = hex => {
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(c => c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (light + 0.05) / (dark + 0.05);
+}
+
+/**
+ * What a change between two schema versions means for existing products: an added required attribute or a removed one
+ * calls for explicit migration; anything else is compatible.
+ */
+export function schemaDiff(previous, next) {
+  const index = specs => new Map((specs ?? []).map(s => [s.key, s]));
+  const before = index(previous), after = index(next);
+  const added = [...after.keys()].filter(k => !before.has(k));
+  const removed = [...before.keys()].filter(k => !after.has(k));
+  const nowRequired = [...after.keys()].filter(k => before.has(k) && after.get(k).required && !before.get(k).required);
+  const variantsChanged = [...after.keys()].filter(k => before.has(k) && Boolean(after.get(k).variantDefining) !== Boolean(before.get(k).variantDefining));
+  const requiresValues = [...added.filter(k => after.get(k).required), ...nowRequired];
+  return {added, removed, nowRequired, variantsChanged, requiresValues, needsMigration: requiresValues.length > 0 || removed.length > 0 || variantsChanged.length > 0};
+}
+
 /** @return list of problems; empty when the store configuration is usable */
 export function validateStore(store) {
   const problems = [];
@@ -23,10 +48,17 @@ export function validateStore(store) {
   need(MODES.includes(store.mode), `mode: one of ${MODES.join(', ')}`);
   const capabilities = store.capabilities ?? {};
   for (const name of ['physicalProducts', 'digitalProducts', 'sellerOnboarding', 'commissions']) need(typeof capabilities[name] === 'boolean', `capabilities.${name}: true or false`);
+  if (capabilities.reviews !== undefined) need(typeof capabilities.reviews === 'boolean', 'capabilities.reviews: true or false');
   need(capabilities.physicalProducts || capabilities.digitalProducts, 'capabilities: a store sells physical or digital products');
   if (store.mode !== 'SINGLE_VENDOR') need(capabilities.sellerOnboarding, `capabilities.sellerOnboarding: required by ${store.mode}`);
   if (store.mode === 'SINGLE_VENDOR') need(!capabilities.sellerOnboarding && !capabilities.commissions, 'capabilities: a single-vendor store has no seller onboarding or commissions');
   for (const name of ['accent', 'accentText', 'surface', 'surfaceAlt', 'text', 'muted', 'border']) need(COLOR.test(store.theme?.[name] ?? ''), `theme.${name}: #rrggbb color`);
+  if (problems.every(p => !p.startsWith('theme.'))) {
+    for (const [foreground, background, minimum] of [['text', 'surface', 4.5], ['accentText', 'accent', 4.5], ['text', 'surfaceAlt', 4.5], ['muted', 'surfaceAlt', 3]]) {
+      const ratio = contrast(store.theme[foreground], store.theme[background]);
+      need(ratio >= minimum, `theme: ${foreground} on ${background} has contrast ${ratio.toFixed(2)}, needs at least ${minimum}`);
+    }
+  }
   need(Number.isInteger(store.theme?.radius) && store.theme.radius >= 0 && store.theme.radius <= 32, 'theme.radius: 0 to 32');
   need(typeof store.domain === 'string' && /^[a-z0-9.-]+$/.test(store.domain), 'domain: host name');
   need(Number.isInteger(store.portBase) && store.portBase >= 20000 && store.portBase <= 60000, 'portBase: 20000 to 60000');
@@ -88,7 +120,7 @@ export function engineEnvironment(store) {
   return {
     COMMERCE_STORE_KEY: store.key, COMMERCE_STORE_MODE: store.mode, COMMERCE_STORE_CURRENCY: store.currency, COMMERCE_STORE_LOCALES: store.locales.join(','),
     COMMERCE_CAP_PHYSICAL: String(store.capabilities.physicalProducts), COMMERCE_CAP_DIGITAL: String(store.capabilities.digitalProducts),
-    COMMERCE_CAP_SELLER_ONBOARDING: String(store.capabilities.sellerOnboarding), COMMERCE_CAP_COMMISSIONS: String(store.capabilities.commissions),
+    COMMERCE_CAP_SELLER_ONBOARDING: String(store.capabilities.sellerOnboarding), COMMERCE_CAP_COMMISSIONS: String(store.capabilities.commissions), COMMERCE_CAP_REVIEWS: String(store.capabilities.reviews ?? false),
   };
 }
 

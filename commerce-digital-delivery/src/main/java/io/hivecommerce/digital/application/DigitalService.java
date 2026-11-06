@@ -126,6 +126,16 @@ public class DigitalService {
     return transactions.inScope(scope, () -> create(scope, sellers.internalSellerId(scope), command));
   }
 
+  /** Seller workspace: the seller's own assets with their versions, never their content. */
+  public java.util.List<AssetView> sellerAssets(UserContext user, UUID sellerId) {
+    UUID actor = user.requireActor();
+    TenantScope scope = deployment.scope();
+    return transactions.inScope(scope, () -> {
+      if (!sellers.allows(scope, actor, sellerId, "assets.manage")) throw HiveException.notFound("Seller not found");
+      return assets.findBySeller(scope, sellerId).stream().map(AssetView::of).toList();
+    });
+  }
+
   /** Seller workspace: assets of a seller the caller may manage (404 otherwise). */
   public AssetView createSellerAsset(UserContext user, UUID sellerId, AssetCommand command) {
     UUID actor = user.requireActor();

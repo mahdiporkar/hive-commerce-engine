@@ -1,6 +1,5 @@
-# Serves the engine's shared admin bundles from the pinned release. Hive reaches this host server-side and verifies each
-# bundle against its registered integrity. Build from the repository root, after tools/fetch-engine.mjs.
-ARG ENGINE_VERSION
+# Serves the engine's shared admin bundles at versioned addresses. Hive reaches this host server-side and verifies each bundle
+# against its registered integrity. To be able to roll back, fetch the previous release too, then, from the repository root:
+#   node tools/assemble-admin-bundles.mjs
 FROM nginxinc/nginx-unprivileged:1.29-alpine
-ARG ENGINE_VERSION
-COPY .engine/${ENGINE_VERSION}/admin-mfes/modules/ /usr/share/nginx/html/
+COPY .engine/admin-host/ /usr/share/nginx/html/

@@ -2,7 +2,7 @@
 // through Hive's artifact gateway under their pinned integrity and that navigation follows the role grants.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {readFileSync, readdirSync} from 'node:fs';
+import {cpSync, readFileSync, readdirSync, rmSync} from 'node:fs';
 import {resolve} from 'node:path';
 import test from 'node:test';
 import {register} from '../../hive/register.mjs';
@@ -12,7 +12,12 @@ const MODULES = resolve(ROOT, 'admin-mfes/dist/modules');
 
 test('hive/register.mjs: idempotent registration, admin bundles through the BFF, navigation follows grants', {timeout: 900000}, async t => {
   const {provision, provisioningPassword} = await startEnvironment(t);
-  const host = await serveDirectory(MODULES, PORTS.modules);
+  // Bundle addresses carry their version, so a host can serve the previous version for a rollback.
+  const version = JSON.parse(readFileSync(resolve(ROOT, 'admin-mfes/package.json'), 'utf8')).version;
+  const served = resolve(ROOT, '.local/e2e/bundle-host');
+  rmSync(served, {recursive: true, force: true});
+  cpSync(MODULES, resolve(served, version), {recursive: true});
+  const host = await serveDirectory(served, PORTS.modules);
   t.after(() => host.close());
   const options = {authorization: `http://127.0.0.1:${PORTS.authorization}`, password: provisioningPassword, application: APPLICATION, displayName: 'Commerce e2e',
     engineUrl: ENGINE, modulesUrl: MODULES_URL, modulesDir: MODULES};

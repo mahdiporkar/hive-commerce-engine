@@ -23,6 +23,12 @@ jobs:
         run: node tools/fetch-engine.mjs
       - name: Contract tests against the engine release
         run: node --test tests/contract/*.test.mjs
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Extensions against the engine's SPI
+        run: node tools/build-extensions.mjs
       - name: Storefront
         working-directory: storefront
         run: npm ci --no-audit --no-fund && npm run build

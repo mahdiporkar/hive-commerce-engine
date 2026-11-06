@@ -10,6 +10,8 @@ import io.hivecommerce.catalog.domain.AttributeConstraints;
 import io.hivecommerce.catalog.domain.AttributeFlags;
 import io.hivecommerce.catalog.domain.AttributeOption;
 import io.hivecommerce.catalog.domain.AttributeType;
+import io.hivecommerce.catalog.domain.CategorySeo;
+import io.hivecommerce.catalog.domain.ProductMedia;
 import io.hivecommerce.catalog.domain.Product;
 import io.hivecommerce.catalog.domain.ProductKind;
 import io.hivecommerce.platform.identity.UserContext;
@@ -24,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -88,6 +91,32 @@ class CatalogAdminController {
         : body.attributes().stream().map(s -> new CatalogCommands.SpecReference(s.key(), s.required(), s.variantDefining())).toList();
     return catalog.createProductType(user, new CatalogCommands.CreateProductType(body.key(), text("name", body.name()), kind(body.kind()), specs));
   }
+
+  record DraftVersionBody(List<SpecBody> attributes) {}
+
+  record MigrateBody(Map<String, Object> attributes, long revision) {}
+
+  record MediaBody(List<ProductMedia> media) {}
+
+  @PostMapping("/product-types/{productTypeKey}/versions")
+  @ResponseStatus(HttpStatus.CREATED)
+  @HiveOperation("admin-product-type-draft")
+  ProductTypeView draftVersion(UserContext user, @PathVariable String productTypeKey, @RequestBody DraftVersionBody body) {
+    var specs = body.attributes() == null ? null : body.attributes().stream().map(s -> new CatalogCommands.SpecReference(s.key(), s.required(), s.variantDefining())).toList();
+    return catalog.draftSchemaVersion(user, productTypeKey, specs);
+  }
+
+  @PostMapping("/products/{productId}/schema-migration")
+  @HiveOperation("admin-product-migrate")
+  ProductView migrate(UserContext user, @PathVariable UUID productId, @RequestBody MigrateBody body) { return catalog.migrateProduct(user, productId, body.attributes(), body.revision()); }
+
+  @PutMapping("/products/{productId}/media")
+  @HiveOperation("admin-product-media")
+  List<ProductMedia> media(UserContext user, @PathVariable UUID productId, @RequestBody MediaBody body) { return catalog.setProductMedia(user, productId, body.media()); }
+
+  @PutMapping("/categories/{categoryId}/seo")
+  @HiveOperation("admin-category-seo")
+  CategorySeo seo(UserContext user, @PathVariable UUID categoryId, @RequestBody CategorySeo body) { return catalog.setCategorySeo(user, categoryId, body); }
 
   @PostMapping("/product-types/{productTypeKey}/versions/{version}/publish")
   @HiveOperation("admin-product-type-publish")

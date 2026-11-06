@@ -53,6 +53,10 @@ final class PaymentControllers {
 
     record RefundBody(String idempotencyKey, BigDecimal amount, List<UUID> orderLineIds) {}
 
+    @org.springframework.web.bind.annotation.GetMapping("/payments")
+    @HiveOperation("admin-payments")
+    List<PaymentService.PaymentView> payments(UserContext user) { return payments.recentPayments(user); }
+
     @PostMapping("/orders/{orderId}/refunds")
     @HiveOperation("admin-order-refund")
     RefundView refund(UserContext user, @PathVariable UUID orderId, @RequestBody RefundBody body) {

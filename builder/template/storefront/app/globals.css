@@ -59,4 +59,7 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .protected { white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, Consolas, monospace; background: var(--surface); border: 1px solid var(--border); border-radius: calc(var(--radius) / 2); padding: 12px; margin: 0; }
 .pager { display: flex; gap: 12px; justify-content: center; margin-block-start: 24px; }
 .stack { display: grid; gap: 16px; }
+.gallery { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.gallery img { inline-size: 100%; block-size: auto; border-radius: var(--radius); border: 1px solid var(--border); display: block; }
+.stars { letter-spacing: 2px; color: var(--accent); }
 .product > aside { align-self: start; }

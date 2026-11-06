@@ -53,8 +53,6 @@ services:
     build:
       context: ..
       dockerfile: deploy/admin-mfes.Dockerfile
-      args:
-        ENGINE_VERSION: ${ENGINE_VERSION:?}
 
   storefront:
     build:

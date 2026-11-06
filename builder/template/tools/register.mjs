@@ -9,9 +9,10 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const store = JSON.parse(readFileSync(join(ROOT, 'storefront/config/store.json'), 'utf8'));
 const {version} = JSON.parse(readFileSync(join(ROOT, 'engine.lock.json'), 'utf8'));
-const engine = join(ROOT, '.engine', process.env.ENGINE_VERSION ?? version);
+const engineDir = requested => join(ROOT, '.engine', requested ?? process.env.ENGINE_VERSION ?? version);
 
-export async function registerStore({authorization, password, engineUrl, modulesUrl, log}) {
+export async function registerStore({authorization, password, engineUrl, modulesUrl, engineVersion, log}) {
+  const engine = engineDir(engineVersion);
   const {register} = await import(pathToFileURL(join(engine, 'hive/register.mjs')).href);
   const extra = join(ROOT, 'hive/resource-manifest.json');
   return register({authorization, password, application: store.key, displayName: store.displayName[store.defaultLocale], engineUrl, modulesUrl,

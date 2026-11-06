@@ -1,7 +1,7 @@
 // What this store needs from the engine release it pins (or from ENGINE_VERSION during an upgrade check). No running
 // stack: a release that fails here is never deployed for this store (Scenario F).
 import assert from 'node:assert/strict';
-import {readdirSync, readFileSync} from 'node:fs';
+import {existsSync, readdirSync, readFileSync} from 'node:fs';
 import {dirname, join, resolve} from 'node:path';
 import test from 'node:test';
 import {fileURLToPath, pathToFileURL} from 'node:url';
@@ -12,7 +12,7 @@ const version = process.env.ENGINE_VERSION ?? read('engine.lock.json').version;
 const engine = join('.engine', version);
 const store = read('storefront/config/store.json');
 
-const walk = dir => readdirSync(dir, {withFileTypes: true}).flatMap(e => e.name === 'node_modules' || e.name === '.next' ? [] : e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
+const walk = dir => !existsSync(dir) ? [] : readdirSync(dir, {withFileTypes: true}).flatMap(e => e.name === 'node_modules' || e.name === '.next' ? [] : e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
 
 test('the store configuration and catalog pass this release\'s builder', async () => {
   const {validateCatalog, validateStore} = await import(pathToFileURL(join(ROOT, engine, 'builder/package/index.mjs')).href);
@@ -28,7 +28,7 @@ test('every operation the storefront SDK calls is published by this release, wit
     ['POST', '/v1/shop/carts', 'HYBRID'], ['GET', '/v1/shop/carts/current', 'HYBRID'], ['POST', '/v1/shop/carts/current/items', 'HYBRID'],
     ['POST', '/v1/shop/checkouts', 'HYBRID'], ['POST', '/v1/shop/payments/{paymentId}/verify', 'HYBRID'], ['GET', '/v1/shop/orders', 'HYBRID'],
     ['GET', '/v1/shop/library', 'HYBRID'], ['POST', '/v1/shop/library/{entitlementId}/downloads', 'HYBRID'],
-    ['POST', '/v1/seller/applications', 'HYBRID'], ['GET', '/v1/seller/me', 'HYBRID']];
+    ['POST', '/v1/seller/applications', 'HYBRID'], ['GET', '/v1/seller/me', 'HYBRID'], ['GET', '/v1/seller/sellers/{sellerId}/listings', 'HYBRID'], ['GET', '/v1/seller/sellers/{sellerId}/finance', 'HYBRID']];
   for (const [method, path, access] of expected) assert.equal(operation(method, path)?.access, access, `${method} ${path}`);
   const openapi = read(join(engine, 'openapi.json'));
   for (const [method, path] of expected) assert.ok(openapi.paths[path]?.[method.toLowerCase()], `${method} ${path} is missing from the API contract`);
@@ -43,6 +43,12 @@ test('this release ships the admin bundles and Hive templates the store register
     assert.match(mf.artifact.integrity, /^sha384-/, moduleKey);
   }
   for (const role of JSON.parse(readFileSync(join(ROOT, engine, 'hive/templates/roles.json'), 'utf8')).roles) assert.ok(role.key.startsWith('commerce-'), role.key);
+});
+
+test('this store extensions were built for this release\'s SPI', () => {
+  const spi = readFileSync(join(ROOT, engine, 'commerce-spi.jar'));
+  assert.ok(spi.length > 0);
+  for (const file of walk(join(ROOT, 'extensions')).filter(f => f.endsWith('pom.xml'))) assert.match(readFileSync(file, 'utf8'), /<artifactId>commerce-spi<\/artifactId>/, file);
 });
 
 test('this repository duplicates no engine logic and holds no engine source', () => {

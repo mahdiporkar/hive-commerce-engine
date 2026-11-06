@@ -32,7 +32,8 @@
         "physicalProducts": {"type": "boolean"},
         "digitalProducts": {"type": "boolean"},
         "sellerOnboarding": {"type": "boolean"},
-        "commissions": {"type": "boolean"}
+        "commissions": {"type": "boolean"},
+        "reviews": {"type": "boolean"}
       }
     },
     "security": {
