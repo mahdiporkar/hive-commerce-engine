@@ -115,6 +115,11 @@ public class OfferService implements ListingQueries {
     return view(offer, null);
   }
 
+  /** The lowest active price of each product, for list views. Products without an active offer are absent. */
+  public Map<UUID, io.hivecommerce.shared.Money> lowestActivePrices(TenantScope scope, java.util.Collection<UUID> productIds) {
+    return offers.lowestActivePrices(scope, productIds);
+  }
+
   /** Active offers of a product with current availability (for the public product page). */
   public List<OfferView> offersOfProduct(TenantScope scope, UUID productId) {
     var active = offers.findActiveByProduct(scope, productId);

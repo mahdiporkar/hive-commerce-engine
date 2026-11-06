@@ -32,4 +32,7 @@ public interface CatalogQueries {
   List<UUID> categorySubtree(TenantScope scope, UUID categoryId);
 
   List<CategoryNode> activeCategories(TenantScope scope);
+
+  /** The first image of each product, for list views; products without an image are absent. */
+  java.util.Map<UUID, MediaItem> firstImages(TenantScope scope, java.util.Collection<UUID> productIds);
 }

@@ -100,7 +100,7 @@ Generated from [hive/templates/commerce-service.json](../../hive/templates/comme
 | `admin-listing-approve` | POST | `/v1/admin/listings/{listingId}/approve` | AUTHENTICATED | `commerce.api.moderation#decide` |
 | `admin-listing-reject` | POST | `/v1/admin/listings/{listingId}/reject` | AUTHENTICATED | `commerce.api.moderation#decide` |
 | `store-categories` | GET | `/v1/store/categories` | PUBLIC | — |
-| `store-products-search` | GET | `/v1/store/products` | PUBLIC | — |
+| `store-products-search` | GET | `/v1/store/products` | PUBLIC | — (since 0.3.0 each card carries `fromPrice` and `image`) |
 | `store-product-detail` | GET | `/v1/store/products/{slug}` | PUBLIC | — |
 | `admin-offer-create` | POST | `/v1/admin/offers` | AUTHENTICATED | `commerce.api.catalog#update` |
 | `admin-offer-stock` | POST | `/v1/admin/offers/{offerId}/stock` | AUTHENTICATED | `commerce.api.catalog#update` |

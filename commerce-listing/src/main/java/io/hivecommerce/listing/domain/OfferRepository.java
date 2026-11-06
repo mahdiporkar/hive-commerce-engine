@@ -15,4 +15,7 @@ public interface OfferRepository {
   List<SellerOffer> findActiveByProduct(TenantScope scope, UUID productId);
 
   List<SellerOffer> findBySeller(TenantScope scope, UUID sellerId);
+
+  /** The lowest active offer price of each product; products without an active offer are absent. */
+  java.util.Map<UUID, io.hivecommerce.shared.Money> lowestActivePrices(TenantScope scope, java.util.Collection<UUID> productIds);
 }

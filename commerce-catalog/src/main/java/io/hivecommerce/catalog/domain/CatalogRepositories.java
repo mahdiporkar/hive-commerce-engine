@@ -72,6 +72,9 @@ public final class CatalogRepositories {
   public interface Presentation {
     List<ProductMedia> productMedia(TenantScope scope, UUID productId);
 
+    /** Media of several products in one query; products without media are absent. */
+    java.util.Map<UUID, List<ProductMedia>> productMedia(TenantScope scope, java.util.Collection<UUID> productIds);
+
     void saveProductMedia(TenantScope scope, UUID productId, List<ProductMedia> media);
 
     CategorySeo categorySeo(TenantScope scope, UUID categoryId);

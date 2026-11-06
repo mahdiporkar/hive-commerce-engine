@@ -375,6 +375,23 @@ final class JdbcCatalogRepositories {
     }
 
     @Override
+    public java.util.Map<UUID, List<io.hivecommerce.catalog.domain.ProductMedia>> productMedia(TenantScope scope, java.util.Collection<UUID> productIds) {
+      if (productIds.isEmpty()) return java.util.Map.of();
+      var out = new java.util.HashMap<UUID, List<io.hivecommerce.catalog.domain.ProductMedia>>();
+      jdbc.sql("select id, media from catalog.product where id in (:ids) and tenant_id = :tenant and store_id = :store and media <> '[]'::jsonb")
+          .param("ids", List.copyOf(productIds)).param("tenant", scope.tenantId()).param("store", scope.storeId())
+          .query((rs, n) -> {
+            try {
+              out.put(rs.getObject("id", UUID.class), mapper.readValue(rs.getString("media"), MEDIA));
+            } catch (java.io.IOException e) {
+              throw new IllegalStateException("Unreadable product media", e);
+            }
+            return null;
+          }).list();
+      return out;
+    }
+
+    @Override
     public void saveProductMedia(TenantScope scope, UUID productId, List<io.hivecommerce.catalog.domain.ProductMedia> media) {
       jdbc.sql("update catalog.product set media = cast(:media as jsonb), updated_at = now() where id = :id and tenant_id = :tenant and store_id = :store")
           .param("media", json.write(media)).param("id", productId).param("tenant", scope.tenantId()).param("store", scope.storeId()).update();

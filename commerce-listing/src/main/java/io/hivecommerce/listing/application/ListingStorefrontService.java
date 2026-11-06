@@ -2,6 +2,8 @@ package io.hivecommerce.listing.application;
 
 import io.hivecommerce.catalog.application.published.CatalogQueries;
 import io.hivecommerce.listing.application.ListingProjection.Detail;
+import io.hivecommerce.listing.application.ListingProjection.Card;
+import io.hivecommerce.listing.application.ListingProjection.FacetCount;
 import io.hivecommerce.listing.application.ListingProjection.Page;
 import io.hivecommerce.listing.application.ListingProjection.SearchQuery;
 import io.hivecommerce.platform.identity.UserContext;
@@ -42,7 +44,19 @@ public class ListingStorefrontService {
     this.catalog = catalog;
   }
 
-  public Page search(UserContext user, Map<String, String> params) {
+  /** A price as list views show it: the lowest active offer, so "from" this amount. */
+  public record Price(BigDecimal amount, String currency) {}
+
+  /**
+   * A search result card: the projection's card plus the lowest active price and first image, read at query time so they
+   * never go stale when an offer or the media change. Both are null when the product has none.
+   */
+  public record StoreCard(UUID listingId, UUID productId, String slug, Map<String, String> title, UUID categoryId, String kind, Map<String, Object> attributes,
+      Price fromPrice, CatalogQueries.MediaItem image) {}
+
+  public record StorePage(List<StoreCard> items, long total, int page, int size, List<FacetCount> facets) {}
+
+  public StorePage search(UserContext user, Map<String, String> params) {
     var equals = new LinkedHashMap<String, List<String>>();
     var min = new LinkedHashMap<String, BigDecimal>();
     var max = new LinkedHashMap<String, BigDecimal>();
@@ -60,13 +74,23 @@ public class ListingStorefrontService {
     String text = params.get("q");
     if (text != null && text.length() > 100) throw DomainValidationException.of("q", "at most 100 characters");
     return transactions.inScope(deployment.scope(), () -> {
+      var scope = deployment.scope();
       List<UUID> categories = null;
       if (params.get("category") != null) {
         UUID categoryId = uuid(params.get("category"));
         categories = catalog.categorySubtree(deployment.scope(), categoryId);
-        if (categories.isEmpty()) return new Page(List.of(), 0, page, size, List.of());
+        if (categories.isEmpty()) return new StorePage(List.of(), 0, page, size, List.of());
       }
-      return projection.search(deployment.scope(), new SearchQuery(categories, text, equals, min, max, sort, page, size));
+      Page found = projection.search(scope, new SearchQuery(categories, text, equals, min, max, sort, page, size));
+      var ids = found.items().stream().map(Card::productId).toList();
+      var prices = offerService.lowestActivePrices(scope, ids);
+      var images = catalog.firstImages(scope, ids);
+      var cards = found.items().stream().map(c -> {
+        var price = prices.get(c.productId());
+        return new StoreCard(c.listingId(), c.productId(), c.slug(), c.title(), c.categoryId(), c.kind(), c.attributes(),
+            price == null ? null : new Price(price.amount(), price.currency().getCurrencyCode()), images.get(c.productId()));
+      }).toList();
+      return new StorePage(cards, found.total(), found.page(), found.size(), found.facets());
     });
   }
 

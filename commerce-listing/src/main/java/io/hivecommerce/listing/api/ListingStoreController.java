@@ -1,6 +1,5 @@
 package io.hivecommerce.listing.api;
 
-import io.hivecommerce.listing.application.ListingProjection.Page;
 import io.hivecommerce.listing.application.ListingStorefrontService;
 import io.hivecommerce.platform.identity.UserContext;
 import io.hivecommerce.platform.web.HiveOperation;
@@ -23,7 +22,7 @@ class ListingStoreController {
 
   @GetMapping("/products")
   @HiveOperation("store-products-search")
-  Page search(UserContext user, @RequestParam Map<String, String> params) {
+  ListingStorefrontService.StorePage search(UserContext user, @RequestParam Map<String, String> params) {
     return storefront.search(user, params);
   }
 

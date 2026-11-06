@@ -64,6 +64,18 @@ class JdbcOfferRepository implements OfferRepository {
     return select(scope, "seller_id = :value", sellerId);
   }
 
+  @Override
+  public java.util.Map<UUID, Money> lowestActivePrices(TenantScope scope, java.util.Collection<UUID> productIds) {
+    if (productIds.isEmpty()) return java.util.Map.of();
+    var out = new java.util.HashMap<UUID, Money>();
+    jdbc.sql("select distinct on (product_id) product_id, price, currency from listing.seller_offer "
+            + "where tenant_id = :tenant and store_id = :store and status = 'ACTIVE' and product_id in (:ids) order by product_id, price, id")
+        .param("tenant", scope.tenantId()).param("store", scope.storeId()).param("ids", List.copyOf(productIds))
+        .query((rs, n) -> out.put(rs.getObject("product_id", UUID.class), new Money(rs.getBigDecimal("price"), Currency.getInstance(rs.getString("currency")))))
+        .list();
+    return out;
+  }
+
   private List<SellerOffer> select(TenantScope scope, String condition, UUID value) {
     return jdbc.sql("select id, seller_id, product_id, variant_id, price, currency, condition, unique_item, digital, seller_sku, status, revision "
             + "from listing.seller_offer where tenant_id = :tenant and store_id = :store and " + condition + " order by price, id")

@@ -163,6 +163,9 @@ export async function seedCatalog(send, store, {attributes = [], productTypes = 
       if (p.asset.text) await expect(`asset text ${p.slug}`, 'PUT', `/v1/admin/assets/${asset.assetId}/text`, {content: p.asset.text});
       if (p.asset.preview) await expect(`asset preview ${p.slug}`, 'PUT', `/v1/admin/assets/${asset.assetId}/preview`, {preview: p.asset.preview});
     }
+    if (p.media?.length) {
+      await expect(`media ${p.slug}`, 'PUT', `/v1/admin/products/${r.body.id}/media`, {media: p.media.map(m => ({url: m.url, alt: m.alt ?? {}, ...(m.kind ? {kind: m.kind} : {})}))});
+    }
     if (p.offer) {
       for (const variant of r.body.variants) {
         await expect(`offer ${variant.sku}`, 'POST', '/v1/admin/offers', {variantId: variant.id, amount: p.offer.amount, currency: p.offer.currency ?? store.currency, quantity: p.offer.quantity ?? null,

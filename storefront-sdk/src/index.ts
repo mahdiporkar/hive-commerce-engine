@@ -4,7 +4,11 @@
 export const ROUTE = '/api/routes/commerce';
 
 export type Localized = Record<string, string>;
-export interface Card {listingId: string; productId: string; slug: string; title: Localized; categoryId: string | null; kind: string; attributes: Record<string, unknown>}
+export interface Card {listingId: string; productId: string; slug: string; title: Localized; categoryId: string | null; kind: string; attributes: Record<string, unknown>;
+  /** Since 0.3.0, search results only: the lowest active offer price, null without an active offer. Absent from older engines. */
+  fromPrice?: {amount: number; currency: string} | null;
+  /** Since 0.3.0, search results only: the first product image, null without one. */
+  image?: Media | null}
 export interface Page {items: Card[]; total: number; page: number; size: number; facets: {key: string; value: string; count: number}[]}
 export interface Offer {offerId: string; productId: string; variantId: string; sellerId: string; price: number; currency: string; condition: string; available: number; uniqueItem: boolean; digital: boolean; status: string}
 export interface Media {url: string; kind: string; alt: Localized}

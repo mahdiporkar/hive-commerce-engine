@@ -2,6 +2,20 @@
 
 Neither version below has been published yet. Both exist as locally packaged releases (`tools/package-release.sh`).
 
+## 0.3.0
+
+Backward compatible with 0.2.0: one additive response change, no migration.
+
+**Added**
+
+- Search results (`GET /v1/store/products`) carry `fromPrice` (lowest active offer: `{amount, currency}`) and `image` (first product
+  image: `{url, kind, alt}`) on each card, both `null` when the product has none. They are read at query time, so a price or
+  media change shows at once. Storefronts no longer need one detail request per card to show a price or a picture.
+- SDK: the two optional fields on `Card`.
+- Builder: `seedCatalog` sets a product's `media` when the catalog file lists it.
+
+**Migrations**: none.
+
 ## 0.2.0
 
 Backward compatible with 0.1.0. A store on 0.1.0 can upgrade and roll back on the same database.

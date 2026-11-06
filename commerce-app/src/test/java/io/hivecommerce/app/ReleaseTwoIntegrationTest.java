@@ -123,6 +123,30 @@ class ReleaseTwoIntegrationTest {
     assertThat(tree.toString()).contains("Best stones");
   }
 
+  @Test
+  void searchCardsCarryTheLowestActivePriceAndTheFirstImage() {
+    type("carded", "PHYSICAL");
+    String id = product("carded", "carded-one").get("id").asText();
+    String bare = product("carded", "carded-bare").get("id").asText();
+    api.call(operator, "admin-product-media", "PUT", "/v1/admin/products/" + id + "/media", Map.of("media", List.of(
+        Map.of("url", "https://cdn.example/card.jpg", "alt", Map.of("en", "Card"))))).expect(200);
+    for (String productId : List.of(id, bare)) api.call(operator, "admin-product-publish", "POST", "/v1/admin/products/" + productId + "/publish", null).expect(200);
+    dispatcher.dispatchAll();
+    String variant = offer("carded-one");
+    api.call(operator, "admin-offer-create", "POST", "/v1/admin/offers", Map.of("variantId", variant, "amount", 5000, "currency", "IRR", "quantity", 3)).expect(201);
+    dispatcher.dispatchAll();
+
+    var items = api.call(Caller.anonymous(), "store-products-search", "GET", "/v1/store/products?q=carded", null).expect(200).body().get("items");
+    var cards = new java.util.HashMap<String, com.fasterxml.jackson.databind.JsonNode>();
+    items.forEach(card -> cards.put(card.get("slug").asText(), card));
+    assertThat(cards.get("carded-one").get("fromPrice").get("amount").decimalValue()).isEqualByComparingTo("5000");
+    assertThat(cards.get("carded-one").get("fromPrice").get("currency").asText()).isEqualTo("IRR");
+    assertThat(cards.get("carded-one").get("image").get("url").asText()).isEqualTo("https://cdn.example/card.jpg");
+    // A product without an offer or an image says so, rather than inventing either.
+    assertThat(cards.get("carded-bare").get("fromPrice").isNull()).isTrue();
+    assertThat(cards.get("carded-bare").get("image").isNull()).isTrue();
+  }
+
   private String sellingProduct(String slug) {
     var product = product("reviewable", slug);
     api.call(operator, "admin-product-publish", "POST", "/v1/admin/products/" + product.get("id").asText() + "/publish", null).expect(200);

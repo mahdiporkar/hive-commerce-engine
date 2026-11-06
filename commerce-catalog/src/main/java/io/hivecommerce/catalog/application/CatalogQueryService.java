@@ -49,6 +49,14 @@ class CatalogQueryService implements CatalogQueries {
   }
 
   @Override
+  public java.util.Map<UUID, MediaItem> firstImages(TenantScope scope, java.util.Collection<UUID> productIds) {
+    var out = new java.util.HashMap<UUID, MediaItem>();
+    presentation.productMedia(scope, productIds).forEach((id, media) -> media.stream().filter(m -> "IMAGE".equals(m.kind())).findFirst()
+        .ifPresent(m -> out.put(id, new MediaItem(m.url(), m.kind(), m.alt()))));
+    return out;
+  }
+
+  @Override
   public List<UUID> categorySubtree(TenantScope scope, UUID categoryId) {
     return categories.subtreeIds(scope, categoryId);
   }

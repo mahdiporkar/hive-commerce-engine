@@ -170,39 +170,6 @@
         },
         "type" : "object"
       },
-      "Card" : {
-        "properties" : {
-          "attributes" : {
-            "additionalProperties" : { },
-            "type" : "object"
-          },
-          "categoryId" : {
-            "format" : "uuid",
-            "type" : "string"
-          },
-          "kind" : {
-            "type" : "string"
-          },
-          "listingId" : {
-            "format" : "uuid",
-            "type" : "string"
-          },
-          "productId" : {
-            "format" : "uuid",
-            "type" : "string"
-          },
-          "slug" : {
-            "type" : "string"
-          },
-          "title" : {
-            "additionalProperties" : {
-              "type" : "string"
-            },
-            "type" : "object"
-          }
-        },
-        "type" : "object"
-      },
       "CartLine" : {
         "properties" : {
           "currency" : {
@@ -1084,35 +1051,6 @@
         },
         "type" : "object"
       },
-      "Page" : {
-        "properties" : {
-          "facets" : {
-            "items" : {
-              "$ref" : "#/components/schemas/FacetCount"
-            },
-            "type" : "array"
-          },
-          "items" : {
-            "items" : {
-              "$ref" : "#/components/schemas/Card"
-            },
-            "type" : "array"
-          },
-          "page" : {
-            "format" : "int32",
-            "type" : "integer"
-          },
-          "size" : {
-            "format" : "int32",
-            "type" : "integer"
-          },
-          "total" : {
-            "format" : "int64",
-            "type" : "integer"
-          }
-        },
-        "type" : "object"
-      },
       "PaymentView" : {
         "properties" : {
           "amount" : {
@@ -1176,6 +1114,17 @@
       "PreviewBody" : {
         "properties" : {
           "preview" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "Price" : {
+        "properties" : {
+          "amount" : {
+            "type" : "number"
+          },
+          "currency" : {
             "type" : "string"
           }
         },
@@ -1881,6 +1830,74 @@
           },
           "unlimited" : {
             "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "StoreCard" : {
+        "properties" : {
+          "attributes" : {
+            "additionalProperties" : { },
+            "type" : "object"
+          },
+          "categoryId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "fromPrice" : {
+            "$ref" : "#/components/schemas/Price"
+          },
+          "image" : {
+            "$ref" : "#/components/schemas/MediaItem"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "listingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "productId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "title" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          }
+        },
+        "type" : "object"
+      },
+      "StorePage" : {
+        "properties" : {
+          "facets" : {
+            "items" : {
+              "$ref" : "#/components/schemas/FacetCount"
+            },
+            "type" : "array"
+          },
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/StoreCard"
+            },
+            "type" : "array"
+          },
+          "page" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "size" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "total" : {
+            "format" : "int64",
+            "type" : "integer"
           }
         },
         "type" : "object"
@@ -4835,7 +4852,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Page"
+                  "$ref" : "#/components/schemas/StorePage"
                 }
               }
             },
