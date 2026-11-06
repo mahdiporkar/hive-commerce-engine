@@ -10,7 +10,10 @@ services:
       POSTGRES_DB: commerce
       POSTGRES_USER: commerce_owner
       POSTGRES_PASSWORD: ${COMMERCE_DB_OWNER_PASSWORD:?}
-    volumes: [db:/var/lib/postgresql/data]
+      COMMERCE_DB_PASSWORD: ${COMMERCE_DB_PASSWORD:?}
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: [CMD-SHELL, pg_isready -U commerce_owner -d commerce]
       interval: 5s
@@ -32,6 +35,7 @@ services:
         ENGINE_IMAGE: ${ENGINE_IMAGE:?}
     env_file: [store.env]
     environment:
+      HIVE_PROFILE: ${HIVE_PROFILE:-production}
       COMMERCE_DB_URL: jdbc:postgresql://db:5432/commerce
       COMMERCE_DB_USER: commerce_app
       COMMERCE_DB_PASSWORD: ${COMMERCE_DB_PASSWORD:?}

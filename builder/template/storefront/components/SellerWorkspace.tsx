@@ -38,7 +38,7 @@ export function SellerWorkspace({locale, categories}: {locale: string; categorie
   const [typeKey, setTypeKey] = useState(taxonomy.productTypes[0]?.key ?? '');
   const [form, setForm] = useState({title: '', slug: '', sku: '', categoryId: ''});
   const [values, setValues] = useState<Record<string, string>>({});
-  const [sale, setSale] = useState<Record<string, {slug: string; price: string; stock: string; content: string; preview: string; title: string}>>({});
+  const [sale, setSale] = useState<Record<string, typeof EMPTY_SALE>>({});
   const [notice, setNotice] = useState<{ok: boolean; text: string} | null>(null);
   const sellerId = memberships[0]?.sellerId;
 

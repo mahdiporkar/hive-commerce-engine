@@ -1,5 +1,112 @@
 # Phase status
 
+## Waiting on the owner
+
+Nothing below blocks further engineering. These need a decision or a credential:
+
+| Item | Why it is open |
+|---|---|
+| Publish a release (push tag `v0.2.0`) | Phase 5 asks stores to consume the *published* version. They consume a locally packaged release with the same layout. Publishing has not been approved, and the release workflow has never run |
+| Merge to default branches | Operating rule. All work is on `phase-1/foundation` (engine) and `phase-5/client-application` (stores) |
+| Real payment provider adapter | Only the fake provider exists, and the production guard refuses it. **No store can start in production until one is added** |
+| Real malware scanner | Only the signature scanner exists |
+| Native review of Persian and Arabic wording | Written by the engineer, not reviewed |
+| Domains and real catalog data | `*.example` domains and invented sample products are placeholders |
+| Stakeholder event-storming workshop | `docs/domain/event-storming.md` is a written hypothesis |
+
+## Scenario status
+
+| Scenario | Result | Where it ran |
+|---|---|---|
+| A: one physical stone, two concurrent buyers, one order | PASS | Engine suite through real Hive; gemstone store in a real browser |
+| B: PDF sold, signed download, non-buyer and expired URL fail | PASS | `DigitalDeliveryIntegrationTest` (real PostgreSQL and storage) |
+| C: two sellers, one cart, separate seller orders, commissions, ledger, isolation | PASS | `MarketplaceIntegrationTest`; aidastoor store in a real browser covers one seller |
+| D: handicraft by configuration alone | PASS | `CatalogStorefrontIntegrationTest`; builder test; third store generated and built |
+| E: single vendor upgrades to multi-vendor, data kept | PASS | `ModeUpgradeIntegrationTest` |
+| F: new version passes B's and C's contract tests and rolls back | PASS, on locally packaged releases | `tests/e2e/upgrade.test.mjs` in both stores |
+
+## Phase 7 — Commerce Builder (COMPLETE)
+
+Implemented:
+- `builder/`: `validate`, `new-store`, `env`, `set`, `schema-diff`. Reviews store configuration (capabilities against mode, WCAG contrast of the theme) and catalogs (references, required values, variant rules) before anything reaches an engine. No visual site builder.
+- Store template: storefront, tools, tests, deployment. Both client repositories and a third store come from it (ADR-0017).
+- Admin side: Catalog creates attributes, product types, schema versions, categories and products; Settings shows capabilities and edits extension documents.
+
+Reused: engine APIs for seeding, so every authorization and validation rule applies.
+
+Tests Executed:
+- `cd builder && npm test`: 12 PASS.
+- Third store from the *packaged* 0.2.0 builder and the handicraft fixture: validate, new-store and set succeed; the store holds 0 Java files; contract tests 6 PASS; `next build` succeeds.
+
+NOT EXECUTED: the third store's end-to-end acceptance (the two real stores cover the same template).
+
+Known limitations: template improvements reach existing stores only by pull request (ADR-0017). Changing a capability needs a redeployment; the admin UI shows capabilities but cannot change them.
+
+## Phase 6 — Industry Extensions (COMPLETE)
+
+Implemented, each in its client repository and depending only on the SPI:
+- **gemstone-verification**: certificate metadata, the shop's inspection (PENDING, PASSED, FAILED, entered through the shared admin Settings module), extra media. Public statement has three levels: no verification, certificate declared, inspected by the store. A failed stone cannot be published. No page claims authenticity. Methodology and limits: `docs/gemstone-verification.md` in that repository.
+- **prompt-verification**: claims, target model, runs, score, similarity, review workflow, time-limited status that lapses by itself; a reviewer cannot approve results below the thresholds; no field can hold a prompt or model output. `tools/verification/evaluate.mjs` produces the evidence. Methodology and limits: `docs/prompt-verification.md` in that repository.
+
+Tests Executed:
+- Unit: gemstone 8 PASS, prompt 11 PASS, evaluation tool 3 PASS.
+- End to end, in the store acceptance runs below, including the aidastoor store restarted with its extension removed: browse, buy and deliver all work, with no badge.
+
+NOT EXECUTED: PromptVerification against a real AI model. The tool takes the model as a function and its tests use a stub.
+
+Known limitations: nothing contacts a gemological laboratory. Expert inspection records what a person reports. Similarity catches near copies, not paraphrase.
+
+## Phase 5 — Client Applications (PARTIAL: everything except consuming a published release)
+
+Exit criterion: **both run independently with separate databases, buckets and domains.** Met locally: both stores ran at the same time, each with its own Hive, Keycloak, database and origin. Aidastoor has its own bucket; gemstone sells no digital goods and starts no storage in its tests.
+
+Implemented:
+- **gemstone-commerce**: Next.js storefront (fa, ar, en), gemstone taxonomy and sample stones, its Hive application, deployment.
+- **aidastoor-commerce**: same, plus seller workspace, customer library, prompt taxonomy with model names as configuration, reviews on.
+- Engine artifacts stores consume: admin bundles (8 modules), `hive/register.mjs`, storefront SDK, test kit, builder, `tools/package-release.sh`, release workflow.
+- **Engine 0.2.0**, closing gaps found by reviewing the master prompt: schema versions and explicit product migration, product media, category search metadata, verified-purchase reviews, Customers and Payments admin areas, seller asset list, `context.events` between modules, Hive theme tokens, Hive public context for direction, seller file upload and version management, deployment docs, flow diagrams. See [release notes](deployment/release-notes.md).
+
+Database migrations: `catalog/V3`, `digital/V2`, `ordering/V3`; expand-only.
+
+API / route-operation / manifest changes: 12 operations added, 96 in total. New modules `commerce-admin-payments` and `commerce-admin-customers`. Bundle addresses carry their version.
+
+Tests Added: `ReleaseTwoIntegrationTest`, `tests/e2e/admin-mfes.test.mjs`, admin bundle tests, SDK tests, builder tests, and in each store contract tests, `acceptance.test.mjs`, `journeys.mjs`, `upgrade.test.mjs`.
+
+Tests Executed:
+- `./mvnw -B clean install -Dopenapi.write=true` at 0.2.0: 158 tests PASS.
+- `node --test --test-concurrency=1 tests/e2e/*.test.mjs` (engine through real Hive, Keycloak, OpenFGA): 17 PASS.
+- `cd admin-mfes && npm test`: 11 PASS. `cd storefront-sdk && npm test`: 8 PASS.
+- Store contract tests: gemstone 6 PASS, aidastoor 9 PASS.
+- Store acceptance, **both running at the same time**, through real Hive and Keycloak in a real browser (Edge): gemstone 18 PASS, aidastoor 16 PASS.
+- Scenario F, each store pinned to 0.1.0 with candidate 0.2.0: contract tests against the candidate, extension built against its SPI, then `ENGINE_CANDIDATE=0.2.0 node --test tests/e2e/upgrade.test.mjs`: gemstone 4 PASS, aidastoor 4 PASS.
+- Deployment, aidastoor: `docker compose` built the real images and started all six services; engine healthy with its extension loaded, migrations ran as owner, gateway routed each path to its service, bundle host served versioned bundles, runtime role present.
+
+FAIL (and how fixed):
+- OIDC sign-in left the store: Next.js rewrites do not forward the host, so the BFF built its redirect for its own address. Stores now have a gateway, in tests as in production (ADR-0019).
+- Redirect lost its port: the gateway must send `X-Forwarded-Port`.
+- **Unversioned bundle addresses**: the upgrade test showed a host could serve only one version, so neither upgrade nor rollback of the admin UI could work. Addresses now carry their version and a host keeps versions side by side.
+- OpenAPI collapsed two `VersionView` schemas: renamed.
+- Compose had nothing to create the runtime database role and no `.dockerignore`: added.
+- Review write answered 400 instead of 401 to anonymous callers: now authenticated before the body is read.
+
+NOT EXECUTED (and why):
+- **Consuming a published release, and the release workflow.** Publishing has not been approved. Stores used `ENGINE_RELEASE_DIR` on a locally packaged release, whose checksums were verified. `gh` is not installed here either, so hosted runs cannot be inspected.
+- **Hosted CI, in all three repositories.** Never observed. Store CI fetches a GitHub release that does not exist yet, so it **will fail at that step until a release is published**.
+- **Admin modules inside Hive's default shell.** Registered through real Hive and served through its artifact gateway, then mounted by a test page using the Hive contract: catalog, settings, payments, customers. Orders, sellers, finance and digital have bundle and contract tests with a stubbed server, not a real-browser run against the engine.
+- Gemstone's Compose stack: same template as aidastoor's, not started separately.
+- Production deployment: not approved, and impossible without a real payment provider.
+
+Known limitations:
+- Sellers cannot set product media; operators can. Gemstone's extension also records media links, but they are not displayed yet.
+- Public structured data carries no ratings (ADR-0018).
+- Hive jars are needed for store end-to-end runs (`HIVE_SOURCE_DIR` or a sibling engine checkout), so hosted store CI runs contract tests and builds only.
+
+Open Blockers: none for engineering. See "Waiting on the owner".
+
+Next phase: none planned. Remaining work is the owner's list at the top.
+
+Commit SHA(s): engine c4d59ab (0.1.0 baseline), 63d4297 and later (0.2.0); see `git log` on each branch.
+
 ## Phase 4 — Marketplace (COMPLETE)
 
 Exit criterion: **Scenario C passes** (`MarketplaceIntegrationTest`): two sellers publish prompts; one cart buys from both; separate seller orders, commissions and ledger entries; neither seller can see the other's data. **Scenario E passes** too (`ModeUpgradeIntegrationTest`).

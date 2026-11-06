@@ -32,7 +32,7 @@ const extensions = join(ROOT, 'deploy/extensions');
 export const kit = kitModule.createKit({hiveDir, hiveVersion: SHORT, engineJar: join(engineDir, 'commerce-engine.jar'), portBase: store.portBase, workDir: join(ROOT, '.local/e2e'),
   storeKey: store.key, application: store.key, users: Object.values(USERS), origins: [ORIGIN], extensions, storage: store.capabilities.digitalProducts,
   engineEnv: {COMMERCE_STORE_MODE: store.mode, COMMERCE_STORE_CURRENCY: store.currency, COMMERCE_STORE_LOCALES: store.locales.join(','), COMMERCE_CAP_PHYSICAL: String(store.capabilities.physicalProducts),
-    COMMERCE_CAP_DIGITAL: String(store.capabilities.digitalProducts), COMMERCE_CAP_SELLER_ONBOARDING: String(store.capabilities.sellerOnboarding), COMMERCE_CAP_COMMISSIONS: String(store.capabilities.commissions),
+    COMMERCE_CAP_DIGITAL: String(store.capabilities.digitalProducts), COMMERCE_CAP_SELLER_ONBOARDING: String(store.capabilities.sellerOnboarding), COMMERCE_CAP_COMMISSIONS: String(store.capabilities.commissions), COMMERCE_CAP_REVIEWS: String(store.capabilities.reviews ?? false),
     COMMERCE_PAYMENT_RETURN_URL: `${ORIGIN}/${store.defaultLocale}/checkout/return`, COMMERCE_FAKE_PSP_URL: `http://127.0.0.1:${PSP_PORT}`, COMMERCE_TAX_RATE_PERCENT: '9', COMMERCE_FLAT_SHIPPING: store.capabilities.physicalProducts ? '500000' : '0'}});
 
 /** Stands in for the provider's hosted page: the shopper approves or declines, then returns to the store. Test only. */

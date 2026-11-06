@@ -1,0 +1,6 @@
+**/node_modules
+**/.next
+**/target
+.local
+.git
+deploy/.env
