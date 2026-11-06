@@ -28,5 +28,11 @@ export function attributeValue(key: string, value: unknown, locale: string, yes:
   return spec?.options ? option(value) : String(value ?? '');
 }
 
+/** A product's attributes in the order the schema declares them, not the order storage returns. */
+export function orderedAttributes(values: Record<string, unknown>): [string, unknown][] {
+  const position = (key: string) => { const i = taxonomy.attributes.findIndex(a => a.key === key); return i < 0 ? Number.MAX_SAFE_INTEGER : i; };
+  return Object.entries(values).sort(([a], [b]) => position(a) - position(b));
+}
+
 export const isLocale = (locale: string) => store.locales.includes(locale);
 export const origin = () => process.env.STORE_ORIGIN ?? `https://${store.domain}`;

@@ -102,8 +102,8 @@ function Products({context, types, attributes, categories, products, reload}: Re
       </div>
     </> : null}
     <Outcome action={action} />
-    <Table columns={['Title', 'Slug', 'SKUs', t(context, 'actions')]} empty={t(context, 'empty')} rows={products.map(p => [text(context, p.title), <code>{p.slug}</code>, p.variants.map((v: any) => v.sku).join(', '),
-      <button className="secondary" onClick={() => action.run(() => api('POST', `/v1/admin/products/${p.id}/publish`), 'Published')}>Publish</button>])} />
+    <Table columns={['Title', 'Slug', 'SKUs', t(context, 'status'), t(context, 'actions')]} empty={t(context, 'empty')} rows={products.map(p => [text(context, p.title), <code>{p.slug}</code>, p.variants.map((v: any) => v.sku).join(', '), p.status,
+      p.status === 'DRAFT' ? <button className="secondary" onClick={() => action.run(() => api('POST', `/v1/admin/products/${p.id}/publish`), 'Published')}>Publish</button> : null])} />
   </section>;
 }
 

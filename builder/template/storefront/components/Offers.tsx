@@ -10,7 +10,7 @@ export function Offers({detail, offers, locale}: {detail: ProductDetail; offers:
   const [outcome, setOutcome] = useState<{ok: boolean; text: string} | null>(null);
   const [busy, setBusy] = useState(false);
   const variantName = (offer: Offer) => {
-    const variant = detail.product.variants.find(v => v.id === offer.variantId);
+    const variant = detail.product.variants.find(v => v.variantId === offer.variantId);
     const attributes = (variant?.attributes ?? {}) as Record<string, unknown>;
     return Object.entries(attributes).map(([k, v]) => attributeValue(k, v, locale, m.yes, m.no)).join(' / ');
   };

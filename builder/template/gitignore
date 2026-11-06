@@ -5,3 +5,4 @@ node_modules/
 target/
 deploy/.env
 *.log
+deploy/extensions/*.jar

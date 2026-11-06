@@ -41,8 +41,8 @@ export default async function Products({params, searchParams}: Props) {
         <ul className="chips">{categories.map(c => <li key={c.id}><a aria-current={c.id === search.category ? 'true' : undefined} href={link({category: c.id === search.category ? undefined : c.id})}>{localized(c.name, locale)}</a></li>)}</ul>
       </nav>
       <div className="layout">
-        <aside className="panel" aria-label={m.filters}>
-          <h2>{m.filters}</h2>
+        <details className="panel filters" open={Object.keys(filters).length > 0 || undefined}>
+          <summary>{m.filters}</summary>
           {[...facets].map(([key, values]) => attribute(key) ? (
             <section key={key}>
               <strong>{attributeLabel(key, locale)}</strong>
@@ -52,7 +52,7 @@ export default async function Products({params, searchParams}: Props) {
                 </a></li>))}</ul>
             </section>) : null)}
           {Object.keys(filters).length ? <a className="button secondary" href={`/${locale}/products`}>{m.clear}</a> : null}
-        </aside>
+        </details>
         <div>
           <p className="muted">{result.total} {m.results}</p>
           <ProductGrid items={result.items} locale={locale} empty={m.noResults} />

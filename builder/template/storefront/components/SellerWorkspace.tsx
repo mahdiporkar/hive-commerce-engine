@@ -5,6 +5,8 @@ import {shop} from '@/lib/shop';
 import {messagesFor} from '@/lib/messages';
 import {attribute, attributeLabel, store, taxonomy, type AttributeSpec} from '@/lib/store';
 
+const EMPTY_SALE = {slug: '', price: '', stock: '', content: '', preview: '', title: ''};
+
 function coerce(type: string | undefined, value: string): unknown {
   if (value === '') return undefined;
   if (type === 'INTEGER' || type === 'DECIMAL') return Number(value);
@@ -30,6 +32,7 @@ export function SellerWorkspace({locale, categories}: {locale: string; categorie
   const [memberships, setMemberships] = useState<{sellerId: string; role: string}[]>([]);
   const [listings, setListings] = useState<any[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
+  const [finance, setFinance] = useState<{pending: number; available: number} | null>(null);
   const [name, setName] = useState('');
   const [typeKey, setTypeKey] = useState(taxonomy.productTypes[0]?.key ?? '');
   const [form, setForm] = useState({title: '', slug: '', sku: '', categoryId: ''});
@@ -43,9 +46,10 @@ export function SellerWorkspace({locale, categories}: {locale: string; categorie
     setMemberships(mine);
     if (mine[0]) {
       const seller = shop.seller(mine[0].sellerId);
-      const [l, o] = await Promise.all([seller.listings().catch(() => []), seller.offers().catch(() => [])]);
+      const [l, o, f] = await Promise.all([seller.listings().catch(() => []), seller.offers().catch(() => []), seller.finance(store.currency).catch(() => null)]);
       setListings(l);
       setOffers(o);
+      setFinance(f);
     }
     setState('ready');
   }, []);
@@ -90,16 +94,20 @@ export function SellerWorkspace({locale, categories}: {locale: string; categorie
     setValues({});
   }, m.waitingApproval);
 
-  const patch = (id: string, change: Partial<(typeof sale)[string]>) => setSale(s => ({...s, [id]: {slug: '', price: '', stock: '', content: '', preview: '', title: '', ...s[id], ...change}}));
+  const patch = (id: string, change: Partial<(typeof sale)[string]>) => setSale(s => ({...s, [id]: {...EMPTY_SALE, ...s[id], ...change}}));
   const digitalType = (taxonomy.productTypes.some(t => t.kind === 'DIGITAL'));
   return (
     <div className="stack">
       {banner}
+      {finance ? <section className="panel" data-testid="seller-finance" data-pending={finance.pending}>
+        <h2>{m.yourFinance}</h2>
+        <dl className="totals"><dt>{m.pendingBalance}</dt><dd>{formatMoney(finance.pending, store.currency, locale)}</dd><dt>{m.availableBalance}</dt><dd>{formatMoney(finance.available, store.currency, locale)}</dd></dl>
+      </section> : null}
       <section className="panel">
         <h2>{m.yourListings}</h2>
         <ul className="lines">
           {listings.map(l => {
-            const s = sale[l.listingId] ?? {slug: '', price: '', stock: '', content: '', preview: '', title: ''};
+            const s = sale[l.listingId] ?? EMPTY_SALE;
             return (
               <li key={l.listingId} className="stack" data-testid="seller-listing" data-status={l.status}>
                 <span className="muted"><code>{l.productId}</code> · {m.status}: {l.status} {l.rejectionReason ? `(${l.rejectionReason})` : ''}</span>

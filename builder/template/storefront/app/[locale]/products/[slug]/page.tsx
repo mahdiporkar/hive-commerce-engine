@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import {breadcrumbJsonLd, localized, productJsonLd} from '@hive-commerce/storefront-sdk';
 import {catalog, orNotFound} from '@/lib/catalog';
 import {messagesFor} from '@/lib/messages';
-import {attributeLabel, attributeValue, origin, store} from '@/lib/store';
+import {attributeLabel, attributeValue, orderedAttributes, origin, store} from '@/lib/store';
 import {Offers} from '@/components/Offers';
 import {ProductExtras} from '@/components/ProductExtras';
 
@@ -37,7 +37,7 @@ export default async function ProductPage({params}: Props) {
           <section className="panel">
             <h2>{m.details}</h2>
             <dl className="spec">
-              {Object.entries(product.attributes).map(([key, value]) => (<div key={key} style={{display: 'contents'}}><dt>{attributeLabel(key, locale)}</dt><dd>{attributeValue(key, value, locale, m.yes, m.no)}</dd></div>))}
+              {orderedAttributes(product.attributes).map(([key, value]) => (<div key={key} style={{display: 'contents'}}><dt>{attributeLabel(key, locale)}</dt><dd><bdi>{attributeValue(key, value, locale, m.yes, m.no)}</bdi></dd></div>))}
             </dl>
           </section>
           <ProductExtras detail={detail} locale={locale} />

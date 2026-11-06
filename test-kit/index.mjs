@@ -5,7 +5,7 @@
 import {execFileSync, spawn} from 'node:child_process';
 import {randomBytes} from 'node:crypto';
 import {closeSync, createReadStream, existsSync, mkdirSync, openSync, readFileSync, statSync, writeFileSync} from 'node:fs';
-import {createServer} from 'node:http';
+import {createServer, request as httpRequest} from 'node:http';
 import {dirname, extname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -34,6 +34,24 @@ export function serveDirectory(directory, port) {
     if (!path.startsWith(resolve(directory)) || !existsSync(path) || !statSync(path).isFile()) { response.writeHead(404).end(); return; }
     response.writeHead(200, {'Content-Type': types[extname(path)] ?? 'application/octet-stream'});
     createReadStream(path).pipe(response);
+  });
+  return new Promise(r => server.listen(port, '127.0.0.1', () => r(server)));
+}
+
+/**
+ * One origin per store, as deploy/gateway.conf.template does in production: BFF paths go to Hive with the browser's Host,
+ * everything else to the storefront. Session and CSRF stay first-party and OIDC redirects return to the store.
+ */
+export function startGateway({port, bff, storefront}) {
+  const server = createServer((request, response) => {
+    const target = new URL(/^\/(api|auth|oauth2|login)\//.test(request.url) ? bff : storefront);
+    const proxied = httpRequest({hostname: target.hostname, port: target.port, path: request.url, method: request.method,
+      headers: {...request.headers, 'x-forwarded-proto': 'http', 'x-forwarded-port': String(port), 'x-forwarded-for': request.socket.remoteAddress}}, upstream => {
+      response.writeHead(upstream.statusCode, upstream.rawHeaders);
+      upstream.pipe(response);
+    });
+    proxied.on('error', () => { if (!response.headersSent) response.writeHead(502); response.end(); });
+    request.pipe(proxied);
   });
   return new Promise(r => server.listen(port, '127.0.0.1', () => r(server)));
 }

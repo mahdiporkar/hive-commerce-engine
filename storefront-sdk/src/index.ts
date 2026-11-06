@@ -89,7 +89,7 @@ export function createShop({origin = '', fetchImpl = (...a) => fetch(...a), toke
       offers: () => send<Offer[]>('GET', `${base}/offers`),
       orders: () => send<any[]>('GET', `${base}/orders`),
       fulfillments: () => send<any[]>('GET', `${base}/fulfillments`),
-      finance: () => send<any>('GET', `${base}/finance`),
+      finance: (currency: string) => send<{pending: number; available: number; currency: string; earnings: any[]; settlements: any[]}>('GET', `${base}/finance?currency=${encodeURIComponent(currency)}`),
       createAsset: (asset: {productId: string; kind: 'FILE' | 'TEXT'; title: string; downloadLimit?: number | null; updatesIncluded?: boolean; licenseUsage?: string}) => send<any>('POST', `${base}/assets`, asset),
       setText: (assetId: string, content: string) => send<any>('PUT', `/v1/seller/assets/${assetId}/text`, {content}),
       setPreview: (assetId: string, preview: string) => send<any>('PUT', `/v1/seller/assets/${assetId}/preview`, {preview}),

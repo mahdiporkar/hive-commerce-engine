@@ -1,0 +1,7 @@
+{
+  "name": "{{storeKey}}-tests",
+  "private": true,
+  "type": "module",
+  "description": "Browser driver for end-to-end tests. No browser is downloaded: tests use the installed Edge or Chromium.",
+  "devDependencies": {"playwright": "1.63.0"}
+}

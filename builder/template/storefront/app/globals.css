@@ -35,6 +35,8 @@ main { flex: 1; inline-size: min(1160px, 100%); margin-inline: auto; padding: 24
 .spec { display: grid; grid-template-columns: minmax(110px, auto) minmax(0, 1fr); gap: 4px 16px; margin: 0; }
 .spec dt { color: var(--muted); }
 .spec dd { margin: 0; overflow-wrap: anywhere; }
+.filters summary { cursor: pointer; font-weight: 600; }
+.filters > section { margin-block-start: 12px; }
 .product { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 800px) { .product { grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr); } }
 .price { font-size: 1.2rem; font-weight: 700; }
@@ -57,3 +59,4 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .protected { white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, Consolas, monospace; background: var(--surface); border: 1px solid var(--border); border-radius: calc(var(--radius) / 2); padding: 12px; margin: 0; }
 .pager { display: flex; gap: 12px; justify-content: center; margin-block-start: 24px; }
 .stack { display: grid; gap: 16px; }
+.product > aside { align-self: start; }

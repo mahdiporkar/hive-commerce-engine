@@ -17,14 +17,16 @@ const engineDir = join(ROOT, '.engine', version);
 const SHORT = readFileSync(join(engineDir, 'hive/HIVE_REVISION'), 'utf8').trim().slice(0, 7);
 const hiveDir = process.env.HIVE_SOURCE_DIR ?? resolve(ROOT, '..', 'hive-commerce-engine/.local/hive-src', SHORT);
 const kitModule = await import(pathToFileURL(join(engineDir, 'kit/package/index.mjs')).href);
-export const {cookieClient, ready, serveDirectory} = kitModule;
+export const {cookieClient, ready, serveDirectory, startGateway} = kitModule;
 
 export const STOREFRONT_PORT = store.portBase + 25;
 export const PSP_PORT = store.portBase + 26;
+const NEXT_PORT = store.portBase + 27;
 export const ORIGIN = `http://127.0.0.1:${STOREFRONT_PORT}`;
 export const USERS = {operator: {username: 'store.operator', password: 'test-only-password-operator'}, buyer: {username: 'first.buyer', password: 'test-only-password-buyer'},
   other: {username: 'other.buyer', password: 'test-only-password-other'}, seller: {username: 'first.seller', password: 'test-only-password-seller'}};
 
+export const ENGINE_JAR = join(engineDir, 'commerce-engine.jar');
 const extensions = join(ROOT, 'deploy/extensions');
 export const kit = kitModule.createKit({hiveDir, hiveVersion: SHORT, engineJar: join(engineDir, 'commerce-engine.jar'), portBase: store.portBase, workDir: join(ROOT, '.local/e2e'),
   storeKey: store.key, application: store.key, users: Object.values(USERS), origins: [ORIGIN], extensions, storage: store.capabilities.digitalProducts,
@@ -52,13 +54,14 @@ function startFakePspPage() {
   return new Promise(r => server.listen(PSP_PORT, '127.0.0.1', () => r(server)));
 }
 
-/** A built storefront is required: next build bakes the same-origin rewrites to this store's BFF. */
+/** Builds the storefront this test run serves. */
 export function buildStorefront() {
   execFileSync(process.execPath, [join(ROOT, 'storefront/node_modules/next/dist/bin/next'), 'build'], {cwd: join(ROOT, 'storefront'), stdio: ['ignore', 'pipe', 'inherit'],
-    env: {...process.env, STOREFRONT_LOCAL_BFF: kit.BFF, STOREFRONT_STANDALONE: 'false', NEXT_TELEMETRY_DISABLED: '1'}, timeout: 400000});
+    env: {...process.env, STOREFRONT_STANDALONE: 'false', NEXT_TELEMETRY_DISABLED: '1'}, timeout: 400000});
 }
 
 export async function startStore(t) {
+  buildStorefront();
   const environment = await kit.startEnvironment(t);
   const modulesHost = await serveDirectory(join(engineDir, 'admin-mfes/modules'), kit.PORTS.modules);
   const psp = await startFakePspPage();
@@ -67,9 +70,11 @@ export async function startStore(t) {
 
   mkdirSync(join(ROOT, '.local/e2e/logs'), {recursive: true});
   const fd = openSync(join(ROOT, '.local/e2e/logs/storefront.log'), 'w');
-  const next = spawn(process.execPath, [join(ROOT, 'storefront/node_modules/next/dist/bin/next'), 'start', '-p', String(STOREFRONT_PORT), '-H', '127.0.0.1'], {cwd: join(ROOT, 'storefront'), windowsHide: true, stdio: ['ignore', fd, fd],
-    env: {...process.env, HIVE_BFF_URL: kit.BFF, STORE_ORIGIN: ORIGIN, STOREFRONT_LOCAL_BFF: kit.BFF, STOREFRONT_STANDALONE: 'false', NEXT_TELEMETRY_DISABLED: '1'}});
+  const next = spawn(process.execPath, [join(ROOT, 'storefront/node_modules/next/dist/bin/next'), 'start', '-p', String(NEXT_PORT), '-H', '127.0.0.1'], {cwd: join(ROOT, 'storefront'), windowsHide: true, stdio: ['ignore', fd, fd],
+    env: {...process.env, HIVE_BFF_URL: kit.BFF, STORE_ORIGIN: ORIGIN, STOREFRONT_STANDALONE: 'false', NEXT_TELEMETRY_DISABLED: '1'}});
   t.after(async () => { next.kill(); await new Promise(r => { next.once('exit', r); setTimeout(r, 4000).unref(); }); closeSync(fd); });
+  const gateway = await startGateway({port: STOREFRONT_PORT, bff: kit.BFF, storefront: `http://127.0.0.1:${NEXT_PORT}`});
+  t.after(() => gateway.close());
   await ready(`${ORIGIN}/robots.txt`);
 
   const operator = await kit.signIn(USERS.operator.username, USERS.operator.password);
@@ -98,15 +103,31 @@ export const api = client => async (method, path, body) => {
 
 export {seedStore};
 
-/** Real browser (Edge on Windows, Chromium elsewhere), playwright is resolved from HIVE_PLAYWRIGHT_DIR or this repository. */
+/** Real browser: installed Edge on Windows, Chromium elsewhere. */
 export async function launchBrowser() {
-  const base = process.env.PLAYWRIGHT_MODULE;
-  const {chromium} = await import(base ? pathToFileURL(base).href : 'playwright');
+  const {chromium} = await import('playwright');
   return chromium.launch({headless: true, ...(process.platform === 'win32' ? {channel: 'msedge'} : {})});
 }
 
+/** Mounts a shared admin bundle in the signed-in page exactly as Hive's runtime does: fetched through the gateway, then evaluated. */
+export async function mountAdminModule(page, area, locale = 'en') {
+  await page.evaluate(async ({area, locale, version}) => {
+    const response = await fetch(`/api/mfe/commerce-admin-${area}/${version}/entry.js`);
+    if (!response.ok) throw new Error(`gateway answered ${response.status}`);
+    const url = URL.createObjectURL(new Blob([await response.text()], {type: 'text/javascript'}));
+    const app = (await import(url)).default;
+    document.body.innerHTML = '<div id="admin-host"></div>';
+    await app.create().mount(document.getElementById('admin-host'), {contractVersion: '1.1.0', moduleKey: `commerce-admin-${area}`, applicationKey: 'store', instanceId: 'i', slotId: 's', route: '/', params: {},
+      locale, direction: 'LTR', context: {}, permissions: {can: () => true}, events: {publish() {}, subscribe: () => () => {}}, signal: new AbortController().signal, basePath: '/', navigate() {}});
+  }, {area, locale, version: adminVersion(area)});
+}
+
+const adminVersion = area => read(join('.engine', version, `admin-mfes/modules/commerce-admin-${area}/mf-manifest.json`)).manifestVersion;
+
 export async function signInInBrowser(page, user) {
-  await page.waitForSelector('#username', {timeout: 30000});
+  await page.waitForSelector('#username', {timeout: 20000}).catch(async () => {
+    throw new Error(`No login form at ${page.url()}: ${(await page.textContent('body').catch(() => '')).slice(0, 300)}`);
+  });
   await page.fill('#username', user.username);
   await page.fill('#password', user.password);
   await page.click('#kc-login');
